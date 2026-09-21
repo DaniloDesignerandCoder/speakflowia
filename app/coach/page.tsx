@@ -209,7 +209,9 @@ useEffect(() => {
 
           <div className="coach-status">
   <i />
-  <span>{userName || "Conta conectada"}</span>
+  <span>
+  {userName ? userName.split(" ")[0] : "Conta conectada"}
+</span>
 
   <button
     type="button"
