@@ -1,189 +1,439 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-const modes = [
+const modules = [
   {
     title: "Conversação",
-    label: "Speaking",
-    text: "Pratique situações reais em inglês com seu coach de IA.",
+    subtitle: "Speaking",
+    description: "Pratique situações reais em inglês com seu Coach IA.",
     icon: "◌",
+    route: "/coach",
   },
   {
     title: "Pronúncia",
-    label: "Speaking",
-    text: "Treine sua fala e receba feedback direcionado.",
+    subtitle: "Speaking",
+    description: "Treine sua fala e prepare sua pronúncia para situações reais.",
     icon: "◉",
+    route: "/coach",
   },
   {
     title: "Vocabulário",
-    label: "Vocabulary",
-    text: "Expanda seu repertório com situações práticas.",
+    subtitle: "Vocabulary",
+    description: "Amplie seu repertório com prática contextualizada.",
     icon: "Aa",
+    route: "/coach",
   },
 ];
 
 export default function Home() {
-  const [active, setActive] = useState("home");
+  const router = useRouter();
 
   return (
-    <main className="sf-shell">
-      <div className="sf-orb sf-orb-one" />
-      <div className="sf-orb sf-orb-two" />
+    <main className="dashboard-shell">
 
-      <div className="sf-container">
-        <header className="sf-header">
-          <div className="sf-brand">
-            <div className="sf-mark">S</div>
+      {/* SIDEBAR */}
+      <aside className="dashboard-sidebar">
 
-            <div>
-              <div className="sf-logo">
-                Speak<span>Flow</span>
-              </div>
+        <div className="dashboard-brand">
+          <img
+            src="/speakflow-logo.svg"
+            alt="SpeakFlow"
+          />
 
-              <div className="sf-kicker">
-                AI ENGLISH COACH
-              </div>
-            </div>
-          </div>
-
-          <button
-            className="sf-profile"
-            onClick={() => setActive("profile")}
-          >
-            Perfil
-          </button>
-        </header>
-
-        <section className="sf-hero">
-          <div className="sf-eyebrow">
-            SPEAKFLOW IA
-          </div>
-
-          <h1>
-            O inglês que você pratica.
-            <br />
-            <em>O inglês que você conquista.</em>
-          </h1>
-
-          <p>
-            Conversas, pronúncia, vocabulário e feedback inteligente
-            em uma experiência criada para acompanhar sua evolução.
-          </p>
-
-          <button
-            className="sf-primary"
-            onClick={() => setActive("coach")}
-          >
-            Começar um treino <span>→</span>
-          </button>
-        </section>
-
-        <section className="sf-section">
-          <div className="sf-section-head">
-            <div>
-              <div className="sf-label">
-                SEU TREINO
-              </div>
-
-              <h2>
-                Escolha como praticar
-              </h2>
-            </div>
-
-            <span className="sf-status">
-              <i />
-              Coach pronto
-            </span>
-          </div>
-
-          <div className="sf-grid">
-            {modes.map((mode) => (
-              <button
-                className="sf-card"
-                key={mode.title}
-                onClick={() => setActive("coach")}
-              >
-                <div className="sf-card-top">
-                  <span className="sf-icon">
-                    {mode.icon}
-                  </span>
-
-                  <span className="sf-card-label">
-                    {mode.label}
-                  </span>
-                </div>
-
-                <h3>
-                  {mode.title}
-                </h3>
-
-                <p>
-                  {mode.text}
-                </p>
-
-                <div className="sf-card-action">
-                  Praticar <span>↗</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="sf-progress">
           <div>
-            <div className="sf-label">
-              SEU PROGRESSO
-            </div>
+            <strong>
+              Speak<span>Flow</span>
+            </strong>
 
-            <h2>
-              Construa sua fluência, uma sessão por vez.
-            </h2>
-
-            <p>
-              Seu histórico e sua evolução aparecerão aqui
-              conforme você pratica.
-            </p>
+            <small>
+              AI ENGLISH COACH
+            </small>
           </div>
-
-          <div className="sf-metric">
-            <strong>0</strong>
-
-            <span>
-              SESSÕES
-            </span>
-          </div>
-        </section>
+        </div>
 
         <nav
-          className="sf-nav"
-          aria-label="Navegação principal"
+          className="dashboard-menu"
+          aria-label="Menu principal"
         >
-          {[
-            ["home", "Início"],
-            ["coach", "Coach"],
-            ["progress", "Progresso"],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              className={active === key ? "active" : ""}
-              onClick={() => setActive(key)}
-            >
-              {label}
-            </button>
-          ))}
+
+          <button className="dashboard-menu-item active">
+            <span>⌂</span>
+            Início
+          </button>
+
+          <button
+            className="dashboard-menu-item"
+            onClick={() => router.push("/coach")}
+          >
+            <span>✦</span>
+            Coach
+          </button>
+
+          <button className="dashboard-menu-item">
+            <span>▥</span>
+            Progresso
+          </button>
+
+          <button className="dashboard-menu-item">
+            <span>♫</span>
+            MusicLab™
+          </button>
+
+          <button className="dashboard-menu-item">
+            <span>⚙</span>
+            Configurações
+          </button>
+
         </nav>
 
-        <footer className="sf-footer">
+        <div className="dashboard-sidebar-footer">
+
+          <img
+            src="/speakflow-logo.svg"
+            alt=""
+            aria-hidden="true"
+          />
+
+          <div>
+            <strong>SpeakFlow</strong>
+
+            <small>
+              Simples. Inteligente. Poderoso.
+            </small>
+          </div>
+
+        </div>
+
+      </aside>
+
+      {/* ÁREA PRINCIPAL */}
+      <section className="dashboard-main">
+
+        {/* TOPBAR */}
+        <header className="dashboard-topbar">
+
+          <div className="dashboard-mobile-brand">
+
+            <img
+              src="/speakflow-logo.svg"
+              alt="SpeakFlow"
+            />
+
+            <strong>
+              Speak<span>Flow</span>
+            </strong>
+
+          </div>
+
+          <div className="dashboard-topbar-spacer" />
+
+          <div className="dashboard-online">
+            <i />
+            Online
+          </div>
+
+          <button
+            className="dashboard-profile"
+            onClick={() => router.push("/login")}
+          >
+            <span className="dashboard-avatar">
+              D
+            </span>
+
+            <span className="dashboard-profile-name">
+              Usuário
+            </span>
+
+            <span>⌄</span>
+          </button>
+
+        </header>
+
+        <div className="dashboard-content">
+
+          {/* HERO */}
+          <section className="dashboard-hero">
+
+            <div className="dashboard-hero-copy">
+
+              <div className="dashboard-eyebrow">
+                SPEAKFLOW IA
+              </div>
+
+              <h1>
+                O poder da IA
+                <br />
+                guiando sua <em>fluência.</em>
+              </h1>
+
+              <p>
+                Converse, pratique e evolua em inglês
+                com um Coach criado para acompanhar
+                seu nível e transformar cada sessão
+                em aprendizado.
+              </p>
+
+              <button
+                className="dashboard-primary"
+                onClick={() => router.push("/coach")}
+              >
+                Começar um treino
+                <span>→</span>
+              </button>
+
+            </div>
+
+            {/* VISUAL DO COACH */}
+            <div
+              className="dashboard-ai-visual"
+              aria-hidden="true"
+            >
+
+              <div className="ai-ring ai-ring-one" />
+              <div className="ai-ring ai-ring-two" />
+
+              <div className="ai-face">
+                S
+              </div>
+
+              <div className="ai-wave">
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </div>
+
+            </div>
+
+          </section>
+
+          {/* MODOS DE TREINO */}
+          <section className="dashboard-section">
+
+            <div className="dashboard-section-heading">
+
+              <div>
+
+                <span className="dashboard-label">
+                  SEU TREINO
+                </span>
+
+                <h2>
+                  Escolha como praticar
+                </h2>
+
+              </div>
+
+              <span className="dashboard-ready">
+                <i />
+                Coach pronto
+              </span>
+
+            </div>
+
+            <div className="dashboard-module-grid">
+
+              {modules.map((module) => (
+
+                <button
+                  className="dashboard-module"
+                  key={module.title}
+                  onClick={() =>
+                    router.push(module.route)
+                  }
+                >
+
+                  <div className="dashboard-module-top">
+
+                    <span className="dashboard-module-icon">
+                      {module.icon}
+                    </span>
+
+                    <span>
+                      {module.subtitle}
+                    </span>
+
+                  </div>
+
+                  <h3>
+                    {module.title}
+                  </h3>
+
+                  <p>
+                    {module.description}
+                  </p>
+
+                  <div className="dashboard-module-action">
+                    Praticar
+                    <span>↗</span>
+                  </div>
+
+                </button>
+
+              ))}
+
+            </div>
+
+          </section>
+
+          {/* COACH */}
+          <section className="dashboard-training">
+
+            <div className="dashboard-training-brand">
+
+              <div className="dashboard-mini-logo">
+
+                <img
+                  src="/speakflow-logo.svg"
+                  alt=""
+                  aria-hidden="true"
+                />
+
+              </div>
+
+              <div>
+
+                <strong>
+                  Seu Coach de Inglês
+                </strong>
+
+                <span>
+                  <i />
+                  Online agora
+                </span>
+
+              </div>
+
+            </div>
+
+            <div className="dashboard-training-center">
+
+              <span className="dashboard-label">
+                PRÓXIMO TREINO
+              </span>
+
+              <h2>
+                Pronto para conversar?
+              </h2>
+
+              <p>
+                Escolha um tema e comece
+                a praticar em inglês.
+              </p>
+
+              <div className="dashboard-topics">
+
+                {[
+                  "Conversação geral",
+                  "Viagens",
+                  "Trabalho",
+                  "Vida cotidiana",
+                ].map((topic) => (
+
+                  <button
+                    key={topic}
+                    onClick={() =>
+                      router.push("/coach")
+                    }
+                  >
+                    {topic}
+                  </button>
+
+                ))}
+
+              </div>
+
+            </div>
+
+            <div className="dashboard-training-time">
+
+              <span>
+                Sessão em andamento
+              </span>
+
+              <strong>
+                00:00
+              </strong>
+
+            </div>
+
+          </section>
+
+          {/* PROGRESSO */}
+          <section className="dashboard-progress">
+
+            <div>
+
+              <span className="dashboard-label">
+                SEU PROGRESSO
+              </span>
+
+              <h2>
+                Construa sua fluência,
+                uma sessão por vez.
+              </h2>
+
+              <p>
+                Seu histórico e sua evolução
+                aparecerão aqui conforme você pratica.
+              </p>
+
+            </div>
+
+            <div className="dashboard-stat">
+
+              <strong>0</strong>
+
+              <span>
+                SESSÕES
+              </span>
+
+            </div>
+
+            <div className="dashboard-stat">
+
+              <strong>0</strong>
+
+              <span>
+                MINUTOS
+              </span>
+
+            </div>
+
+            <div className="dashboard-stat">
+
+              <strong>0</strong>
+
+              <span>
+                DIAS
+              </span>
+
+            </div>
+
+          </section>
+
+        </div>
+
+        {/* FOOTER */}
+        <footer className="dashboard-footer">
+
           <span>
             SpeakFlow IA
           </span>
 
           <span>
-            Simples. Inteligente. Poderoso.
+            O poder da IA guiando
+            sua fluência em inglês.
           </span>
+
         </footer>
-      </div>
+
+      </section>
+
     </main>
   );
 }
