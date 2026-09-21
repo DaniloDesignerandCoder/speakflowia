@@ -177,6 +177,7 @@ export default function LoginPage() {
             </button>
           </div>
         </section>
+        
 
         <footer className="login-footer">
           SpeakFlow — o poder da IA guiando sua fluência em inglês.
