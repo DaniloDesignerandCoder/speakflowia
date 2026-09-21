@@ -39,7 +39,7 @@ export default function Home() {
 
         <div className="dashboard-brand">
           <img
-            src="/speakflow-logo.jpg"
+            src="/speakflow-logo.png"
             alt="SpeakFlow"
           />
 
@@ -90,7 +90,7 @@ export default function Home() {
         <div className="dashboard-sidebar-footer">
 
           <img
-            src="/speakflow-logo.jpg"
+            src="/speakflow-logo.png"
             alt=""
             aria-hidden="true"
           />
@@ -115,7 +115,7 @@ export default function Home() {
           <div className="dashboard-mobile-brand">
 
             <img
-              src="/speakflow-logo.jpg"
+              src="/speakflow-logo.png"
               alt="SpeakFlow"
             />
 
@@ -192,7 +192,7 @@ export default function Home() {
 
               <div className="ai-face">
   <img
-    src="/speakflow-logo.jpg"
+    src="/speakflow-logo.png"
     alt=""
     aria-hidden="true"
   />
@@ -286,7 +286,7 @@ export default function Home() {
 
               <div className="dashboard-mini-logo">
                 <img
-                  src="/speakflow-logo.jpg"
+                  src="/speakflow-logo.png"
                   alt=""
                   aria-hidden="true"
                 />
