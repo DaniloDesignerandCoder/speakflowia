@@ -2672,8 +2672,10 @@ img {
   }
 
   .coach-status {
-    font-size: 0;
-  }
+  font-size: 11px;
+  gap: 6px;
+  white-space: nowrap;
+}
 
   .coach-start h1 {
     font-size:
