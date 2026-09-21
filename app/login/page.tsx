@@ -185,4 +185,4 @@ export default function LoginPage() {
     </main>
   );
 }
-</footer>
+
