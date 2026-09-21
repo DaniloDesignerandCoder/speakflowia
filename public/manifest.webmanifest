@@ -1,0 +1,10 @@
+{
+  "name": "SpeakFlow IA",
+  "short_name": "SpeakFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090d",
+  "theme_color": "#07090d",
+  "description": "O poder da IA guiando sua fluência em inglês.",
+  "lang": "pt-BR"
+}
