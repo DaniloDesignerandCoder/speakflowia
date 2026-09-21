@@ -2739,3 +2739,29 @@ img {
   }
 
 }
+/* TESTE DE CARREGAMENTO SPEAKFLOW */
+
+.dashboard-module {
+  background: #151c35 !important;
+  color: #ffffff !important;
+  border: 2px solid #6f8cff !important;
+  border-radius: 20px !important;
+}
+
+.dashboard-primary {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 14px !important;
+}
+
+@media (max-width: 760px) {
+  .dashboard-sidebar {
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+
+    width: 100% !important;
+    height: 70px !important;
+  }
+}
