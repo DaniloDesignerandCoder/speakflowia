@@ -47,6 +47,7 @@ export default function CoachPage() {
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
+  const [userName, setUserName] = useState("");
 
 useEffect(() => {
   async function checkAuth() {
@@ -55,11 +56,21 @@ useEffect(() => {
     } = await supabase.auth.getSession();
 
     if (!session) {
-      router.replace("/login");
-      return;
-    }
+  router.replace("/login");
+  return;
+}
 
-    setAuthChecking(false);
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("full_name")
+  .eq("id", session.user.id)
+  .single();
+
+if (profile?.full_name) {
+  setUserName(profile.full_name);
+}
+
+setAuthChecking(false);
   }
 
   checkAuth();
@@ -76,6 +87,11 @@ useEffect(() => {
     window.clearInterval(timer);
   };
 }, [started]);
+
+  async function handleLogout() {
+  await supabase.auth.signOut();
+  router.replace("/login");
+}
 
   function startSession() {
     setSessionSeconds(0);
@@ -192,9 +208,17 @@ useEffect(() => {
           </div>
 
           <div className="coach-status">
-            <i />
-            Modo prática
-          </div>
+  <i />
+  <span>{userName || "Conta conectada"}</span>
+
+  <button
+    type="button"
+    onClick={handleLogout}
+    className="coach-logout"
+  >
+    Sair
+  </button>
+</div>
 
         </header>
 
