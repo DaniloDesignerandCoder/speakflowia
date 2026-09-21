@@ -446,3 +446,266 @@ button {
     gap: 8px;
   }
 }
+
+/* =========================
+   SPEAKFLOW LOGIN
+   ========================= */
+
+.login-shell {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      #18233e 0,
+      #0a0e18 38%,
+      #06080d 78%
+    );
+  color: #f7f9fc;
+}
+
+.login-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.login-glow-one {
+  width: 320px;
+  height: 320px;
+  background: #367cff;
+  top: -120px;
+  left: -120px;
+}
+
+.login-glow-two {
+  width: 280px;
+  height: 280px;
+  background: #695cff;
+  bottom: -120px;
+  right: -100px;
+}
+
+.login-container {
+  width: min(100%, 460px);
+  position: relative;
+  z-index: 2;
+}
+
+.login-back {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 13px;
+  padding: 6px 0;
+  margin-bottom: 18px;
+}
+
+.login-back:hover {
+  color: white;
+}
+
+.login-card {
+  padding: 34px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.075),
+      rgba(255, 255, 255, 0.025)
+    );
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(22px);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  border: 1px solid rgba(130, 170, 255, 0.35);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(92, 145, 255, 0.24),
+      rgba(255, 255, 255, 0.04)
+    );
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.login-logo {
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.6px;
+}
+
+.login-logo span {
+  color: #78a9ff;
+}
+
+.login-kicker {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 8px;
+  letter-spacing: 2px;
+}
+
+.login-heading {
+  margin-top: 42px;
+}
+
+.login-eyebrow {
+  color: #79a9ff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2.4px;
+}
+
+.login-heading h1 {
+  margin: 13px 0 10px;
+  font-size: 35px;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+}
+
+.login-heading p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.43);
+  font-size: 14px;
+}
+
+.login-form {
+  margin-top: 30px;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 17px;
+}
+
+.login-form label span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+}
+
+.login-form input {
+  width: 100%;
+  height: 49px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.18);
+  color: white;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.login-form input::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.login-form input:focus {
+  border-color: rgba(120, 169, 255, 0.65);
+  box-shadow: 0 0 0 3px rgba(80, 130, 255, 0.1);
+}
+
+.login-message {
+  margin: 12px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(120, 169, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(80, 130, 255, 0.07);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.login-submit {
+  width: 100%;
+  height: 51px;
+  margin-top: 5px;
+  border: 0;
+  border-radius: 13px;
+  background: #f6f8fb;
+  color: #07090d;
+  font-size: 14px;
+  font-weight: 700;
+  transition: 0.2s;
+}
+
+.login-submit:hover {
+  transform: translateY(-1px);
+  background: white;
+}
+
+.login-submit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  transform: none;
+}
+
+.login-switch {
+  margin-top: 25px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-size: 12px;
+}
+
+.login-switch span {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.login-switch button {
+  border: 0;
+  background: transparent;
+  color: #80aaff;
+  font-weight: 600;
+}
+
+.login-footer {
+  margin-top: 22px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .login-card {
+    padding: 27px 22px;
+    border-radius: 22px;
+  }
+
+  .login-heading {
+    margin-top: 34px;
+  }
+
+  .login-heading h1 {
+    font-size: 30px;
+  }
+}
