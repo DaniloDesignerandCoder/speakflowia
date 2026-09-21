@@ -191,8 +191,12 @@ export default function Home() {
               <div className="ai-ring ai-ring-two" />
 
               <div className="ai-face">
-                S
-              </div>
+  <img
+    src="/speakflow-logo.jpg"
+    alt=""
+    aria-hidden="true"
+  />
+</div>
 
               <div className="ai-wave">
                 <i />
