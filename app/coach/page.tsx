@@ -46,18 +46,36 @@ export default function CoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
 
-  useEffect(() => {
-    if (!started) return;
+useEffect(() => {
+  async function checkAuth() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    const timer = window.setInterval(() => {
-      setSessionSeconds((current) => current + 1);
-    }, 1000);
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
 
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [started]);
+    setAuthChecking(false);
+  }
+
+  checkAuth();
+}, [router]);
+
+useEffect(() => {
+  if (!started) return;
+
+  const timer = window.setInterval(() => {
+    setSessionSeconds((current) => current + 1);
+  }, 1000);
+
+  return () => {
+    window.clearInterval(timer);
+  };
+}, [started]);
 
   function startSession() {
     setSessionSeconds(0);
