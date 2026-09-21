@@ -1,0 +1,99 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 120 120"
+  role="img"
+  aria-labelledby="speakflowLogoTitle"
+>
+  <title id="speakflowLogoTitle">SpeakFlow</title>
+
+  <defs>
+    <linearGradient
+      id="speakflowGradient"
+      x1="15%"
+      y1="10%"
+      x2="85%"
+      y2="90%"
+    >
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="45%" stop-color="#dce5ff" />
+      <stop offset="100%" stop-color="#7d96ff" />
+    </linearGradient>
+
+    <filter
+      id="speakflowGlow"
+      x="-50%"
+      y="-50%"
+      width="200%"
+      height="200%"
+    >
+      <feGaussianBlur
+        stdDeviation="3"
+        result="blur"
+      />
+
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g
+    fill="none"
+    stroke="url(#speakflowGradient)"
+    stroke-width="12"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    filter="url(#speakflowGlow)"
+  >
+
+    <path
+      d="
+        M30 18
+        L58 46
+        L42 62
+        L20 40
+        Z
+      "
+    />
+
+    <path
+      d="
+        M90 18
+        L62 46
+        L78 62
+        L100 40
+        Z
+      "
+    />
+
+    <path
+      d="
+        M42 58
+        L62 78
+        L46 94
+        L26 74
+        Z
+      "
+    />
+
+    <path
+      d="
+        M78 58
+        L58 78
+        L74 94
+        L94 74
+        Z
+      "
+    />
+
+    <path
+      d="
+        M46 94
+        L60 108
+        L74 94
+      "
+    />
+
+  </g>
+</svg>
