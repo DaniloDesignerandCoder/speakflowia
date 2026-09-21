@@ -2789,3 +2789,21 @@ img {
   height: 72%;
   object-fit: contain;
 }
+.coach-logout {
+  margin-left: 8px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.coach-logout:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
