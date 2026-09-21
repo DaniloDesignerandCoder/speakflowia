@@ -258,7 +258,6 @@ export default function CoachPage() {
               </div>
             </div>
           </section>
-      
         )}
 
         <footer className="coach-footer">
