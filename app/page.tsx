@@ -421,3 +421,15 @@ export default function Home() {
     </main>
   );
 }
+.dashboard-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dashboard-avatar img {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
