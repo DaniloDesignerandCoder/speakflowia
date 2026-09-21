@@ -2,44 +2,47 @@
 
 import { useRouter } from "next/navigation";
 
-const modules = [
+const trainingModes = [
   {
-    title: "Conversação",
-    subtitle: "Speaking",
-    description: "Pratique situações reais em inglês com seu Coach IA.",
     icon: "◌",
-    route: "/coach",
+    category: "SPEAKING",
+    title: "Conversação",
+    description:
+      "Pratique situações reais em inglês com seu Coach.",
   },
   {
+    icon: "◎",
+    category: "SPEAKING",
     title: "Pronúncia",
-    subtitle: "Speaking",
-    description: "Treine sua fala e prepare sua pronúncia para situações reais.",
-    icon: "◉",
-    route: "/coach",
+    description:
+      "Treine sua fala e desenvolva uma pronúncia mais natural.",
   },
   {
-    title: "Vocabulário",
-    subtitle: "Vocabulary",
-    description: "Amplie seu repertório com prática contextualizada.",
     icon: "Aa",
-    route: "/coach",
+    category: "VOCABULARY",
+    title: "Vocabulário",
+    description:
+      "Amplie seu repertório através de situações práticas.",
   },
 ];
 
 export default function Home() {
   const router = useRouter();
 
+  function goToCoach() {
+    router.push("/coach");
+  }
+
   return (
-    <main className="dashboard-shell">
+    <main className="home-v2">
 
-      {/* SIDEBAR */}
-      <aside className="dashboard-sidebar">
+      {/* SIDEBAR DESKTOP */}
+      <aside className="home-v2-sidebar">
 
-        <div className="dashboard-brand">
-          <img
-            src="/speakflow-logo.svg"
-            alt="SpeakFlow"
-          />
+        <div className="home-v2-brand">
+          <div className="home-v2-brand-symbol">
+            S
+          </div>
 
           <div>
             <strong>
@@ -52,131 +55,110 @@ export default function Home() {
           </div>
         </div>
 
-        <nav
-          className="dashboard-menu"
-          aria-label="Menu principal"
-        >
+        <nav className="home-v2-menu">
 
-          <button className="dashboard-menu-item active">
+          <button className="active">
             <span>⌂</span>
             Início
           </button>
 
-          <button
-            className="dashboard-menu-item"
-            onClick={() => router.push("/coach")}
-          >
+          <button onClick={goToCoach}>
             <span>✦</span>
             Coach
           </button>
 
-          <button className="dashboard-menu-item">
+          <button>
             <span>▥</span>
             Progresso
           </button>
 
-          <button className="dashboard-menu-item">
+          <button>
             <span>♫</span>
             MusicLab™
           </button>
 
-          <button className="dashboard-menu-item">
+          <button>
             <span>⚙</span>
             Configurações
           </button>
 
         </nav>
 
-        <div className="dashboard-sidebar-footer">
+        <div className="home-v2-sidebar-footer">
+          <strong>SpeakFlow</strong>
 
-          <img
-            src="/speakflow-logo.svg"
-            alt=""
-            aria-hidden="true"
-          />
-
-          <div>
-            <strong>SpeakFlow</strong>
-
-            <small>
-              Simples. Inteligente. Poderoso.
-            </small>
-          </div>
-
+          <span>
+            Simples. Inteligente. Poderoso.
+          </span>
         </div>
 
       </aside>
 
-      {/* ÁREA PRINCIPAL */}
-      <section className="dashboard-main">
+      {/* CONTEÚDO */}
+      <section className="home-v2-main">
 
-        {/* TOPBAR */}
-        <header className="dashboard-topbar">
+        {/* HEADER */}
+        <header className="home-v2-header">
 
-          <div className="dashboard-mobile-brand">
-
-            <img
-              src="/speakflow-logo.svg"
-              alt="SpeakFlow"
-            />
+          <div className="home-v2-mobile-brand">
+            <div className="home-v2-mobile-symbol">
+              S
+            </div>
 
             <strong>
               Speak<span>Flow</span>
             </strong>
-
           </div>
 
-          <div className="dashboard-topbar-spacer" />
+          <div className="home-v2-header-space" />
 
-          <div className="dashboard-online">
+          <div className="home-v2-status">
             <i />
-            Online
+            App ativo
           </div>
 
           <button
-            className="dashboard-profile"
+            className="home-v2-account"
             onClick={() => router.push("/login")}
           >
-            <span className="dashboard-avatar">
-              D
+            <span className="home-v2-avatar">
+              S
             </span>
 
-            <span className="dashboard-profile-name">
-              Usuário
+            <span className="home-v2-account-text">
+              Minha conta
             </span>
-
-            <span>⌄</span>
           </button>
 
         </header>
 
-        <div className="dashboard-content">
+        <div className="home-v2-content">
 
           {/* HERO */}
-          <section className="dashboard-hero">
+          <section className="home-v2-hero">
 
-            <div className="dashboard-hero-copy">
+            <div className="home-v2-hero-copy">
 
-              <div className="dashboard-eyebrow">
+              <span className="home-v2-eyebrow">
                 SPEAKFLOW IA
-              </div>
+              </span>
 
               <h1>
                 O poder da IA
                 <br />
-                guiando sua <em>fluência.</em>
+                guiando sua
+                <span> fluência.</span>
               </h1>
 
               <p>
-                Converse, pratique e evolua em inglês
-                com um Coach criado para acompanhar
-                seu nível e transformar cada sessão
-                em aprendizado.
+                Pratique inglês em uma experiência criada
+                para acompanhar sua evolução e transformar
+                cada sessão em aprendizado.
               </p>
 
               <button
-                className="dashboard-primary"
-                onClick={() => router.push("/coach")}
+                className="home-v2-primary"
+                onClick={goToCoach}
               >
                 Começar um treino
                 <span>→</span>
@@ -184,20 +166,18 @@ export default function Home() {
 
             </div>
 
-            {/* VISUAL DO COACH */}
             <div
-              className="dashboard-ai-visual"
+              className="home-v2-orbit"
               aria-hidden="true"
             >
+              <div className="home-v2-orbit-outer" />
+              <div className="home-v2-orbit-inner" />
 
-              <div className="ai-ring ai-ring-one" />
-              <div className="ai-ring ai-ring-two" />
-
-              <div className="ai-face">
+              <div className="home-v2-orbit-core">
                 S
               </div>
 
-              <div className="ai-wave">
+              <div className="home-v2-wave">
                 <i />
                 <i />
                 <i />
@@ -206,70 +186,65 @@ export default function Home() {
                 <i />
                 <i />
               </div>
-
             </div>
 
           </section>
 
-          {/* MODOS DE TREINO */}
-          <section className="dashboard-section">
+          {/* TREINOS */}
+          <section className="home-v2-section">
 
-            <div className="dashboard-section-heading">
+            <div className="home-v2-section-title">
 
               <div>
-
-                <span className="dashboard-label">
+                <span className="home-v2-label">
                   SEU TREINO
                 </span>
 
                 <h2>
                   Escolha como praticar
                 </h2>
-
               </div>
 
-              <span className="dashboard-ready">
+              <div className="home-v2-ready">
                 <i />
-                Coach pronto
-              </span>
+                Treino disponível
+              </div>
 
             </div>
 
-            <div className="dashboard-module-grid">
+            <div className="home-v2-training-grid">
 
-              {modules.map((module) => (
+              {trainingModes.map((mode) => (
 
                 <button
-                  className="dashboard-module"
-                  key={module.title}
-                  onClick={() =>
-                    router.push(module.route)
-                  }
+                  className="home-v2-training-card"
+                  key={mode.title}
+                  onClick={goToCoach}
                 >
 
-                  <div className="dashboard-module-top">
+                  <div className="home-v2-card-top">
 
-                    <span className="dashboard-module-icon">
-                      {module.icon}
-                    </span>
+                    <div className="home-v2-card-icon">
+                      {mode.icon}
+                    </div>
 
                     <span>
-                      {module.subtitle}
+                      {mode.category}
                     </span>
 
                   </div>
 
                   <h3>
-                    {module.title}
+                    {mode.title}
                   </h3>
 
                   <p>
-                    {module.description}
+                    {mode.description}
                   </p>
 
-                  <div className="dashboard-module-action">
+                  <div className="home-v2-card-action">
                     Praticar
-                    <span>↗</span>
+                    <span>→</span>
                   </div>
 
                 </button>
@@ -281,136 +256,88 @@ export default function Home() {
           </section>
 
           {/* COACH */}
-          <section className="dashboard-training">
+          <section className="home-v2-coach">
 
-            <div className="dashboard-training-brand">
+            <div className="home-v2-coach-info">
 
-              <div className="dashboard-mini-logo">
-
-                <img
-                  src="/speakflow-logo.svg"
-                  alt=""
-                  aria-hidden="true"
-                />
-
+              <div className="home-v2-coach-avatar">
+                S
               </div>
 
               <div>
-
-                <strong>
-                  Seu Coach de Inglês
-                </strong>
-
-                <span>
-                  <i />
-                  Online agora
+                <span className="home-v2-label">
+                  SPEAKFLOW COACH
                 </span>
 
+                <h2>
+                  Pronto para conversar?
+                </h2>
+
+                <p>
+                  Escolha um tema e comece sua prática.
+                </p>
               </div>
 
             </div>
 
-            <div className="dashboard-training-center">
+            <div className="home-v2-topics">
 
-              <span className="dashboard-label">
-                PRÓXIMO TREINO
-              </span>
+              {[
+                "Conversação",
+                "Viagens",
+                "Trabalho",
+                "Dia a dia",
+              ].map((topic) => (
 
-              <h2>
-                Pronto para conversar?
-              </h2>
+                <button
+                  key={topic}
+                  onClick={goToCoach}
+                >
+                  {topic}
+                </button>
 
-              <p>
-                Escolha um tema e comece
-                a praticar em inglês.
-              </p>
-
-              <div className="dashboard-topics">
-
-                {[
-                  "Conversação geral",
-                  "Viagens",
-                  "Trabalho",
-                  "Vida cotidiana",
-                ].map((topic) => (
-
-                  <button
-                    key={topic}
-                    onClick={() =>
-                      router.push("/coach")
-                    }
-                  >
-                    {topic}
-                  </button>
-
-                ))}
-
-              </div>
-
-            </div>
-
-            <div className="dashboard-training-time">
-
-              <span>
-                Sessão em andamento
-              </span>
-
-              <strong>
-                00:00
-              </strong>
+              ))}
 
             </div>
 
           </section>
 
           {/* PROGRESSO */}
-          <section className="dashboard-progress">
+          <section className="home-v2-progress">
 
-            <div>
+            <div className="home-v2-progress-copy">
 
-              <span className="dashboard-label">
+              <span className="home-v2-label">
                 SEU PROGRESSO
               </span>
 
               <h2>
-                Construa sua fluência,
-                uma sessão por vez.
+                Sua evolução começa aqui.
               </h2>
 
               <p>
-                Seu histórico e sua evolução
-                aparecerão aqui conforme você pratica.
+                Seus resultados aparecerão conforme
+                você concluir novas sessões.
               </p>
 
             </div>
 
-            <div className="dashboard-stat">
+            <div className="home-v2-stats">
 
-              <strong>0</strong>
+              <div>
+                <strong>0</strong>
+                <span>SESSÕES</span>
+              </div>
 
-              <span>
-                SESSÕES
-              </span>
+              <div>
+                <strong>0</strong>
+                <span>MINUTOS</span>
+              </div>
 
-            </div>
-
-            <div className="dashboard-stat">
-
-              <strong>0</strong>
-
-              <span>
-                MINUTOS
-              </span>
-
-            </div>
-
-            <div className="dashboard-stat">
-
-              <strong>0</strong>
-
-              <span>
-                DIAS
-              </span>
+              <div>
+                <strong>0</strong>
+                <span>DIAS</span>
+              </div>
 
             </div>
 
@@ -418,21 +345,45 @@ export default function Home() {
 
         </div>
 
-        {/* FOOTER */}
-        <footer className="dashboard-footer">
+        <footer className="home-v2-footer">
+          <span>SpeakFlow IA</span>
 
           <span>
-            SpeakFlow IA
+            O poder da IA guiando sua fluência em inglês.
           </span>
-
-          <span>
-            O poder da IA guiando
-            sua fluência em inglês.
-          </span>
-
         </footer>
 
       </section>
+
+      {/* NAVEGAÇÃO MOBILE */}
+      <nav className="home-v2-mobile-nav">
+
+        <button className="active">
+          <span>⌂</span>
+          Início
+        </button>
+
+        <button onClick={goToCoach}>
+          <span>✦</span>
+          Coach
+        </button>
+
+        <button>
+          <span>▥</span>
+          Progresso
+        </button>
+
+        <button>
+          <span>♫</span>
+          MusicLab
+        </button>
+
+        <button>
+          <span>⚙</span>
+          Ajustes
+        </button>
+
+      </nav>
 
     </main>
   );
