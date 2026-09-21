@@ -46,7 +46,7 @@ export default function LoginPage() {
       if (error) {
         setMessage(error.message);
       } else {
-        router.push("/");
+        router.push("/coach");
         router.refresh();
       }
     }
@@ -69,7 +69,12 @@ export default function LoginPage() {
 
         <section className="login-card">
           <div className="login-brand">
-            <div className="login-mark">S</div>
+            <div className="login-mark">
+  <img
+    src="/speakflow-logo.png"
+    alt="SpeakFlow"
+  />
+</div>
 
             <div>
               <div className="login-logo">
