@@ -136,10 +136,14 @@ export default function Home() {
             className="dashboard-profile"
             onClick={() => router.push("/login")}
           >
-            <span className="dashboard-avatar">
-              S
-            </span>
-
+            
+<span className="dashboard-avatar">
+  <img
+    src="/speakflow-logo.png"
+    alt=""
+    aria-hidden="true"
+  />
+</span>
             <span className="dashboard-profile-name">
               Minha conta
             </span>
