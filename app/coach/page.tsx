@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "../lib/supabase";
 
 type Message = {
   role: "coach" | "student";
@@ -44,6 +45,7 @@ export default function CoachPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionSeconds, setSessionSeconds] = useState(0);
+  const [isReplying, setIsReplying] = useState(false);
 
   useEffect(() => {
     if (!started) return;
@@ -69,25 +71,58 @@ export default function CoachPage() {
     ]);
   }
 
-  function sendMessage() {
-    const text = input.trim();
+  
+    async function sendMessage() {
+  const text = input.trim();
 
-    if (!text) return;
+  if (!text || isReplying) return;
+
+  setMessages((current) => [
+    ...current,
+    {
+      role: "student",
+      text,
+    },
+  ]);
+
+  setInput("");
+  setIsReplying(true);
+
+  try {
+    const { data, error } = await supabase.functions.invoke(
+      "speakflow-coach",
+      {
+        body: {
+          level,
+          messages,
+          message: text,
+        },
+      }
+    );
+
+    if (error) throw error;
 
     setMessages((current) => [
       ...current,
       {
-        role: "student",
-        text,
-      },
-      {
         role: "coach",
-        text: "Great! Keep going. Try to add one more detail to your answer.",
+        text: data.reply,
       },
     ]);
+  } catch (error) {
+    console.error(error);
 
-    setInput("");
+    setMessages((current) => [
+      ...current,
+      {
+        role: "coach",
+        text: "I couldn't answer right now. Please try again.",
+      },
+    ]);
+  } finally {
+    setIsReplying(false);
   }
+    }
 
   function finishSession() {
     setStarted(false);
@@ -325,7 +360,7 @@ export default function CoachPage() {
                 <button
                   className="send-button"
                   onClick={sendMessage}
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || isReplying}
                   aria-label="Enviar mensagem"
                 >
                   →
