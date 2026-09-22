@@ -158,7 +158,24 @@ useEffect(() => {
   }
     }
 
-  function finishSession() {
+  async function finishSession() {
+    const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+if (!session) return;
+    const { error } = await supabase
+  .from("learning_sessions")
+  .insert({
+    user_id: session.user.id,
+    mode: "conversation",
+    duration_seconds: sessionSeconds,
+  });
+
+if (error) {
+  console.error("Erro ao salvar sessão:", error);
+  return;
+}
     setStarted(false);
     setInput("");
   }
