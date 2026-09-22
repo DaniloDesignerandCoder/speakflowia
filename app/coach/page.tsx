@@ -505,8 +505,6 @@ last_practice_date: today,
             <div className="conversation-actions">
               <button
   type="button"
-                <button
-  type="button"
   className="voice-toggle"
   onClick={() => {
     setVoiceEnabled((current) => {
