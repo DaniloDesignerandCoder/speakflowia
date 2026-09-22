@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "./lib/supabase";
 
 const modules = [
   {
@@ -31,6 +33,32 @@ const modules = [
 
 export default function Home() {
   const router = useRouter();
+  const [progress, setProgress] = useState({
+    useEffect(() => {
+  async function loadProgress() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) return;
+
+    const { data } = await supabase
+      .from("progress")
+      .select("conversations_count, total_minutes, streak_days")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (data) {
+      setProgress(data);
+    }
+  }
+
+  loadProgress();
+}, []);
+  conversations_count: 0,
+  total_minutes: 0,
+  streak_days: 0,
+});
 
   return (
     <main className="dashboard-shell">
@@ -385,19 +413,19 @@ export default function Home() {
 
 
             <div className="dashboard-stat">
-              <strong>0</strong>
-              <span>SESSÕES</span>
-            </div>
+  <strong>{progress.conversations_count}</strong>
+  <span>SESSÕES</span>
+</div>
 
             <div className="dashboard-stat">
-              <strong>0</strong>
-              <span>MINUTOS</span>
-            </div>
+  <strong>{progress.total_minutes}</strong>
+  <span>MINUTOS</span>
+</div>
 
             <div className="dashboard-stat">
-              <strong>0</strong>
-              <span>DIAS</span>
-            </div>
+  <strong>{progress.streak_days}</strong>
+  <span>DIAS</span>
+</div>
 
           </section>
 
