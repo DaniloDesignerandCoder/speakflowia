@@ -184,13 +184,17 @@ if (error) {
     console.log("PROGRESS:", currentProgress);
 console.log("PROGRESS ERROR:", progressError);
     if (currentProgress) {
-  await supabase
+  const { data: updatedProgress, error: updateError } = await supabase
     .from("progress")
     .update({
       conversations_count:
         currentProgress.conversations_count + 1,
     })
-    .eq("user_id", session.user.id);
+    .eq("user_id", session.user.id)
+    .select();
+
+  console.log("UPDATED PROGRESS:", updatedProgress);
+  console.log("UPDATE ERROR:", updateError);
     }
     setStarted(false);
     setInput("");
