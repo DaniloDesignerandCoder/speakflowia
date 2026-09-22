@@ -218,6 +218,30 @@ useEffect(() => {
       },
     ]);
     speakText(data.reply);
+    if (data.feedback) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (session) {
+    const { error: insightError } = await supabase
+      .from("learning_insights")
+      .insert({
+        user_id: session.user.id,
+        level,
+        original_text: data.feedback.original,
+        corrected_text: data.feedback.corrected,
+        tip: data.feedback.tip,
+      });
+
+    if (insightError) {
+      console.error(
+        "Erro ao salvar SpeakFlow Insight:",
+        insightError
+      );
+    }
+  }
+    }
   } catch (error) {
     console.error(error);
 
