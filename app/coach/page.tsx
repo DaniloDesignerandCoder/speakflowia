@@ -44,6 +44,7 @@ export default function CoachPage() {
   const [started, setStarted] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -108,6 +109,7 @@ useEffect(() => {
   }
 
   function speakText(text: string) {
+  if (!voiceEnabled) return;
   if (typeof window === "undefined") return;
   if (!("speechSynthesis" in window)) return;
 
