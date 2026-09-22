@@ -490,6 +490,15 @@ last_practice_date: today,
                         : "message student-message"
                     }
                   >
+                    {message.role === "coach" && (
+  <div className="message-avatar coach-avatar">
+    <img
+      src="/speakflow-logo.png"
+      alt=""
+      aria-hidden="true"
+    />
+  </div>
+)}
                     <span className="message-label">
                       {message.role === "coach"
                         ? "SPEAKFLOW COACH"
