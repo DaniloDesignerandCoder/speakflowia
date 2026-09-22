@@ -460,6 +460,17 @@ last_practice_date: today,
                     <p>
                       {message.text}
                     </p>
+                    {message.role === "coach" && (
+  <button
+    type="button"
+    className="message-speak"
+    onClick={() => speakText(message.text)}
+    aria-label="Ouvir novamente"
+    title="Ouvir novamente"
+  >
+    🔊
+  </button>
+)}
 
                   </div>
 
