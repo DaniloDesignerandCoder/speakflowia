@@ -499,6 +499,15 @@ last_practice_date: today,
     />
   </div>
 )}
+                    {message.role === "student" && (
+  <div className="message-avatar student-avatar">
+    <span>
+      {userName
+        ? userName.charAt(0).toUpperCase()
+        : "U"}
+    </span>
+  </div>
+)}
                     <span className="message-label">
                       {message.role === "coach"
                         ? "SPEAKFLOW COACH"
