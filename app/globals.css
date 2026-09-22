@@ -2998,3 +2998,107 @@ img {
 
   text-transform: uppercase;
 }
+/* =========================================================
+   SPEAKFLOW INSIGHT
+   ========================================================= */
+
+.speakflow-insight {
+  width: min(100%, 430px);
+
+  margin-top: 12px;
+  padding: 16px;
+
+  text-align: left;
+
+  border:
+    1px solid rgba(129, 156, 255, 0.16);
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(105, 128, 255, 0.09),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.16);
+}
+
+.insight-title {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 15px;
+
+  color: #9eb0ff;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+.insight-title span {
+  font-size: 12px;
+}
+
+.insight-section {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  margin-top: 11px;
+}
+
+.insight-label {
+  color: rgba(255, 255, 255, 0.32);
+
+  font-size: 7px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
+}
+
+.insight-section strong {
+  color: #e8ebf4;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  line-height: 1.5;
+}
+
+.insight-section:nth-of-type(3) strong {
+  color: #aebdff;
+}
+
+.insight-tip {
+  margin-top: 14px;
+  padding-top: 12px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.06);
+
+  color: rgba(255, 255, 255, 0.55);
+
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.insight-tip span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #819cff;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 1.2px;
+}
