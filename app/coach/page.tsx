@@ -176,11 +176,13 @@ if (error) {
   console.error("Erro ao salvar sessão:", error);
   return;
 }
-    const { data: currentProgress } = await supabase
+    const { data: currentProgress, error: progressError } = await supabase
   .from("progress")
   .select("total_minutes, conversations_count")
   .eq("user_id", session.user.id)
   .single();
+    console.log("PROGRESS:", currentProgress);
+console.log("PROGRESS ERROR:", progressError);
     if (currentProgress) {
   await supabase
     .from("progress")
