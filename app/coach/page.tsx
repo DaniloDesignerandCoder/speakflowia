@@ -4,9 +4,16 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
+type Feedback = {
+  original: string;
+  corrected: string;
+  tip: string;
+};
+
 type Message = {
   role: "coach" | "student";
   text: string;
+  feedback?: Feedback | null;
 };
 
 const levels = [
@@ -206,6 +213,7 @@ useEffect(() => {
       {
         role: "coach",
         text: data.reply,
+        feedback: data.feedback ?? null,
       },
     ]);
     speakText(data.reply);
@@ -527,6 +535,29 @@ last_practice_date: today,
   >
     🔊
   </button>
+)}
+                    {message.role === "coach" && message.feedback && (
+  <div className="speakflow-insight">
+    <div className="insight-title">
+      <span>✦</span>
+      SPEAKFLOW INSIGHT
+    </div>
+
+    <div className="insight-section">
+      <span className="insight-label">VOCÊ DISSE</span>
+      <strong>{message.feedback.original}</strong>
+    </div>
+
+    <div className="insight-section">
+      <span className="insight-label">FORMA RECOMENDADA</span>
+      <strong>{message.feedback.corrected}</strong>
+    </div>
+
+    <div className="insight-tip">
+      <span>DICA</span>
+      {message.feedback.tip}
+    </div>
+  </div>
 )}
 
                   </div>
