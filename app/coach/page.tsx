@@ -8,6 +8,7 @@ type Feedback = {
   original: string;
   corrected: string;
   tip: string;
+  skill_category: string;
 };
 
 type Message = {
@@ -232,6 +233,7 @@ useEffect(() => {
         original_text: data.feedback.original,
         corrected_text: data.feedback.corrected,
         tip: data.feedback.tip,
+        skill_category: data.feedback.skill_category,
       });
 
     if (insightError) {
