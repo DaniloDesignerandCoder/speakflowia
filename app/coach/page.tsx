@@ -186,9 +186,25 @@ if (error) {
 }
     const { data: currentProgress } = await supabase
   .from("progress")
-  .select("total_minutes, conversations_count")
+   .select(
+  "total_minutes, conversations_count, streak_days, last_practice_date"
+)
   .eq("user_id", session.user.id)
   .single();
+
+    const today = new Date().toISOString().split("T")[0];
+    const yesterdayDate = new Date();
+yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+const yesterday = yesterdayDate.toISOString().split("T")[0];
+
+let nextStreak = currentProgress?.streak_days ?? 0;
+
+if (currentProgress?.last_practice_date !== today) {
+  nextStreak =
+    currentProgress?.last_practice_date === yesterday
+      ? nextStreak + 1
+      : 1;
+}
     
     if (currentProgress) {
   await supabase
@@ -199,6 +215,8 @@ if (error) {
   total_minutes:
     currentProgress.total_minutes +
     Math.max(1, Math.round(sessionSeconds / 60)),
+      streak_days: nextStreak,
+last_practice_date: today,
 })
     .eq("user_id", session.user.id);
     }
