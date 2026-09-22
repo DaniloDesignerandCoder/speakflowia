@@ -33,9 +33,15 @@ const modules = [
 
 export default function Home() {
   const router = useRouter();
+
   const [progress, setProgress] = useState({
-    useEffect(() => {
-  async function loadProgress() {
+    conversations_count: 0,
+    total_minutes: 0,
+    streak_days: 0,
+  });
+
+  useEffect(() => {
+    async function loadProgress() {
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -55,11 +61,7 @@ export default function Home() {
 
   loadProgress();
 }, []);
-  conversations_count: 0,
-  total_minutes: 0,
-  streak_days: 0,
-});
-
+  
   return (
     <main className="dashboard-shell">
 
