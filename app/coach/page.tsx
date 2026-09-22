@@ -48,6 +48,7 @@ export default function CoachPage() {
   const [isReplying, setIsReplying] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [userName, setUserName] = useState("");
+  const [debugMessage, setDebugMessage] = useState("");
 
 useEffect(() => {
   async function checkAuth() {
@@ -195,8 +196,15 @@ console.log("PROGRESS ERROR:", progressError);
 
   console.log("UPDATED PROGRESS:", updatedProgress);
   console.log("UPDATE ERROR:", updateError);
+    if (updateError) {
+  setDebugMessage(`Erro progress: ${updateError.message}`);
+} else {
+  setDebugMessage(
+    `Progress atualizado: ${JSON.stringify(updatedProgress)}`
+  );
+}
     }
-    setStarted(false);
+   // setStarted(false);
     setInput("");
   }
 
@@ -465,6 +473,11 @@ console.log("PROGRESS ERROR:", progressError);
                 <span>●</span>
                 Sessão de prática em andamento.
               </div>
+              {debugMessage && (
+  <div>
+    {debugMessage}
+  </div>
+)}
 
             </div>
 
