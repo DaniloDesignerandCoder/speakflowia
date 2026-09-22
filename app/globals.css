@@ -2485,7 +2485,11 @@ img {
   padding-left: 54px;
 }
 .student-message {
+  position: relative;
+
   margin-left: auto;
+
+  padding-right: 54px;
 
   text-align: right;
 }
@@ -2966,4 +2970,31 @@ img {
   left: 0;
 
   margin: 0;
+}
+.student-avatar {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  margin: 0;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(111, 136, 255, 0.22),
+      rgba(104, 72, 190, 0.18)
+    );
+
+  border-color:
+    rgba(129, 156, 255, 0.28);
+}
+
+.student-avatar span {
+  color: #dce4ff;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  text-transform: uppercase;
 }
