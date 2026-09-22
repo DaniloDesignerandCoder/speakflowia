@@ -503,6 +503,22 @@ last_practice_date: today,
 
 
             <div className="conversation-actions">
+              <button
+  type="button"
+  onClick={() => {
+    setVoiceEnabled((current) => {
+      if (current) {
+        window.speechSynthesis?.cancel();
+      }
+
+      return !current;
+    });
+  }}
+  aria-label={voiceEnabled ? "Desativar voz" : "Ativar voz"}
+  title={voiceEnabled ? "Desativar voz" : "Ativar voz"}
+>
+  {voiceEnabled ? "🔊" : "🔇"}
+</button>
 
               <button
   className="finish-button"
