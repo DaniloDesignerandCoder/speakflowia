@@ -46,9 +46,10 @@ export default function CoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [userName, setUserName] = useState("");
-  const [debugMessage, setDebugMessage] = useState("");
+  
 
 useEffect(() => {
   async function checkAuth() {
@@ -160,11 +161,16 @@ useEffect(() => {
     }
 
   async function finishSession() {
+    if (isFinishing) return;
+setIsFinishing(true);
     const {
   data: { session },
 } = await supabase.auth.getSession();
 
-if (!session) return;
+if (!session) {
+  setIsFinishing(false);
+  return;
+}
     const { error } = await supabase
   .from("learning_sessions")
   .insert({
@@ -175,37 +181,30 @@ if (!session) return;
 
 if (error) {
   console.error("Erro ao salvar sessão:", error);
+  setIsFinishing(false);
   return;
 }
-    const { data: currentProgress, error: progressError } = await supabase
+    const { data: currentProgress } = await supabase
   .from("progress")
   .select("total_minutes, conversations_count")
   .eq("user_id", session.user.id)
   .single();
-    console.log("PROGRESS:", currentProgress);
-console.log("PROGRESS ERROR:", progressError);
+    
     if (currentProgress) {
-  const { data: updatedProgress, error: updateError } = await supabase
+  await supabase
     .from("progress")
     .update({
-      conversations_count:
-        currentProgress.conversations_count + 1,
-    })
-    .eq("user_id", session.user.id)
-    .select();
-
-  console.log("UPDATED PROGRESS:", updatedProgress);
-  console.log("UPDATE ERROR:", updateError);
-    if (updateError) {
-  setDebugMessage(`Erro progress: ${updateError.message}`);
-} else {
-  setDebugMessage(
-    `Progress atualizado: ${JSON.stringify(updatedProgress)}`
-  );
-}
+  conversations_count:
+    currentProgress.conversations_count + 1,
+  total_minutes:
+    currentProgress.total_minutes +
+    Math.max(1, Math.round(sessionSeconds / 60)),
+})
+    .eq("user_id", session.user.id);
     }
-   // setStarted(false);
+    setStarted(false);
     setInput("");
+    setIsFinishing(false);
   }
 
   const currentLevel = levels.find(
@@ -463,21 +462,18 @@ console.log("PROGRESS ERROR:", progressError);
             <div className="conversation-actions">
 
               <button
-                className="finish-button"
-                onClick={finishSession}
-              >
-                Finalizar sessão
-              </button>
+  className="finish-button"
+  onClick={finishSession}
+  disabled={isFinishing}
+>
+  {isFinishing ? "Salvando..." : "Finalizar sessão"}
+</button>
 
               <div className="conversation-note">
                 <span>●</span>
                 Sessão de prática em andamento.
               </div>
-              {debugMessage && (
-  <div>
-    {debugMessage}
-  </div>
-)}
+              
 
             </div>
 
