@@ -2926,3 +2926,35 @@ img {
 .mic-button:disabled {
   cursor: default;
 }
+/* AVATAR — SPEAKFLOW COACH */
+
+.message-avatar {
+  width: 42px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 8px;
+
+  border-radius: 14px;
+  overflow: hidden;
+
+  background: rgba(8, 10, 16, 0.9);
+  border: 1px solid rgba(129, 156, 255, 0.18);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(111, 136, 255, 0.08);
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.coach-avatar {
+  margin-right: auto;
+}
