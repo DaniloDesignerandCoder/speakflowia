@@ -45,6 +45,7 @@ export default function CoachPage() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isListening, setIsListening] = useState(false);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -131,6 +132,44 @@ useEffect(() => {
   }
 
   window.speechSynthesis.speak(speech);
+  }
+  function startListening() {
+  if (typeof window === "undefined") return;
+
+  const SpeechRecognition =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("O reconhecimento de voz não está disponível neste navegador.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  recognition.onstart = () => {
+    setIsListening(true);
+  };
+
+  recognition.onresult = (event: any) => {
+    const transcript = event.results[0][0].transcript;
+
+    setInput(transcript);
+  };
+
+  recognition.onerror = () => {
+    setIsListening(false);
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognition.start();
   }
     async function sendMessage() {
   const text = input.trim();
@@ -498,6 +537,28 @@ last_practice_date: today,
                     }
                   }}
                 />
+                <button
+  type="button"
+  className={
+    isListening
+      ? "mic-button listening"
+      : "mic-button"
+  }
+  onClick={startListening}
+  disabled={isListening}
+  aria-label={
+    isListening
+      ? "Ouvindo sua voz"
+      : "Falar em inglês"
+  }
+  title={
+    isListening
+      ? "Ouvindo..."
+      : "Falar em inglês"
+  }
+>
+  {isListening ? "●" : "🎙️"}
+</button>
 
                 <button
                   className="send-button"
