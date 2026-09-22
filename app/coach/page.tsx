@@ -107,7 +107,29 @@ useEffect(() => {
     ]);
   }
 
-  
+  function speakText(text: string) {
+  if (typeof window === "undefined") return;
+  if (!("speechSynthesis" in window)) return;
+
+  window.speechSynthesis.cancel();
+
+  const speech = new SpeechSynthesisUtterance(text);
+
+  speech.lang = "en-US";
+  speech.rate = 0.95;
+  speech.pitch = 1;
+
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoice = voices.find((voice) =>
+    voice.lang.toLowerCase().startsWith("en")
+  );
+
+  if (englishVoice) {
+    speech.voice = englishVoice;
+  }
+
+  window.speechSynthesis.speak(speech);
+  }
     async function sendMessage() {
   const text = input.trim();
 
@@ -145,6 +167,7 @@ useEffect(() => {
         text: data.reply,
       },
     ]);
+    speakText(data.reply);
   } catch (error) {
     console.error(error);
 
