@@ -207,7 +207,7 @@ useEffect(() => {
     );
 
     if (error) throw error;
-    alert(JSON.stringify(data.feedback));
+    
 
     setMessages((current) => [
       ...current,
