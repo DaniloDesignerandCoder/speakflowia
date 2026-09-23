@@ -129,6 +129,7 @@ export default function CoachPage() {
   const [pronunciationResult, setPronunciationResult] = useState<{ heard: string; score: number } | null>(null);
   const [pronunciationAttempts, setPronunciationAttempts] = useState<PronunciationAttempt[]>([]);
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
+  const [showExitGuard, setShowExitGuard] = useState(false);
 
   const currentPhrases = pronunciationPhrases[level] ?? pronunciationPhrases.intermediate;
   const pronunciationTarget = currentPhrases[pronunciationIndex % currentPhrases.length];
@@ -176,6 +177,24 @@ export default function CoachPage() {
     return () => window.clearInterval(timer);
   }, [started]);
 
+  useEffect(() => {
+    if (!started || isFinishing) return;
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [started, isFinishing]);
+
+  function requestExitSession() {
+    if (!started) {
+      router.push("/");
+      return;
+    }
+    setShowExitGuard(true);
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -201,6 +220,7 @@ export default function CoachPage() {
     setPronunciationResult(null);
     setPronunciationAttempts([]);
     setSessionSummary(null);
+    setShowExitGuard(false);
     setStarted(true);
 
     if (isPronunciation) {
@@ -322,7 +342,8 @@ export default function CoachPage() {
   }
 
   async function finishSession() {
-    if (isFinishing) return;
+    if (isFinishing || isReplying) return;
+    setShowExitGuard(false);
     setIsFinishing(true);
 
     const { data: { session } } = await supabase.auth.getSession();
@@ -442,7 +463,7 @@ export default function CoachPage() {
 
       <div className="coach-container">
         <header className="coach-header">
-          <button className="coach-back" onClick={() => router.push("/")}>← Voltar</button>
+          <button className="coach-back" onClick={requestExitSession}>← Voltar</button>
           <div className="coach-brand">
             <div className="coach-mark"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div>
             <div>
@@ -607,7 +628,7 @@ export default function CoachPage() {
 
             <div className="conversation-actions">
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? "Salvando..." : "Finalizar sessão"}
+                {isFinishing ? "✦ Preparando seu progresso..." : "Finalizar sessão"}
               </button>
               <div className="conversation-note"><span>●</span> Treino de pronúncia em andamento.</div>
             </div>
@@ -732,11 +753,30 @@ export default function CoachPage() {
                 {voiceEnabled ? "🔊" : "🔇"}
               </button>
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? "Salvando..." : "Finalizar sessão"}
+                {isFinishing ? "✦ Preparando seu progresso..." : "Finalizar sessão"}
               </button>
               <div className="conversation-note"><span>●</span> Sessão de prática em andamento.</div>
             </div>
           </section>
+        )}
+
+        {showExitGuard && started && (
+          <div className="session-exit-overlay" role="dialog" aria-modal="true" aria-labelledby="session-exit-title">
+            <div className="session-exit-dialog">
+              <div className="session-exit-mark">✦</div>
+              <span className="coach-label">SESSÃO EM ANDAMENTO</span>
+              <h2 id="session-exit-title">Quer encerrar seu treino?</h2>
+              <p>Para transformar esta prática em progresso, finalize a sessão antes de sair. Assim o SpeakFlow gera seu resumo e atualiza seu aprendizado.</p>
+              <div className="session-exit-actions">
+                <button type="button" className="coach-primary" onClick={finishSession} disabled={isFinishing || isReplying}>
+                  {isFinishing ? "✦ Preparando seu progresso..." : isReplying ? "Aguarde o Coach responder..." : "Encerrar e salvar sessão"}
+                </button>
+                <button type="button" className="session-exit-continue" onClick={() => setShowExitGuard(false)} disabled={isFinishing}>
+                  Continuar praticando
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         <footer className="coach-footer">
