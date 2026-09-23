@@ -504,7 +504,7 @@ export default function CoachPage() {
         {!started && sessionCompleted ? (
           <section className="session-summary">
             <div className="session-summary-hero">
-              <div className="session-summary-mark">✦</div>
+              <div className="session-summary-mark"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div>
               <span className="coach-label">SESSÃO CONCLUÍDA</span>
               <h1>Seu treino virou<br /><em>próximo passo.</em></h1>
               <p>{sessionSummary?.summary ?? "Sua sessão foi salva com sucesso. O SpeakFlow registrou esta prática no seu histórico de aprendizado."}</p>
@@ -787,7 +787,7 @@ export default function CoachPage() {
         {isFinishing && started && !showExitGuard && (
           <div className="session-processing-overlay" role="status" aria-live="polite">
             <div className="session-processing-card">
-              <div className="session-processing-orbit"><span>✦</span></div>
+              <div className="session-processing-orbit"><span><img src="/speakflow-logo.png" alt="SpeakFlow" /></span></div>
               <span className="coach-label">SPEAKFLOW INTELLIGENCE</span>
               <h2>{finishStage <= 1 ? "Analisando sua prática..." : finishStage === 2 ? "Atualizando seu aprendizado..." : "Preparando seu progresso..."}</h2>
               <p>{finishStage <= 1 ? "O Coach está transformando sua sessão em insights úteis." : finishStage === 2 ? "Seu histórico e seu plano adaptativo estão sendo considerados." : "Só mais um instante para organizar seu próximo passo."}</p>
@@ -799,7 +799,7 @@ export default function CoachPage() {
         {showExitGuard && started && (
           <div className="session-exit-overlay" role="dialog" aria-modal="true" aria-labelledby="session-exit-title">
             <div className="session-exit-dialog">
-              <div className="session-exit-mark">✦</div>
+              <div className="session-exit-mark"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div>
               <span className="coach-label">SESSÃO EM ANDAMENTO</span>
               <h2 id="session-exit-title">Quer encerrar seu treino?</h2>
               <p>Para transformar esta prática em progresso, finalize a sessão antes de sair. Assim o SpeakFlow gera seu resumo e atualiza seu aprendizado.</p>
