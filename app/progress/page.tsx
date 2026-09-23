@@ -54,7 +54,7 @@ export default function ProgressPage(){
    <div className="progress-sidebar-footer"><img src="/speakflow-logo.png" alt=""/><div><strong>SpeakFlow</strong><small>Sua evolução, em movimento.</small></div></div>
   </aside>
   <section className="progress-main">
-   <header className="progress-topbar"><button className="progress-mobile-brand" onClick={()=>router.push("/")}><img src="/speakflow-logo.png" alt="SpeakFlow"/><strong>Speak<span>Flow</span></strong></button><div className="progress-topbar-spacer"/><span className="progress-live"><i/>Dados sincronizados</span><button className="progress-coach-link" onClick={()=>router.push("/coach")}>Praticar agora <span>→</span></button></header>
+   <header className="progress-topbar"><button className="progress-mobile-brand" onClick={()=>router.push("/")}><img src="/speakflow-logo.png" alt="SpeakFlow"/><strong>Speak<span>Flow</span></strong></button><div className="progress-topbar-spacer"/><button className="progress-coach-link" onClick={()=>router.push("/coach")}>Praticar agora <span>→</span></button></header>
    <div className="progress-content">
     <section className="progress-hero"><div><span className="progress-eyebrow">SEU PROGRESSO</span><h1>Sua evolução.<br/><em>Visível.</em></h1><p>Acompanhe sua constância, suas sessões e os insights que o SpeakFlow identifica ao longo da sua prática.</p></div><div className="progress-hero-mark"><div className="progress-orbit"/><img src="/speakflow-logo.png" alt=""/></div></section>
     {loading?<section className="progress-state">Carregando sua jornada...</section>:<>
