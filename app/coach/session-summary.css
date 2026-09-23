@@ -1,0 +1,17 @@
+.session-summary{width:min(100%,900px);margin:0 auto;padding:46px 0 24px}
+.session-summary-hero{position:relative;overflow:hidden;padding:38px;border:1px solid rgba(129,156,255,.15);border-radius:28px;background:radial-gradient(circle at 85% 10%,rgba(113,91,255,.17),transparent 35%),linear-gradient(145deg,rgba(20,26,44,.96),rgba(8,11,20,.98));box-shadow:0 30px 90px rgba(0,0,0,.3)}
+.session-summary-mark{width:48px;height:48px;display:grid;place-items:center;margin-bottom:24px;border:1px solid rgba(145,168,255,.3);border-radius:15px;background:rgba(99,124,255,.12);color:#aebcff;font-size:20px;box-shadow:0 0 34px rgba(99,124,255,.12)}
+.session-summary-hero h1{margin:10px 0 16px;font-size:clamp(38px,6vw,62px);line-height:1;letter-spacing:-2.6px}
+.session-summary-hero h1 em{color:#91a8ff;font-style:normal}
+.session-summary-hero>p{max-width:680px;margin:0;color:rgba(255,255,255,.58);font-size:14px;line-height:1.7}
+.session-summary-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.session-summary-meta span{padding:7px 10px;border:1px solid rgba(129,156,255,.13);border-radius:999px;background:rgba(129,156,255,.06);color:#aebcff;font-size:8px;font-weight:800;letter-spacing:.6px}
+.session-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.session-summary-grid article{min-height:145px;padding:22px;border:1px solid rgba(255,255,255,.065);border-radius:19px;background:rgba(255,255,255,.025)}
+.session-summary-grid article>span{color:#819cff;font-size:8px;font-weight:800;letter-spacing:1.3px}
+.session-summary-grid article>strong{display:block;margin-top:13px;color:#eef1fb;font-size:13px;font-weight:600;line-height:1.65}
+.session-summary-grid .session-summary-next{grid-column:1/-1;min-height:0;background:linear-gradient(120deg,rgba(99,124,255,.09),rgba(128,91,210,.055))}
+.session-summary-actions{display:flex;align-items:center;gap:10px;margin-top:18px}
+.session-summary-actions .coach-primary{width:auto;margin:0}
+.session-summary-progress{min-height:46px;padding:0 17px;border:1px solid rgba(129,156,255,.16);border-radius:13px;background:rgba(129,156,255,.06);color:#b4c0ff;font-size:10px;font-weight:800}
+@media(max-width:700px){.session-summary{padding:22px 0 16px}.session-summary-hero{padding:27px 20px;border-radius:23px;text-align:left}.session-summary-hero h1{font-size:clamp(36px,11vw,49px);letter-spacing:-2px}.session-summary-hero>p{font-size:12px}.session-summary-grid{grid-template-columns:1fr}.session-summary-grid .session-summary-next{grid-column:auto}.session-summary-grid article{min-height:0;padding:19px}.session-summary-actions{display:grid;grid-template-columns:1fr}.session-summary-actions .coach-primary,.session-summary-progress{width:100%}}
