@@ -5,32 +5,31 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import * as THREE from "three";
 import "./musiclab.css";
+import { approvedMusicCatalog, attributionFor, type MusicTrack } from "./catalog";
 
-type Track = {
-  id: string; title: string; artist: string; level: string; focus: string; duration: string; mood: string;
-  description: string; phrases: { line: string; meaning: string; note: string }[];
-};
-
-const tracks: Track[] = [
-  { id:"city-lights", title:"City Lights", artist:"SpeakFlow Originals", level:"Beginner", focus:"Everyday English", duration:"6 min", mood:"Night Drive", description:"Uma história curta sobre rotina, cidade e planos.",
+const originalTracks: MusicTrack[] = [
+  { catalogStatus:"original", id:"city-lights", title:"City Lights", artist:"SpeakFlow Originals", level:"Beginner", focus:"Everyday English", duration:"6 min", mood:"Night Drive", description:"Uma história curta sobre rotina, cidade e planos.",
     phrases:[
       {line:"I’m walking home under the city lights.",meaning:"Estou voltando para casa sob as luzes da cidade.",note:"Walking home é uma forma natural de dizer que você está indo para casa a pé."},
       {line:"Tomorrow, I’ll take a different road.",meaning:"Amanhã, vou pegar um caminho diferente.",note:"I’ll é a contração de I will, muito comum ao falar de decisões e futuro."},
       {line:"There’s still time to change my mind.",meaning:"Ainda há tempo para mudar de ideia.",note:"Change my mind significa mudar de ideia, não mudar a mente literalmente."}
     ]},
-  { id:"new-day", title:"A New Day", artist:"SpeakFlow Originals", level:"Elementary", focus:"Listening & Vocabulary", duration:"7 min", mood:"Morning Flow", description:"Novos começos, hábitos e pequenas decisões do cotidiano.",
+  { catalogStatus:"original", id:"new-day", title:"A New Day", artist:"SpeakFlow Originals", level:"Elementary", focus:"Listening & Vocabulary", duration:"7 min", mood:"Morning Flow", description:"Novos começos, hábitos e pequenas decisões do cotidiano.",
     phrases:[
       {line:"I woke up early and opened the window.",meaning:"Acordei cedo e abri a janela.",note:"Woke up é o passado irregular de wake up."},
       {line:"I’m ready to start again.",meaning:"Estou pronto para começar de novo.",note:"Ready to + verbo é uma estrutura frequente para indicar disposição."},
       {line:"One small step can change the day.",meaning:"Um pequeno passo pode mudar o dia.",note:"Can expressa possibilidade ou capacidade, dependendo do contexto."}
     ]},
-  { id:"weekend-call", title:"Weekend Call", artist:"SpeakFlow Originals", level:"Intermediate", focus:"Natural Conversation", duration:"8 min", mood:"Late Call", description:"Expressões naturais para combinar planos e conversar sobre o fim de semana.",
+  { catalogStatus:"original", id:"weekend-call", title:"Weekend Call", artist:"SpeakFlow Originals", level:"Intermediate", focus:"Natural Conversation", duration:"8 min", mood:"Late Call", description:"Expressões naturais para combinar planos e conversar sobre o fim de semana.",
     phrases:[
       {line:"Are you free this weekend?",meaning:"Você está livre neste fim de semana?",note:"Uma pergunta curta e natural para descobrir se alguém tem disponibilidade."},
       {line:"I haven’t made any plans yet.",meaning:"Ainda não fiz nenhum plano.",note:"Yet aparece com frequência no fim de frases negativas no present perfect."},
       {line:"Let’s figure something out.",meaning:"Vamos combinar alguma coisa.",note:"Figure something out pode significar encontrar uma solução ou decidir algo."}
     ]}
 ];
+
+const playableLicensedTracks = approvedMusicCatalog.filter(track=>track.audioUrl && track.phrases.length > 0);
+const tracks: MusicTrack[] = [...originalTracks, ...playableLicensedTracks];
 
 export default function MusicLab() {
   const router = useRouter();
@@ -45,6 +44,7 @@ export default function MusicLab() {
   const audioEnergyRef=useRef(0);
   const audioProgressRef=useRef(0);
   const activeWordRef=useRef(0);
+  const trackAudioRef=useRef<HTMLAudioElement|null>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
 
@@ -102,8 +102,23 @@ export default function MusicLab() {
     e.currentTarget.style.setProperty("--my",`${e.clientY-rect.top}px`);
   }
 
-  function chooseTrack(id:string){setSelectedId(id);setStep(0);setRevealed(false);setPlaying(false);}
+  function chooseTrack(id:string){trackAudioRef.current?.pause();trackAudioRef.current=null;setSelectedId(id);setStep(0);setRevealed(false);setPlaying(false);}
   function movePhrase(direction:number){setStep(current=>(current+direction+track.phrases.length)%track.phrases.length);setRevealed(false);setPlaying(false);}
+
+  async function playLicensedTrack(){
+    if(!track.audioUrl) return;
+    trackAudioRef.current?.pause();
+    const audio=new Audio(track.audioUrl); audio.crossOrigin="anonymous"; trackAudioRef.current=audio; setPlaying(true);
+    try{
+      const AudioContextClass=window.AudioContext||(window as typeof window & {webkitAudioContext:typeof AudioContext}).webkitAudioContext;
+      const context=new AudioContextClass(); const source=context.createMediaElementSource(audio); const analyser=context.createAnalyser();
+      analyser.fftSize=256; analyser.smoothingTimeConstant=.78; source.connect(analyser); analyser.connect(context.destination);
+      const data=new Uint8Array(analyser.frequencyBinCount); let audioRaf=0;
+      const sample=()=>{analyser.getByteFrequencyData(data);let sum=0;for(let i=0;i<data.length;i++)sum+=data[i];audioEnergyRef.current=sum/(data.length*255);if(audio.duration&&Number.isFinite(audio.duration)){audioProgressRef.current=audio.currentTime/audio.duration;shellRef.current?.style.setProperty("--audio-progress",String(audioProgressRef.current));shellRef.current?.style.setProperty("--audio-energy",String(audioEnergyRef.current))}audioRaf=requestAnimationFrame(sample)};
+      const cleanup=()=>{cancelAnimationFrame(audioRaf);audioEnergyRef.current=0;audioProgressRef.current=0;trackAudioRef.current=null;void context.close();setPlaying(false)};
+      audio.addEventListener("ended",cleanup,{once:true});audio.addEventListener("error",cleanup,{once:true});await context.resume();audioRaf=requestAnimationFrame(sample);await audio.play();
+    }catch{trackAudioRef.current=null;setPlaying(false)}
+  }
 
   async function speak(text:string){
     setPlaying(true);
@@ -157,10 +172,10 @@ export default function MusicLab() {
         <div className="ml-timeline"><span style={{width:`${progress}%`}}/></div>
         <div className="ml-controls">
           <button onClick={()=>movePhrase(-1)} aria-label="Anterior">‹</button>
-          <button className="ml-play" onClick={()=>speak(phrase.line)} aria-label="Ouvir frase">{playing?"Ⅱ":"▶"}</button>
+          <button className="ml-play" onClick={()=>track.audioUrl?playLicensedTrack():speak(phrase.line)} aria-label={track.audioUrl?"Reproduzir música":"Ouvir frase"}>{playing?"Ⅱ":"▶"}</button>
           <button onClick={()=>movePhrase(1)} aria-label="Próxima">›</button>
         </div>
-        <div className="ml-player-meta"><span>{step+1}/{track.phrases.length}</span><span>{track.level}</span><span>{track.duration}</span></div>
+        <div className="ml-player-meta"><span>{step+1}/{track.phrases.length}</span><span>{track.level}</span><span>{track.duration}</span>{track.catalogStatus==="rights-approved"&&<span>LICENSED · {track.rights?.license}</span>}</div>
       </div></div>
     </section>
 
@@ -187,6 +202,6 @@ export default function MusicLab() {
       </div>
     </section>
 
-    <footer className="musiclab-footer"><img src="/speakflow-logo.png" alt=""/><p>MusicLab™ · uma experiência SpeakFlow</p><span>LISTEN · FEEL · SPEAK</span></footer>
+    <footer className="musiclab-footer"><img src="/speakflow-logo.png" alt=""/><p>MusicLab™ · uma experiência SpeakFlow</p><span>{attributionFor(track)??"LISTEN · FEEL · SPEAK"}</span></footer>
   </main>;
 }
