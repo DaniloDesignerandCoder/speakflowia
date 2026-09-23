@@ -48,6 +48,8 @@ export default function Home() {
     avatarUrl: "",
   });
 
+  const [heroExperience, setHeroExperience] = useState<"coach" | "musiclab">("coach");
+
   const [progress, setProgress] = useState({
     conversations_count: 0,
     total_minutes: 0,
@@ -67,6 +69,13 @@ export default function Home() {
     minutes: 0,
     route: "/coach?mode=conversation",
   });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setHeroExperience((current) => current === "coach" ? "musiclab" : "coach");
+    }, 8500);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     async function loadProgress() {
@@ -331,38 +340,22 @@ export default function Home() {
             </div>
 
 
-            <div className="dashboard-live-demo" aria-label="Demonstração do SpeakFlow Coach">
-              <div className="live-demo-brand">
-                <img src="/speakflow-logo.png" alt="" aria-hidden="true" />
-                <div>
-                  <strong>SpeakFlow Coach</strong>
-                  <span>CONVERSAÇÃO</span>
-                </div>
+            <div className={"dashboard-live-demo " + (heroExperience === "musiclab" ? "show-musiclab" : "show-coach")} aria-label="Demonstração interativa SpeakFlow">
+              <div className="live-demo-scene live-demo-coach-scene" aria-hidden={heroExperience !== "coach"}>
+                <div className="live-demo-brand"><img src="/speakflow-logo.png" alt="" aria-hidden="true" /><div><strong>SpeakFlow Coach</strong><span>CONVERSAÇÃO</span></div></div>
+                <div className="live-demo-conversation"><div className="live-demo-message student"><span>YOU</span><p>Yesterday I go to school.</p></div><div className="live-demo-message coach"><span>SPEAKFLOW</span><p>Almost! Try: “Yesterday I went to school.”</p></div><div className="live-demo-insight"><span>✦ SMART FEEDBACK</span><strong>went</strong><small>past tense of “go”</small></div></div>
+                <div className="live-demo-caption"><span>Speak naturally.</span><span>Learn while you talk.</span></div>
               </div>
-
-              <div className="live-demo-conversation">
-                <div className="live-demo-message student">
-                  <span>YOU</span>
-                  <p>Yesterday I go to school.</p>
-                </div>
-
-                <div className="live-demo-message coach">
-                  <span>SPEAKFLOW</span>
-                  <p>Almost! Try: “Yesterday I went to school.”</p>
-                </div>
-
-                <div className="live-demo-insight">
-                  <span>✦ SMART FEEDBACK</span>
-                  <strong>went</strong>
-                  <small>past tense of “go”</small>
-                </div>
+              <div className="live-demo-scene live-demo-musiclab-scene" aria-hidden={heroExperience !== "musiclab"}>
+                <div className="live-music-head"><div><span>MUSICLAB™</span><small>NOW LISTENING</small></div><b>LIVE EXPERIENCE</b></div>
+                <div className="live-music-core"><div className="live-music-rings"><div className="live-music-disc"><img src="/speakflow-logo.png" alt="" aria-hidden="true" /></div></div></div>
+                <div className="live-music-copy"><span>ACOUSTIC POP</span><strong>The Circle</strong><small>Kira Daly / Good Time Villains</small></div>
+                <div className="live-music-wave">{Array.from({length:24},(_,i)=><i key={i} style={{height: (22 + ((i * 17) % 72)) + "%"}} />)}</div>
+                <div className="live-music-progress"><span /></div>
+                <div className="live-music-footer"><span>LISTEN</span><span>DISCOVER</span><span>SHADOW</span></div>
               </div>
-
-              <div className="live-demo-caption">
-                <span>Speak naturally.</span>
-                <span>Learn while you talk.</span>
-              </div>
-            </div>
+              <div className="live-demo-switch" aria-hidden="true"><i className={heroExperience === "coach" ? "active" : ""} /><i className={heroExperience === "musiclab" ? "active" : ""} /></div>
+            </div>>
 
           </section>
 
