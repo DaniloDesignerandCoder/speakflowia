@@ -3136,3 +3136,201 @@ img {
   .dashboard-focus-copy p { margin: 0 auto; }
   .dashboard-focus-stats { grid-template-columns: 1fr 1fr; }
 }
+
+
+/* =========================================================
+   HOME HERO — PREMIUM CAMPAIGN
+   ========================================================= */
+
+.dashboard-hero {
+  min-height: 430px;
+  border-color: rgba(126, 153, 255, 0.13);
+  background:
+    radial-gradient(circle at 82% 48%, rgba(91, 116, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 8% 0%, rgba(118, 94, 255, 0.09), transparent 34%),
+    linear-gradient(125deg, rgba(18, 23, 39, 0.98), rgba(8, 11, 20, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 32px 90px rgba(0, 0, 0, 0.28);
+}
+
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(129, 156, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(129, 156, 255, 0.08) 1px, transparent 1px);
+  background-size: 54px 54px;
+  mask-image: linear-gradient(90deg, transparent, black 65%, transparent);
+}
+
+.dashboard-hero-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.dashboard-hero-brand img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(116, 143, 255, 0.25));
+}
+
+.dashboard-hero-brand strong {
+  display: block;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.dashboard-hero-brand strong span {
+  color: #91a8ff;
+}
+
+.dashboard-hero-brand small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 7px;
+  letter-spacing: 1.8px;
+}
+
+.dashboard-hero h1 {
+  max-width: 720px;
+}
+
+.dashboard-hero h1 em {
+  background: linear-gradient(90deg, #9aafff, #7288ff 55%, #b5a4ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.dashboard-hero-proof {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dashboard-hero-proof span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 8px;
+  letter-spacing: 0.2px;
+}
+
+.dashboard-hero-proof i,
+.ai-status i {
+  width: 5px;
+  height: 5px;
+  display: inline-block;
+  border-radius: 50%;
+  background: #72ffa9;
+  box-shadow: 0 0 10px rgba(114, 255, 169, 0.65);
+}
+
+.dashboard-ai-visual {
+  width: 290px;
+  height: 290px;
+}
+
+.ai-ring-one {
+  width: 272px;
+  height: 272px;
+  border-color: rgba(126, 153, 255, 0.2);
+  box-shadow: 0 0 85px rgba(90, 115, 255, 0.12);
+}
+
+.ai-ring-two {
+  width: 205px;
+  height: 205px;
+}
+
+.ai-face {
+  width: 142px;
+  height: 142px;
+  border-color: rgba(143, 164, 255, 0.3);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(220, 227, 255, 0.18), transparent 25%),
+    linear-gradient(145deg, rgba(92, 117, 235, 0.28), rgba(85, 56, 166, 0.14));
+  box-shadow:
+    0 0 70px rgba(91, 116, 255, 0.22),
+    inset 0 0 32px rgba(135, 154, 255, 0.06);
+}
+
+.ai-face img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+}
+
+.ai-status {
+  position: absolute;
+  right: 4px;
+  bottom: 38px;
+  z-index: 4;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(129, 156, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 11, 20, 0.76);
+  backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 7px;
+  letter-spacing: 0.8px;
+}
+
+.ai-status span {
+  color: #72ffa9;
+  font-size: 6px;
+}
+
+@media (max-width: 760px) {
+  .dashboard-hero {
+    min-height: auto;
+  }
+
+  .dashboard-hero-brand {
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .dashboard-hero-proof {
+    justify-content: center;
+  }
+
+  .dashboard-ai-visual {
+    width: 220px;
+    height: 220px;
+    margin: 25px auto 0;
+  }
+
+  .ai-ring-one {
+    width: 210px;
+    height: 210px;
+  }
+
+  .ai-ring-two {
+    width: 160px;
+    height: 160px;
+  }
+
+  .ai-face {
+    width: 108px;
+    height: 108px;
+  }
+
+  .ai-status {
+    right: 0;
+    bottom: 18px;
+  }
+}
