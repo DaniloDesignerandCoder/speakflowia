@@ -1,0 +1,60 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/speakflow-voice/**"
+      - "supabase/functions/speakflow-coach/**"
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      voice: ${{ steps.filter.outputs.voice }}
+      coach: ${{ steps.filter.outputs.coach }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed Edge Functions
+        id: filter
+        shell: bash
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+          CHANGED="$(git diff --name-only "$BEFORE" "$AFTER")"
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-voice/'; then echo "voice=true" >> "$GITHUB_OUTPUT"; else echo "voice=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-coach/'; then echo "coach=true" >> "$GITHUB_OUTPUT"; else echo "coach=false" >> "$GITHUB_OUTPUT"; fi
+
+  deploy-voice:
+    needs: changes
+    if: needs.changes.outputs.voice == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy speakflow-voice
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy speakflow-voice --project-ref njoisdldoellzuqxkyuk
+
+  deploy-coach:
+    needs: changes
+    if: needs.changes.outputs.coach == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy speakflow-coach
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy speakflow-coach --project-ref njoisdldoellzuqxkyuk
