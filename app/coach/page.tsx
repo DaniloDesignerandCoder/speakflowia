@@ -19,6 +19,20 @@ type Message = {
   feedback?: Feedback | null;
 };
 
+type SessionSummary = {
+  summary: string;
+  skills_practiced: string;
+  positive_point: string;
+  improvement_point: string;
+  next_recommendation: string;
+};
+
+type PronunciationAttempt = {
+  target: string;
+  heard: string;
+  score: number;
+};
+
 const levels = [
   { id: "beginner", label: "Beginner", description: "Iniciante" },
   { id: "elementary", label: "Elementary", description: "Básico" },
@@ -112,6 +126,8 @@ export default function CoachPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [pronunciationIndex, setPronunciationIndex] = useState(0);
   const [pronunciationResult, setPronunciationResult] = useState<{ heard: string; score: number } | null>(null);
+  const [pronunciationAttempts, setPronunciationAttempts] = useState<PronunciationAttempt[]>([]);
+  const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
 
   const currentPhrases = pronunciationPhrases[level] ?? pronunciationPhrases.intermediate;
   const pronunciationTarget = currentPhrases[pronunciationIndex % currentPhrases.length];
@@ -182,6 +198,8 @@ export default function CoachPage() {
     setSessionSeconds(0);
     setPronunciationIndex(0);
     setPronunciationResult(null);
+    setPronunciationAttempts([]);
+    setSessionSummary(null);
     setStarted(true);
 
     if (isPronunciation) {
@@ -233,10 +251,10 @@ export default function CoachPage() {
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       if (isPronunciation) {
-        setPronunciationResult({
-          heard: transcript,
-          score: wordSimilarity(pronunciationTarget, transcript),
-        });
+        const score = wordSimilarity(pronunciationTarget, transcript);
+        const attempt = { target: pronunciationTarget, heard: transcript, score };
+        setPronunciationResult({ heard: transcript, score });
+        setPronunciationAttempts((current) => [...current, attempt]);
       } else {
         setInput(transcript);
       }
@@ -312,12 +330,49 @@ export default function CoachPage() {
       return;
     }
 
+    let generatedSummary: SessionSummary | null = null;
+
+    try {
+      const { data, error: summaryError } = await supabase.functions.invoke("speakflow-coach", {
+        body: {
+          operation: "session_summary",
+          level,
+          mode: trainingMode,
+          learningGoal,
+          correctionStyle,
+          conversationPace,
+          duration_seconds: sessionSeconds,
+          messages: isPronunciation ? [] : messages,
+          pronunciation_results: isPronunciation ? pronunciationAttempts : [],
+        },
+      });
+
+      if (summaryError) throw summaryError;
+
+      if (
+        data?.summary &&
+        data?.skills_practiced &&
+        data?.positive_point &&
+        data?.improvement_point &&
+        data?.next_recommendation
+      ) {
+        generatedSummary = data as SessionSummary;
+      }
+    } catch (summaryError) {
+      console.error("Erro ao gerar resumo da sessão:", summaryError);
+    }
+
     const { error } = await supabase
       .from("learning_sessions")
       .insert({
         user_id: session.user.id,
         mode: trainingMode,
         duration_seconds: sessionSeconds,
+        summary: generatedSummary?.summary ?? null,
+        skills_practiced: generatedSummary?.skills_practiced ?? null,
+        positive_point: generatedSummary?.positive_point ?? null,
+        improvement_point: generatedSummary?.improvement_point ?? null,
+        next_recommendation: generatedSummary?.next_recommendation ?? null,
       });
 
     if (error) {
@@ -355,9 +410,11 @@ export default function CoachPage() {
         .eq("user_id", session.user.id);
     }
 
+    setSessionSummary(generatedSummary);
     setStarted(false);
     setInput("");
     setPronunciationResult(null);
+    setPronunciationAttempts([]);
     setIsFinishing(false);
   }
 
@@ -398,7 +455,45 @@ export default function CoachPage() {
           </div>
         </header>
 
-        {!started ? (
+        {!started && sessionSummary ? (
+          <section className="session-summary">
+            <div className="session-summary-hero">
+              <div className="session-summary-mark">✦</div>
+              <span className="coach-label">SESSÃO CONCLUÍDA</span>
+              <h1>Seu treino virou<br /><em>próximo passo.</em></h1>
+              <p>{sessionSummary.summary}</p>
+              <div className="session-summary-meta">
+                <span>{currentLevel?.label}</span>
+                <span>{isPronunciation ? "Pronúncia" : isVocabulary ? "Vocabulário" : "Conversação"}</span>
+                <span>{Math.max(1, Math.round(sessionSeconds / 60))} min</span>
+              </div>
+            </div>
+
+            <div className="session-summary-grid">
+              <article>
+                <span>HABILIDADES PRATICADAS</span>
+                <strong>{sessionSummary.skills_practiced}</strong>
+              </article>
+              <article>
+                <span>PONTO POSITIVO</span>
+                <strong>{sessionSummary.positive_point}</strong>
+              </article>
+              <article>
+                <span>PRÓXIMA EVOLUÇÃO</span>
+                <strong>{sessionSummary.improvement_point}</strong>
+              </article>
+              <article className="session-summary-next">
+                <span>RECOMENDAÇÃO DO COACH</span>
+                <strong>{sessionSummary.next_recommendation}</strong>
+              </article>
+            </div>
+
+            <div className="session-summary-actions">
+              <button className="coach-primary" onClick={startSession}>Praticar novamente <span>→</span></button>
+              <button className="session-summary-progress" onClick={() => router.push("/progress")}>Ver meu progresso</button>
+            </div>
+          </section>
+        ) : !started ? (
           <section className="coach-start">
             <div className="coach-eyebrow">
               {isPronunciation ? "SPEAKFLOW PRONUNCIATION" : isVocabulary ? "SPEAKFLOW VOCABULARY" : "SPEAKFLOW COACH"}
