@@ -15,3 +15,16 @@
 .session-summary-actions .coach-primary{width:auto;margin:0}
 .session-summary-progress{min-height:46px;padding:0 17px;border:1px solid rgba(129,156,255,.16);border-radius:13px;background:rgba(129,156,255,.06);color:#b4c0ff;font-size:10px;font-weight:800}
 @media(max-width:700px){.session-summary{padding:22px 0 16px}.session-summary-hero{padding:27px 20px;border-radius:23px;text-align:left}.session-summary-hero h1{font-size:clamp(36px,11vw,49px);letter-spacing:-2px}.session-summary-hero>p{font-size:12px}.session-summary-grid{grid-template-columns:1fr}.session-summary-grid .session-summary-next{grid-column:auto}.session-summary-grid article{min-height:0;padding:19px}.session-summary-actions{display:grid;grid-template-columns:1fr}.session-summary-actions .coach-primary,.session-summary-progress{width:100%}}
+
+/* ACTIVE SESSION EXIT GUARD */
+.session-exit-overlay{position:fixed;inset:0;z-index:500;display:grid;place-items:center;padding:20px;background:rgba(3,5,10,.78);backdrop-filter:blur(14px)}
+.session-exit-dialog{width:min(100%,500px);padding:30px;border:1px solid rgba(129,156,255,.2);border-radius:24px;background:radial-gradient(circle at 90% 0,rgba(113,91,255,.17),transparent 38%),linear-gradient(145deg,#111728,#080b14);box-shadow:0 35px 100px rgba(0,0,0,.55)}
+.session-exit-mark{width:44px;height:44px;display:grid;place-items:center;margin-bottom:20px;border:1px solid rgba(145,168,255,.3);border-radius:14px;background:rgba(99,124,255,.12);color:#aebcff;font-size:18px}
+.session-exit-dialog h2{margin:10px 0 12px;color:#f6f8ff;font-size:28px;letter-spacing:-1px}
+.session-exit-dialog>p{margin:0;color:rgba(255,255,255,.56);font-size:12px;line-height:1.7}
+.session-exit-actions{display:grid;gap:9px;margin-top:24px}
+.session-exit-actions .coach-primary{width:100%;margin:0}
+.session-exit-continue{min-height:46px;border:1px solid rgba(129,156,255,.15);border-radius:13px;background:rgba(129,156,255,.05);color:#b4c0ff;font-size:10px;font-weight:800}
+.session-exit-actions button:disabled{opacity:.55;cursor:default}
+.finish-button:disabled{cursor:wait}
+@media(max-width:700px){.session-exit-dialog{padding:24px 19px;border-radius:21px}.session-exit-dialog h2{font-size:24px}}
