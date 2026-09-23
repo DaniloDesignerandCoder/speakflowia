@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import "./session-summary.css";
 
 type TrainingMode = "conversation" | "vocabulary" | "pronunciation";
 
