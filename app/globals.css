@@ -3489,3 +3489,147 @@ img {
     font-size: 10px;
   }
 }
+
+
+/* =========================================================
+   PRONUNCIATION MODE
+   ========================================================= */
+
+.pronunciation-card {
+  overflow: visible;
+}
+
+.pronunciation-workspace {
+  padding: 32px;
+}
+
+.pronunciation-workspace h2 {
+  margin: 12px 0 14px;
+  color: #f3f5fb;
+  font-size: clamp(24px, 4vw, 38px);
+  line-height: 1.18;
+  letter-spacing: -0.8px;
+}
+
+.pronunciation-workspace > p {
+  max-width: 650px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pronunciation-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.pronunciation-actions .voice-toggle,
+.pronunciation-actions .mic-button {
+  width: auto;
+  height: 48px;
+  flex: 0 1 auto;
+  padding: 0 18px;
+  gap: 8px;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pronunciation-actions .voice-toggle {
+  color: #dce4ff;
+}
+
+.pronunciation-actions .mic-button {
+  color: #b7c4ff;
+}
+
+.pronunciation-result {
+  width: 100%;
+  max-width: none;
+  margin-top: 24px;
+}
+
+.pronunciation-workspace > .coach-primary {
+  width: auto;
+  min-width: 230px;
+  margin-top: 24px;
+}
+
+@media (max-width: 700px) {
+  .pronunciation-session .conversation-top {
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  .pronunciation-session .conversation-top h1 {
+    font-size: clamp(27px, 8.2vw, 38px);
+    line-height: 1.05;
+  }
+
+  .pronunciation-session .session-time {
+    flex: 0 0 auto;
+  }
+
+  .pronunciation-card {
+    border-radius: 22px;
+  }
+
+  .pronunciation-workspace {
+    padding: 24px 18px 20px;
+  }
+
+  .pronunciation-workspace h2 {
+    margin-top: 10px;
+    font-size: clamp(25px, 7.5vw, 34px);
+    line-height: 1.18;
+  }
+
+  .pronunciation-workspace > p {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .pronunciation-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .pronunciation-actions .voice-toggle,
+  .pronunciation-actions .mic-button {
+    width: 100%;
+    min-width: 0;
+    height: 52px;
+    padding: 0 12px;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .pronunciation-workspace > .coach-primary {
+    width: 100%;
+    min-width: 0;
+    margin-top: 20px;
+  }
+
+  .pronunciation-session .conversation-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pronunciation-session .finish-button {
+    width: 100%;
+    min-height: 48px;
+    font-size: 13px;
+  }
+
+  .pronunciation-session .conversation-note {
+    text-align: center;
+  }
+}
