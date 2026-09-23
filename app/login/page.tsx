@@ -79,13 +79,29 @@ export default function LoginPage() {
           return;
         }
 
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_completed")
-          .eq("id", session.user.id)
-          .maybeSingle();
+        const [{ data: profile }, { count: priorSessions }] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("onboarding_completed")
+            .eq("id", session.user.id)
+            .maybeSingle(),
+          supabase
+            .from("learning_sessions")
+            .select("user_id", { count: "exact", head: true })
+            .eq("user_id", session.user.id),
+        ]);
 
-        router.push(profile?.onboarding_completed ? "/coach" : "/onboarding");
+        const isExistingLearner =
+          profile?.onboarding_completed === true || (priorSessions ?? 0) > 0;
+
+        if (isExistingLearner && profile?.onboarding_completed !== true) {
+          await supabase
+            .from("profiles")
+            .update({ onboarding_completed: true })
+            .eq("id", session.user.id);
+        }
+
+        router.push(isExistingLearner ? "/" : "/onboarding");
         router.refresh();
       }
     }
