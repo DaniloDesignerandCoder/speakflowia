@@ -45,6 +45,7 @@ export default function Home() {
     tip: "Continue praticando para o SpeakFlow identificar seu próximo foco.",
     sessions: 0,
     minutes: 0,
+    route: "/coach?mode=conversation",
   });
 
   useEffect(() => {
@@ -103,12 +104,19 @@ export default function Home() {
     });
 
     const skill = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Seu aprendizado";
+    const route =
+      skill === "Pronúncia"
+        ? "/coach?mode=pronunciation"
+        : skill === "Vocabulário"
+          ? "/coach?mode=vocabulary"
+          : "/coach?mode=conversation";
 
     setLearningFocus({
       skill,
       tip: insights[0]?.tip ?? "Continue praticando para o SpeakFlow identificar seu próximo foco.",
       sessions: sessions.length,
       minutes,
+      route,
     });
   }
 
@@ -389,7 +397,7 @@ export default function Home() {
               <span className="dashboard-label">CONTINUE DE ONDE PAROU</span>
               <h2>{learningFocus.skill}</h2>
               <p>{learningFocus.tip}</p>
-              <button className="dashboard-focus-action" onClick={() => router.push("/coach")}>
+              <button className="dashboard-focus-action" onClick={() => router.push(learningFocus.route)}>
                 Continuar praticando <span>→</span>
               </button>
             </div>
