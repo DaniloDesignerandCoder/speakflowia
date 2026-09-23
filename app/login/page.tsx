@@ -14,6 +14,31 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  function getFriendlyAuthMessage(errorMessage: string) {
+    const raw = errorMessage.toLowerCase();
+
+    if (raw.includes("invalid login credentials")) {
+      return "E-mail ou senha incorretos. Confira seus dados e tente novamente.";
+    }
+    if (raw.includes("email not confirmed")) {
+      return "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada e a pasta de spam.";
+    }
+    if (raw.includes("user already registered") || raw.includes("already been registered")) {
+      return "Este e-mail já possui uma conta no SpeakFlow. Entre com sua senha para continuar.";
+    }
+    if (raw.includes("password") && (raw.includes("weak") || raw.includes("least"))) {
+      return "Escolha uma senha mais segura, com pelo menos 6 caracteres.";
+    }
+    if (raw.includes("rate limit") || raw.includes("too many")) {
+      return "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.";
+    }
+    if (raw.includes("network") || raw.includes("fetch")) {
+      return "Não foi possível conectar ao SpeakFlow agora. Verifique sua internet e tente novamente.";
+    }
+
+    return "Não foi possível concluir esta ação agora. Tente novamente em alguns instantes.";
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -31,10 +56,10 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setMessage(error.message);
+        setMessage(getFriendlyAuthMessage(error.message));
       } else {
         setMessage(
-          "Conta criada. Verifique seu e-mail para confirmar o acesso."
+          "Conta criada com sucesso! Enviamos um link de confirmação para o seu e-mail. Verifique também a pasta de spam."
         );
       }
     } else {
