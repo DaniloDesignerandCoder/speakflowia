@@ -24,6 +24,10 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState("");
   const [stats, setStats] = useState({ sessions: 0, minutes: 0, streak: 0 });
   const [focusSkills, setFocusSkills] = useState<string[]>([]);
+  const [learningGoal, setLearningGoal] = useState("conversation");
+  const [correctionStyle, setCorrectionStyle] = useState("balanced");
+  const [conversationPace, setConversationPace] = useState("natural");
+  const [savingPreferences, setSavingPreferences] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -36,7 +40,7 @@ export default function ProfilePage() {
       setUserId(session.user.id);
       const [{ data }, { data: progress }, { data: insights }] = await Promise.all([
         supabase.from("profiles")
-          .select("full_name, preferred_level, avatar_url")
+          .select("full_name, preferred_level, avatar_url, learning_goal, correction_style, conversation_pace")
           .eq("id", session.user.id)
           .maybeSingle(),
         supabase.from("progress")
@@ -59,6 +63,9 @@ export default function ProfilePage() {
         streak: progress?.streak_days || 0,
       });
       setLevel(data?.preferred_level || "intermediate");
+      setLearningGoal(data?.learning_goal || "conversation");
+      setCorrectionStyle(data?.correction_style || "balanced");
+      setConversationPace(data?.conversation_pace || "natural");
       const counts = (insights || []).reduce((acc: Record<string, number>, item: { skill_category?: string | null }) => {
         const skill = item.skill_category?.trim();
         if (skill) acc[skill] = (acc[skill] || 0) + 1;
@@ -110,6 +117,15 @@ export default function ProfilePage() {
       setMessage("Perfil atualizado.");
     } else setMessage("Não foi possível atualizar o perfil.");
     setSaving(false);
+  }
+
+  async function savePreferences() {
+    if (!userId) return;
+    setSavingPreferences(true);
+    setMessage("");
+    const { error } = await supabase.from("profiles").update({ learning_goal: learningGoal, correction_style: correctionStyle, conversation_pace: conversationPace }).eq("id", userId);
+    setMessage(error ? "Não foi possível salvar suas preferências." : "Preferências de aprendizado atualizadas.");
+    setSavingPreferences(false);
   }
 
   async function signOut() {
@@ -176,6 +192,15 @@ export default function ProfilePage() {
             </article>
           ))}
         </div>
+      </section>
+      <section className="profile-preferences">
+        <div className="profile-preferences-heading"><div><span>PREFERÊNCIAS DE APRENDIZADO</span><h2>Personalize seu Coach</h2></div><p>Estas escolhas orientam como o SpeakFlow conduz suas sessões.</p></div>
+        <div className="profile-preference-grid">
+          <label><span>OBJETIVO PRINCIPAL</span><select value={learningGoal} onChange={(e) => setLearningGoal(e.target.value)}><option value="conversation">Conversação</option><option value="vocabulary">Vocabulário</option><option value="pronunciation">Pronúncia</option></select></label>
+          <label><span>ESTILO DE CORREÇÃO</span><select value={correctionStyle} onChange={(e) => setCorrectionStyle(e.target.value)}><option value="essential">Essencial</option><option value="balanced">Equilibrado</option><option value="detailed">Detalhado</option></select></label>
+          <label><span>RITMO DA CONVERSA</span><select value={conversationPace} onChange={(e) => setConversationPace(e.target.value)}><option value="relaxed">Tranquilo</option><option value="natural">Natural</option><option value="challenging">Desafiador</option></select></label>
+        </div>
+        <button type="button" className="profile-preferences-save" disabled={savingPreferences} onClick={savePreferences}>{savingPreferences ? "Salvando..." : "Salvar preferências"}</button>
       </section>
       <div className="profile-actions">
         <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach →</button>
