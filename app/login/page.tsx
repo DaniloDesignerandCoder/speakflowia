@@ -69,9 +69,23 @@ export default function LoginPage() {
       });
 
       if (error) {
-        setMessage(error.message);
+        setMessage(getFriendlyAuthMessage(error.message));
       } else {
-        router.push("/coach");
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+          setMessage("Não foi possível iniciar sua sessão agora. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_completed")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        router.push(profile?.onboarding_completed ? "/coach" : "/onboarding");
         router.refresh();
       }
     }
