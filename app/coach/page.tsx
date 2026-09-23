@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 type Feedback = {
@@ -47,6 +47,10 @@ const levels = [
 
 export default function CoachPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedMode = searchParams.get("mode");
+  const trainingMode = requestedMode === "vocabulary" ? "vocabulary" : "conversation";
+  const isVocabulary = trainingMode === "vocabulary";
 
   const [level, setLevel] = useState("intermediate");
   const [started, setStarted] = useState(false);
@@ -112,7 +116,9 @@ useEffect(() => {
     setMessages([
       {
         role: "coach",
-        text: "Hi! I'm your SpeakFlow coach. Let's practice English together. Tell me about your day.",
+        text: isVocabulary
+          ? "Hi! Today we'll build your vocabulary through conversation. Tell me about something you enjoy doing, and I'll help you discover useful new words along the way."
+          : "Hi! I'm your SpeakFlow coach. Let's practice English together. Tell me about your day.",
       },
     ]);
   }
@@ -201,6 +207,7 @@ useEffect(() => {
       {
         body: {
           level,
+          mode: trainingMode,
           messages,
           message: text,
         },
@@ -274,7 +281,7 @@ if (!session) {
   .from("learning_sessions")
   .insert({
     user_id: session.user.id,
-    mode: "conversation",
+    mode: trainingMode,
     duration_seconds: sessionSeconds,
   });
 
@@ -461,14 +468,16 @@ last_practice_date: today,
               className="coach-primary"
               onClick={startSession}
             >
-              Começar conversa
+              {isVocabulary ? "Começar treino de vocabulário" : "Começar conversa"}
               <span>→</span>
             </button>
 
 
             <div className="coach-tip">
               <span>✦</span>
-              Escolha seu nível e pratique no seu ritmo.
+              {isVocabulary
+                ? "Escolha seu nível e amplie seu vocabulário em contexto."
+                : "Escolha seu nível e pratique no seu ritmo."}
             </div>
 
           </section>
@@ -481,11 +490,11 @@ last_practice_date: today,
 
               <div>
                 <span className="coach-label">
-                  CONVERSAÇÃO
+                  {isVocabulary ? "VOCABULÁRIO" : "CONVERSAÇÃO"}
                 </span>
 
                 <h1>
-                  English Practice
+                  {isVocabulary ? "Vocabulary Practice" : "English Practice"}
                 </h1>
               </div>
 
