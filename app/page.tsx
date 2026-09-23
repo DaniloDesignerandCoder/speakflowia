@@ -101,7 +101,10 @@ export default function Home() {
             Coach
           </button>
 
-          <button className="dashboard-menu-item">
+          <button
+            className="dashboard-menu-item"
+            onClick={() => router.push("/progress")}
+          >
             <span>▥</span>
             Progresso
           </button>
