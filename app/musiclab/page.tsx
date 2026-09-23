@@ -39,8 +39,21 @@ export default function MusicLab() {
   const [revealed,setRevealed]=useState(false);
   const [playing,setPlaying]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
+  const canvasRef=useRef<HTMLCanvasElement>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
+
+  useEffect(()=>{
+    const canvas=canvasRef.current; if(!canvas) return;
+    const ctx=canvas.getContext("2d"); if(!ctx) return;
+    let raf=0, pointerX=.5, pointerY=.5;
+    const dots=Array.from({length:110},(_,i)=>({a:(i/110)*Math.PI*2,r:90+(i%17)*16,z:(i%13)/13,s:.0015+(i%7)*.00025}));
+    const resize=()=>{const d=Math.min(window.devicePixelRatio||1,2);canvas.width=innerWidth*d;canvas.height=innerHeight*d;canvas.style.width=innerWidth+"px";canvas.style.height=innerHeight+"px";ctx.setTransform(d,0,0,d,0,0)};
+    const pointer=(e:PointerEvent)=>{pointerX=e.clientX/innerWidth;pointerY=e.clientY/innerHeight};
+    const draw=(t:number)=>{ctx.clearRect(0,0,innerWidth,innerHeight);const cx=innerWidth*(.68+(pointerX-.5)*.035),cy=innerHeight*(.43+(pointerY-.5)*.025);dots.forEach((p,i)=>{const speed=playing?3.1:1;p.a+=p.s*speed;const depth=.55+p.z*.75;const x=cx+Math.cos(p.a+t*.00005)*p.r*depth;const y=cy+Math.sin(p.a+t*.00004)*p.r*.42*depth;const pulse=playing?.55+.45*Math.sin(t*.008+i):.45;ctx.beginPath();ctx.arc(x,y,Math.max(.55,1.8*p.z),0,Math.PI*2);ctx.fillStyle=`rgba(150,160,255,${.08+p.z*.22*pulse})`;ctx.fill()});raf=requestAnimationFrame(draw)};
+    resize();window.addEventListener("resize",resize);window.addEventListener("pointermove",pointer,{passive:true});raf=requestAnimationFrame(draw);
+    return()=>{cancelAnimationFrame(raf);window.removeEventListener("resize",resize);window.removeEventListener("pointermove",pointer)};
+  },[playing]);
 
   const track=useMemo(()=>tracks.find(item=>item.id===selectedId)??tracks[0],[selectedId]);
   const phrase=track.phrases[step];
@@ -73,6 +86,7 @@ export default function MusicLab() {
   }
 
   return <main ref={shellRef} onPointerMove={moveLight} className={playing?"musiclab-shell is-playing":"musiclab-shell"}>
+    <canvas ref={canvasRef} className="ml-particle-field" aria-hidden="true"/>
     <div className="ml-cursor-light"/>
     <div className="ml-grid"/>
     <div className="ml-scanline"/>
@@ -85,6 +99,7 @@ export default function MusicLab() {
     </header>
 
     <section className="ml-stage">
+      <div className="ml-depth-label depth-a">01 / SOUND</div><div className="ml-depth-label depth-b">02 / LANGUAGE</div><div className="ml-depth-label depth-c">03 / VOICE</div>
       <div className="ml-stage-copy">
         <span className="ml-kicker">IMMERSIVE ENGLISH STUDIO</span>
         <h1>Não estude uma frase.<br/><em>Entre nela.</em></h1>
@@ -92,7 +107,7 @@ export default function MusicLab() {
         <div className="ml-journey"><b>LISTEN</b><i/><span>DISCOVER</span><i/><span>SHADOW</span></div>
       </div>
 
-      <div className="ml-player-wrap"><div className="ml-ring r1"/><div className="ml-ring r2"/><div className="ml-ring r3"/><div className="ml-player">
+      <div className="ml-player-wrap"><div className="ml-spatial-title">SOUND<br/>CORE</div><div className="ml-ring r1"/><div className="ml-ring r2"/><div className="ml-ring r3"/><div className="ml-player">
         <div className="ml-orbit"><div className="ml-disc"><img src="/speakflow-logo.png" alt=""/></div></div>
         <div className="ml-player-copy"><span>{track.mood}</span><h2>{track.title}</h2><p>{track.artist}</p></div>
         <div className="ml-spectrum" aria-hidden="true">{Array.from({length:34}).map((_,i)=><i key={i}/>)}</div>
