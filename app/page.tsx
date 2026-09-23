@@ -29,6 +29,14 @@ const modules = [
     icon: "Aa",
     route: "/coach?mode=vocabulary",
   },
+  {
+    title: "MusicLab™",
+    subtitle: "Music × Language",
+    description:
+      "Aprenda inglês ouvindo música em uma experiência audiovisual interativa.",
+    icon: "♫",
+    route: "/musiclab",
+  },
 ];
 
 export default function Home() {
