@@ -11,7 +11,7 @@ const modules = [
     description:
       "Pratique situações reais em inglês com seu Coach.",
     icon: "◌",
-    route: "/coach",
+    route: "/coach?mode=conversation",
   },
   {
     title: "Pronúncia",
@@ -19,7 +19,7 @@ const modules = [
     description:
       "Treine sua fala e desenvolva uma pronúncia mais natural.",
     icon: "◎",
-    route: "/coach",
+    route: "/coach?mode=conversation",
   },
   {
     title: "Vocabulário",
@@ -27,7 +27,7 @@ const modules = [
     description:
       "Amplie seu repertório através de situações práticas.",
     icon: "Aa",
-    route: "/coach",
+    route: "/coach?mode=vocabulary",
   },
 ];
 
