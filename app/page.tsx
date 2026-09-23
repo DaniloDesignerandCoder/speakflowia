@@ -208,7 +208,10 @@ export default function Home() {
             Progresso
           </button>
 
-          <button className="dashboard-menu-item">
+          <button
+            className="dashboard-menu-item"
+            onClick={() => router.push("/musiclab")}
+          >
             <span>♫</span>
             MusicLab™
           </button>
