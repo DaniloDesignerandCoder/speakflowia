@@ -92,13 +92,40 @@ export default function MusicLab() {
     setRevealed(false);
   }
 
-  function speak(text: string) {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    utterance.rate = 0.88;
-    window.speechSynthesis.speak(utterance);
+  async function speak(text: string) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No active session");
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-voice`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Neural voice unavailable");
+
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      audio.addEventListener("ended", () => URL.revokeObjectURL(audioUrl), { once: true });
+      await audio.play();
+      return;
+    } catch {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 0.88;
+      window.speechSynthesis.speak(utterance);
+    }
   }
 
   return (
