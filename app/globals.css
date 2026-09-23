@@ -3763,3 +3763,9 @@ img {
 @media(max-width:700px){.profile-preferences{padding:18px}.profile-preferences-heading{align-items:flex-start;flex-direction:column}.profile-preferences-heading p{text-align:left}.profile-preference-grid{grid-template-columns:1fr}}
 
 .profile-preferences-actions{display:flex;align-items:center;gap:12px;margin-top:14px;min-height:42px}.profile-preferences-actions .profile-preferences-save{margin-top:0}.profile-preferences-feedback{font-size:9px;font-weight:700;animation:profileFeedbackIn .2s ease-out}.profile-preferences-feedback.success{color:#7fe3b0}.profile-preferences-feedback.error{color:#ff8f9d}@keyframes profileFeedbackIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}@media(max-width:700px){.profile-preferences-actions{align-items:flex-start;flex-direction:column;height:auto}.profile-preferences-feedback{padding-left:2px}}
+
+
+/* Four intuitive training cards, including MusicLab */
+.dashboard-module-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1050px){.dashboard-module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.dashboard-module-grid{grid-template-columns:1fr}}
