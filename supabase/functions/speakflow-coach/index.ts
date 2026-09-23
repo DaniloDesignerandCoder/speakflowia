@@ -561,9 +561,8 @@ Rules:
                 { role: "system", content: summaryInstruction },
                 { role: "user", content: sessionEvidence },
               ],
-              max_tokens: 350,
+              max_tokens: 650,
               temperature: 0.2,
-              response_format: { type: "json_object" },
             }),
           },
         );
@@ -837,10 +836,81 @@ Rules:
         console.error("Groq session summary error:", groqSummaryData);
       }
 
-      return new Response(
-        JSON.stringify({ error: "The AI services could not generate a session summary." }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      console.error("Session summary route used: local deterministic fallback.");
+
+      const messageCount = Array.isArray(sessionData.messages) ? sessionData.messages.length : 0;
+      const feedbackCount = Array.isArray(sessionData.feedbacks) ? sessionData.feedbacks.length : 0;
+      const pronunciationCount = Array.isArray(sessionData.pronunciationResults)
+        ? sessionData.pronunciationResults.length
+        : 0;
+      const modeLabel =
+        sessionData.mode === "pronunciation"
+          ? "pronunciation"
+          : sessionData.mode === "vocabulary"
+            ? "vocabulary"
+            : "conversation";
+      const evidenceCount = modeLabel === "pronunciation" ? pronunciationCount : messageCount;
+
+      const result = {
+        summary: `Completed a ${modeLabel} practice session with ${evidenceCount} recorded practice item${evidenceCount === 1 ? "" : "s"}.`,
+        skills_practiced:
+          modeLabel === "pronunciation"
+            ? "Pronunciation practice with recorded target and recognized-text attempts."
+            : modeLabel === "vocabulary"
+              ? "Vocabulary practice through the recorded session exchanges."
+              : "Conversation practice through the recorded session exchanges.",
+        positive_point: "The session was completed and recorded in the learning history.",
+        improvement_point:
+          feedbackCount > 0
+            ? `Continue working with the ${feedbackCount} correction${feedbackCount === 1 ? "" : "s"} recorded during this session.`
+            : "Continue practicing so future sessions can provide more specific evidence.",
+        next_recommendation:
+          modeLabel === "pronunciation"
+            ? "Continue with another pronunciation practice when ready."
+            : modeLabel === "vocabulary"
+              ? "Continue with another vocabulary practice when ready."
+              : "Continue with another conversation practice when ready.",
+      };
+
+      if (learningPlan) {
+        const currentPlan = parseAdaptivePlanResult({
+          primary_goal: learningPlan.primary_goal,
+          priority_skills: learningPlan.priority_skills,
+          current_focus: learningPlan.current_focus,
+          next_milestone: learningPlan.next_milestone,
+          coach_strategy: learningPlan.coach_strategy,
+          evidence_summary: learningPlan.evidence_summary,
+        });
+
+        if (currentPlan) {
+          const directEvidence = `Latest completed session: mode=${modeLabel}; recorded_items=${evidenceCount}; recorded_feedbacks=${feedbackCount}.`;
+          const planRow = {
+            user_id: user.id,
+            ...currentPlan,
+            evidence_summary: `${currentPlan.evidence_summary} | ${directEvidence}`,
+            sessions_analyzed:
+              (typeof learningPlan.sessions_analyzed === "number" ? learningPlan.sessions_analyzed : 0) + 1,
+            updated_at: new Date().toISOString(),
+          };
+
+          const { error: planUpsertError } = await supabase
+            .from("learning_plans")
+            .upsert(planRow, { onConflict: "user_id" });
+
+          if (planUpsertError) {
+            console.error("Adaptive plan upsert failed after local session summary fallback:", {
+              code: planUpsertError.code ?? null,
+              message: planUpsertError.message ?? "unknown",
+            });
+          } else {
+            console.error("Adaptive plan route used: local deterministic fallback after local session summary.");
+          }
+        }
+      }
+
+      return new Response(JSON.stringify(result), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     if (!userMessage) {
