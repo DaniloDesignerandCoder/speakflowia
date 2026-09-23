@@ -260,7 +260,7 @@ export default function Home() {
 
           <button
             className="dashboard-profile"
-            onClick={() => router.push("/login")}
+            onClick={() => router.push("/profile")}
           >
             
 <span className="dashboard-avatar">
