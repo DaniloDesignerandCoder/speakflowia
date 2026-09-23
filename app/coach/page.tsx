@@ -106,6 +106,7 @@ export default function CoachPage() {
   const [isFinishing, setIsFinishing] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [userName, setUserName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [pronunciationIndex, setPronunciationIndex] = useState(0);
   const [pronunciationResult, setPronunciationResult] = useState<{ heard: string; score: number } | null>(null);
 
@@ -131,11 +132,12 @@ export default function CoachPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, preferred_level")
+        .select("full_name, preferred_level, avatar_url")
         .eq("id", session.user.id)
         .single();
 
       if (profile?.full_name) setUserName(profile.full_name);
+      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
       if (profile?.preferred_level && levels.some((item) => item.id === profile.preferred_level)) {
         setLevel(profile.preferred_level);
       }
@@ -536,7 +538,7 @@ export default function CoachPage() {
                   >
                     {message.role === "coach" && (
                       <div className="message-avatar coach-avatar">
-                        <img src="/speakflow-logo.png" alt="" aria-hidden="true" />
+                        <img src={avatarUrl || "/speakflow-logo.png"} alt={avatarUrl ? "Foto do perfil" : ""} />
                       </div>
                     )}
                     {message.role === "student" && (
