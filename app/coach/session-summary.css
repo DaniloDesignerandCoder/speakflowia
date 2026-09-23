@@ -28,3 +28,15 @@
 .session-exit-actions button:disabled{opacity:.55;cursor:default}
 .finish-button:disabled{cursor:wait}
 @media(max-width:700px){.session-exit-dialog{padding:24px 19px;border-radius:21px}.session-exit-dialog h2{font-size:24px}}
+
+.session-processing-overlay{position:fixed;inset:0;z-index:480;display:grid;place-items:center;padding:20px;background:rgba(3,5,10,.72);backdrop-filter:blur(12px)}
+.session-processing-card{width:min(100%,480px);padding:34px;text-align:center;border:1px solid rgba(129,156,255,.18);border-radius:26px;background:#0b101d;box-shadow:0 35px 100px rgba(0,0,0,.5)}
+.session-processing-orbit{width:66px;height:66px;display:grid;place-items:center;margin:0 auto 22px;border:1px solid rgba(145,168,255,.18);border-radius:50%;background:rgba(99,124,255,.07);animation:sessionPulse 1.8s ease-in-out infinite}
+.session-processing-orbit span{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:rgba(99,124,255,.14);color:#b7c4ff;font-size:17px}
+.session-processing-card h2{margin:11px 0 10px;color:#f6f8ff;font-size:25px;letter-spacing:-.8px}
+.session-processing-card p{max-width:360px;margin:0 auto;color:rgba(255,255,255,.5);font-size:11px;line-height:1.65}
+.session-processing-track{height:3px;margin-top:25px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.06)}
+.session-processing-track span{display:block;height:100%;border-radius:inherit;background:#7b8cff;transition:width .6s ease}
+.session-processing-track .stage-1{width:34%}.session-processing-track .stage-2{width:68%}.session-processing-track .stage-3{width:92%}
+@keyframes sessionPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@media(max-width:700px){.session-processing-card{padding:29px 20px;border-radius:22px}.session-processing-card h2{font-size:22px}}
