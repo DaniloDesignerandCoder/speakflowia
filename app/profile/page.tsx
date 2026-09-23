@@ -7,7 +7,9 @@ export default function ProfilePage() {
   const router = useRouter();
   const [name, setName] = useState("Usuário SpeakFlow");
   const [email, setEmail] = useState("");
-  const [level, setLevel] = useState("Intermediate");
+  const [level, setLevel] = useState("intermediate");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const [userId, setUserId] = useState("");
   const [stats, setStats] = useState({ sessions: 0, minutes: 0, streak: 0 });
@@ -48,7 +50,7 @@ export default function ProfilePage() {
         minutes: progress?.total_minutes || 0,
         streak: progress?.streak_days || 0,
       });
-      setLevel(labels[data?.preferred_level || "intermediate"] || labels.intermediate);
+      setLevel(data?.preferred_level || "intermediate");
       setLoading(false);
     }
     loadProfile();
@@ -82,6 +84,20 @@ export default function ProfilePage() {
     setUploading(false);
   }
 
+  async function saveProfile() {
+    if (!userId || !name.trim()) return;
+    setSaving(true);
+    setMessage("");
+    const cleanName = name.trim();
+    const { error } = await supabase.from("profiles").update({ full_name: cleanName, preferred_level: level }).eq("id", userId);
+    if (!error) {
+      setName(cleanName);
+      setEditing(false);
+      setMessage("Perfil atualizado.");
+    } else setMessage("Não foi possível atualizar o perfil.");
+    setSaving(false);
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -112,7 +128,7 @@ export default function ProfilePage() {
         <article><strong>{stats.streak}</strong><span>Dias de sequência</span></article>
       </div>
       <div className="profile-grid">
-        <article><span>NÍVEL ATUAL</span><strong>{level}</strong><p>O Coach adapta seus treinos a este nível.</p></article>
+        <article className="profile-settings-card"><div className="profile-card-heading"><span>PERFIL DE APRENDIZADO</span><button type="button" className="profile-edit" onClick={() => setEditing((value) => !value)}>{editing ? "Cancelar" : "Editar"}</button></div>{editing ? <div className="profile-edit-form"><label><span>Nome</span><input value={name} maxLength={60} onChange={(e) => setName(e.target.value)} /></label><label><span>Nível</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option value="beginner">Beginner · Iniciante</option><option value="elementary">Elementary · Básico</option><option value="intermediate">Intermediate · Intermediário</option><option value="upper_intermediate">Upper Intermediate · Intermediário avançado</option><option value="advanced">Advanced · Avançado</option></select></label><button type="button" className="profile-save" disabled={saving || !name.trim()} onClick={saveProfile}>{saving ? "Salvando..." : "Salvar alterações"}</button></div> : <><strong>{labels[level] || labels.intermediate}</strong><p>O Coach adapta vocabulário, perguntas e feedback ao seu nível.</p></>}</article>
         <article><span>CONTA</span><strong>Conta ativa</strong><p>Seu progresso fica vinculado a este perfil.</p></article>
       </div>
       <div className="profile-actions">
