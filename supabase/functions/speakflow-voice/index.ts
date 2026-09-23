@@ -27,7 +27,11 @@ serve(async (req) => {
     const text = typeof body?.text === "string" ? body.text.trim() : "";
     if (!text || text.length > 500) return new Response(JSON.stringify({ error: "Text must contain 1 to 500 characters." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    const voiceId = "21m00Tcm4TlvDq8ikWAM";
+    const voiceId = Deno.env.get("ELEVENLABS_VOICE_ID");
+    if (!voiceId) {
+      console.error("SpeakFlow Voice ID is not configured.");
+      return new Response(JSON.stringify({ error: "Voice service unavailable." }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
       method: "POST",
       headers: { "xi-api-key": apiKey, "Content-Type": "application/json", "Accept": "audio/mpeg" },
