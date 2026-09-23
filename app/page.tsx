@@ -37,6 +37,7 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState({
     name: "Minha conta",
     email: "",
+    avatarUrl: "",
   });
 
   const [progress, setProgress] = useState({
@@ -70,6 +71,7 @@ export default function Home() {
     setUserProfile({
       name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Minha conta",
       email: session.user.email ?? "",
+      avatarUrl: "",
     });
 
     const { data } = await supabase
@@ -97,7 +99,7 @@ export default function Home() {
         .limit(30),
       supabase
         .from("profiles")
-        .select("preferred_level")
+        .select("preferred_level, avatar_url")
         .eq("id", session.user.id)
         .maybeSingle(),
     ]);
@@ -112,6 +114,10 @@ export default function Home() {
     const levelId = profileResult.data?.preferred_level ?? "intermediate";
     const levelInfo = levelMap[levelId] ?? levelMap.intermediate;
     setCurrentLevel({ id: levelId, ...levelInfo });
+    setUserProfile((current) => ({
+      ...current,
+      avatarUrl: profileResult.data?.avatar_url ?? "",
+    }));
 
     const sessions = sessionsResult.data ?? [];
     const insights = insightsResult.data ?? [];
@@ -265,9 +271,8 @@ export default function Home() {
             
 <span className="dashboard-avatar">
   <img
-    src="/speakflow-logo.png"
-    alt=""
-    aria-hidden="true"
+    src={userProfile.avatarUrl || "/speakflow-logo.png"}
+    alt={userProfile.avatarUrl ? "Foto do perfil" : ""}
   />
 </span>
             <span className="dashboard-profile-name">
