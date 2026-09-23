@@ -130,6 +130,7 @@ export default function CoachPage() {
   const [pronunciationAttempts, setPronunciationAttempts] = useState<PronunciationAttempt[]>([]);
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
   const [showExitGuard, setShowExitGuard] = useState(false);
+  const [finishStage, setFinishStage] = useState(0);
 
   const currentPhrases = pronunciationPhrases[level] ?? pronunciationPhrases.intermediate;
   const pronunciationTarget = currentPhrases[pronunciationIndex % currentPhrases.length];
@@ -176,6 +177,20 @@ export default function CoachPage() {
     const timer = window.setInterval(() => setSessionSeconds((current) => current + 1), 1000);
     return () => window.clearInterval(timer);
   }, [started]);
+
+  useEffect(() => {
+    if (!isFinishing) {
+      setFinishStage(0);
+      return;
+    }
+    setFinishStage(1);
+    const secondStage = window.setTimeout(() => setFinishStage(2), 1800);
+    const thirdStage = window.setTimeout(() => setFinishStage(3), 4200);
+    return () => {
+      window.clearTimeout(secondStage);
+      window.clearTimeout(thirdStage);
+    };
+  }, [isFinishing]);
 
   useEffect(() => {
     if (!started || isFinishing) return;
@@ -403,34 +418,40 @@ export default function CoachPage() {
       return;
     }
 
-    const { data: currentProgress } = await supabase
-      .from("progress")
-      .select("total_minutes, conversations_count, streak_days, last_practice_date")
-      .eq("user_id", session.user.id)
-      .single();
-
-    const today = new Date().toISOString().split("T")[0];
-    const yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    const yesterday = yesterdayDate.toISOString().split("T")[0];
-    let nextStreak = currentProgress?.streak_days ?? 0;
-
-    if (currentProgress?.last_practice_date !== today) {
-      nextStreak = currentProgress?.last_practice_date === yesterday ? nextStreak + 1 : 1;
-    }
-
-    if (currentProgress) {
-      await supabase
+    const progressUpdate = (async () => {
+      const { data: currentProgress } = await supabase
         .from("progress")
-        .update({
-          conversations_count: currentProgress.conversations_count + 1,
-          total_minutes:
-            currentProgress.total_minutes + Math.max(1, Math.round(sessionSeconds / 60)),
-          streak_days: nextStreak,
-          last_practice_date: today,
-        })
-        .eq("user_id", session.user.id);
-    }
+        .select("total_minutes, conversations_count, streak_days, last_practice_date")
+        .eq("user_id", session.user.id)
+        .single();
+
+      const today = new Date().toISOString().split("T")[0];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split("T")[0];
+      let nextStreak = currentProgress?.streak_days ?? 0;
+
+      if (currentProgress?.last_practice_date !== today) {
+        nextStreak = currentProgress?.last_practice_date === yesterday ? nextStreak + 1 : 1;
+      }
+
+      if (currentProgress) {
+        const { error: progressError } = await supabase
+          .from("progress")
+          .update({
+            conversations_count: currentProgress.conversations_count + 1,
+            total_minutes:
+              currentProgress.total_minutes + Math.max(1, Math.round(sessionSeconds / 60)),
+            streak_days: nextStreak,
+            last_practice_date: today,
+          })
+          .eq("user_id", session.user.id);
+
+        if (progressError) console.error("Erro ao atualizar progresso:", progressError);
+      }
+    })();
+
+    void progressUpdate;
 
     setSessionSummary(generatedSummary);
     setStarted(false);
@@ -628,7 +649,7 @@ export default function CoachPage() {
 
             <div className="conversation-actions">
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? "✦ Preparando seu progresso..." : "Finalizar sessão"}
+                {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : "Finalizar sessão"}
               </button>
               <div className="conversation-note"><span>●</span> Treino de pronúncia em andamento.</div>
             </div>
@@ -753,11 +774,23 @@ export default function CoachPage() {
                 {voiceEnabled ? "🔊" : "🔇"}
               </button>
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? "✦ Preparando seu progresso..." : "Finalizar sessão"}
+                {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : "Finalizar sessão"}
               </button>
               <div className="conversation-note"><span>●</span> Sessão de prática em andamento.</div>
             </div>
           </section>
+        )}
+
+        {isFinishing && started && !showExitGuard && (
+          <div className="session-processing-overlay" role="status" aria-live="polite">
+            <div className="session-processing-card">
+              <div className="session-processing-orbit"><span>✦</span></div>
+              <span className="coach-label">SPEAKFLOW INTELLIGENCE</span>
+              <h2>{finishStage <= 1 ? "Analisando sua prática..." : finishStage === 2 ? "Atualizando seu aprendizado..." : "Preparando seu progresso..."}</h2>
+              <p>{finishStage <= 1 ? "O Coach está transformando sua sessão em insights úteis." : finishStage === 2 ? "Seu histórico e seu plano adaptativo estão sendo considerados." : "Só mais um instante para organizar seu próximo passo."}</p>
+              <div className="session-processing-track"><span className={`stage-${finishStage}`} /></div>
+            </div>
+          </div>
         )}
 
         {showExitGuard && started && (
@@ -769,7 +802,7 @@ export default function CoachPage() {
               <p>Para transformar esta prática em progresso, finalize a sessão antes de sair. Assim o SpeakFlow gera seu resumo e atualiza seu aprendizado.</p>
               <div className="session-exit-actions">
                 <button type="button" className="coach-primary" onClick={finishSession} disabled={isFinishing || isReplying}>
-                  {isFinishing ? "✦ Preparando seu progresso..." : isReplying ? "Aguarde o Coach responder..." : "Encerrar e salvar sessão"}
+                  {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : isReplying ? "Aguarde o Coach responder..." : "Encerrar e salvar sessão"}
                 </button>
                 <button type="button" className="session-exit-continue" onClick={() => setShowExitGuard(false)} disabled={isFinishing}>
                   Continuar praticando
