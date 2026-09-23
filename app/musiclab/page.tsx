@@ -38,6 +38,9 @@ export default function MusicLab() {
   const [step,setStep]=useState(0);
   const [revealed,setRevealed]=useState(false);
   const [playing,setPlaying]=useState(false);
+  const [audioCurrentTime,setAudioCurrentTime]=useState(0);
+  const [audioDuration,setAudioDuration]=useState(0);
+  const [audioError,setAudioError]=useState("");
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -45,6 +48,10 @@ export default function MusicLab() {
   const audioProgressRef=useRef(0);
   const activeWordRef=useRef(0);
   const trackAudioRef=useRef<HTMLAudioElement|null>(null);
+  const audioContextRef=useRef<AudioContext|null>(null);
+  const audioAnalyserRef=useRef<AnalyserNode|null>(null);
+  const audioRafRef=useRef<number|null>(null);
+  const audioTrackIdRef=useRef<string|null>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
 
@@ -94,7 +101,10 @@ export default function MusicLab() {
 
   const track=useMemo(()=>tracks.find(item=>item.id===selectedId)??tracks[0],[selectedId]);
   const phrase=track.phrases[step];
-  const progress=((step+1)/track.phrases.length)*100;
+  const lessonProgress=((step+1)/track.phrases.length)*100;
+  const playbackProgress=audioDuration>0?(audioCurrentTime/audioDuration)*100:0;
+  const progress=track.audioUrl?playbackProgress:lessonProgress;
+  const formatTime=(seconds:number)=>Number.isFinite(seconds)?`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,"0")}`:"0:00";
 
   function moveLight(e: React.PointerEvent<HTMLElement>){
     const rect=e.currentTarget.getBoundingClientRect();
@@ -102,25 +112,124 @@ export default function MusicLab() {
     e.currentTarget.style.setProperty("--my",`${e.clientY-rect.top}px`);
   }
 
-  function chooseTrack(id:string){trackAudioRef.current?.pause();trackAudioRef.current=null;setSelectedId(id);setStep(0);setRevealed(false);setPlaying(false);}
-  function movePhrase(direction:number){setStep(current=>(current+direction+track.phrases.length)%track.phrases.length);setRevealed(false);setPlaying(false);}
+  function stopTrackAudio(resetProgress=true){
+    if(audioRafRef.current!==null){cancelAnimationFrame(audioRafRef.current);audioRafRef.current=null;}
+    trackAudioRef.current?.pause();
+    trackAudioRef.current=null;
+    audioTrackIdRef.current=null;
+    audioAnalyserRef.current=null;
+    if(audioContextRef.current){void audioContextRef.current.close();audioContextRef.current=null;}
+    audioEnergyRef.current=0;
+    audioProgressRef.current=0;
+    shellRef.current?.style.setProperty("--audio-progress","0");
+    shellRef.current?.style.setProperty("--audio-energy","0");
+    if(resetProgress){setAudioCurrentTime(0);setAudioDuration(0);}
+    setPlaying(false);
+  }
+
+  function sampleTrackAudio(){
+    const audio=trackAudioRef.current;
+    const analyser=audioAnalyserRef.current;
+    if(!audio||!analyser||audio.paused)return;
+    const data=new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+    let sum=0;
+    for(let i=0;i<data.length;i++)sum+=data[i];
+    audioEnergyRef.current=sum/(data.length*255);
+    if(audio.duration&&Number.isFinite(audio.duration)){
+      audioProgressRef.current=audio.currentTime/audio.duration;
+      setAudioCurrentTime(audio.currentTime);
+      setAudioDuration(audio.duration);
+      shellRef.current?.style.setProperty("--audio-progress",String(audioProgressRef.current));
+      shellRef.current?.style.setProperty("--audio-energy",String(audioEnergyRef.current));
+    }
+    audioRafRef.current=requestAnimationFrame(sampleTrackAudio);
+  }
+
+  function chooseTrack(id:string){
+    stopTrackAudio();
+    window.speechSynthesis?.cancel();
+    setSelectedId(id);
+    setStep(0);
+    setRevealed(false);
+    setAudioError("");
+  }
+
+  function movePhrase(direction:number){
+    setStep(current=>(current+direction+track.phrases.length)%track.phrases.length);
+    setRevealed(false);
+    if(!track.audioUrl)setPlaying(false);
+  }
 
   async function playLicensedTrack(){
-    if(!track.audioUrl) return;
-    trackAudioRef.current?.pause();
-    const audio=new Audio(track.audioUrl); audio.crossOrigin="anonymous"; trackAudioRef.current=audio; setPlaying(true);
+    if(!track.audioUrl)return;
+    setAudioError("");
+    const currentAudio=trackAudioRef.current;
+    if(currentAudio&&audioTrackIdRef.current===track.id){
+      if(!currentAudio.paused){
+        currentAudio.pause();
+        if(audioRafRef.current!==null){cancelAnimationFrame(audioRafRef.current);audioRafRef.current=null;}
+        audioEnergyRef.current=0;
+        shellRef.current?.style.setProperty("--audio-energy","0");
+        setPlaying(false);
+        return;
+      }
+      try{
+        await audioContextRef.current?.resume();
+        setPlaying(true);
+        await currentAudio.play();
+        sampleTrackAudio();
+      }catch{
+        setPlaying(false);
+        setAudioError("Não foi possível retomar a faixa. Tente novamente.");
+      }
+      return;
+    }
+
+    stopTrackAudio();
     try{
+      const audio=new Audio();
+      audio.crossOrigin="anonymous";
+      audio.preload="metadata";
+      audio.src=track.audioUrl;
       const AudioContextClass=window.AudioContext||(window as typeof window & {webkitAudioContext:typeof AudioContext}).webkitAudioContext;
-      const context=new AudioContextClass(); const source=context.createMediaElementSource(audio); const analyser=context.createAnalyser();
-      analyser.fftSize=256; analyser.smoothingTimeConstant=.78; source.connect(analyser); analyser.connect(context.destination);
-      const data=new Uint8Array(analyser.frequencyBinCount); let audioRaf=0;
-      const sample=()=>{analyser.getByteFrequencyData(data);let sum=0;for(let i=0;i<data.length;i++)sum+=data[i];audioEnergyRef.current=sum/(data.length*255);if(audio.duration&&Number.isFinite(audio.duration)){audioProgressRef.current=audio.currentTime/audio.duration;shellRef.current?.style.setProperty("--audio-progress",String(audioProgressRef.current));shellRef.current?.style.setProperty("--audio-energy",String(audioEnergyRef.current))}audioRaf=requestAnimationFrame(sample)};
-      const cleanup=()=>{cancelAnimationFrame(audioRaf);audioEnergyRef.current=0;audioProgressRef.current=0;trackAudioRef.current=null;void context.close();setPlaying(false)};
-      audio.addEventListener("ended",cleanup,{once:true});audio.addEventListener("error",cleanup,{once:true});await context.resume();audioRaf=requestAnimationFrame(sample);await audio.play();
-    }catch{trackAudioRef.current=null;setPlaying(false)}
+      const context=new AudioContextClass();
+      const source=context.createMediaElementSource(audio);
+      const analyser=context.createAnalyser();
+      analyser.fftSize=256;
+      analyser.smoothingTimeConstant=.78;
+      source.connect(analyser);
+      analyser.connect(context.destination);
+      trackAudioRef.current=audio;
+      audioTrackIdRef.current=track.id;
+      audioContextRef.current=context;
+      audioAnalyserRef.current=analyser;
+      audio.addEventListener("loadedmetadata",()=>{if(Number.isFinite(audio.duration))setAudioDuration(audio.duration)},{once:true});
+      audio.addEventListener("ended",()=>{
+        if(audioRafRef.current!==null){cancelAnimationFrame(audioRafRef.current);audioRafRef.current=null;}
+        audioEnergyRef.current=0;
+        audioProgressRef.current=1;
+        shellRef.current?.style.setProperty("--audio-energy","0");
+        shellRef.current?.style.setProperty("--audio-progress","1");
+        setAudioCurrentTime(audio.duration||0);
+        setPlaying(false);
+      },{once:true});
+      audio.addEventListener("error",()=>{
+        stopTrackAudio();
+        setAudioError("Não foi possível carregar a gravação licenciada.");
+      },{once:true});
+      await context.resume();
+      setPlaying(true);
+      await audio.play();
+      sampleTrackAudio();
+    }catch{
+      stopTrackAudio();
+      setAudioError("Não foi possível iniciar a gravação licenciada.");
+    }
   }
 
   async function speak(text:string){
+    if(trackAudioRef.current)stopTrackAudio();
     setPlaying(true);
     try{
       const {data:{session}}=await supabase.auth.getSession();
@@ -172,10 +281,16 @@ export default function MusicLab() {
         <div className="ml-timeline"><span style={{width:`${progress}%`}}/></div>
         <div className="ml-controls">
           <button onClick={()=>movePhrase(-1)} aria-label="Anterior">‹</button>
-          <button className="ml-play" onClick={()=>track.audioUrl?playLicensedTrack():speak(phrase.line)} aria-label={track.audioUrl?"Reproduzir música":"Ouvir frase"}>{playing?"Ⅱ":"▶"}</button>
+          <button className="ml-play" onClick={()=>track.audioUrl?playLicensedTrack():speak(phrase.line)} aria-label={track.audioUrl?(playing?"Pausar música":"Reproduzir música"):"Ouvir frase"}>{playing?"Ⅱ":"▶"}</button>
           <button onClick={()=>movePhrase(1)} aria-label="Próxima">›</button>
         </div>
-        <div className="ml-player-meta"><span>{step+1}/{track.phrases.length}</span><span>{track.level}</span><span>{track.duration}</span>{track.catalogStatus==="rights-approved"&&<span>LICENSED · {track.rights?.license}</span>}</div>
+        <div className="ml-player-meta"><span>{track.audioUrl?`${formatTime(audioCurrentTime)} / ${formatTime(audioDuration)}`:`${step+1}/${track.phrases.length}`}</span><span>{track.level}</span><span>{track.duration}</span>{track.catalogStatus==="rights-approved"&&<span>LICENSED · {track.rights?.license}</span>}</div>
+        {audioError&&<p className="ml-audio-error" role="alert">{audioError}</p>}
+        {track.rights?.attributionRequired&&<div className="ml-attribution" aria-label="Atribuição da música licenciada">
+          <span>{track.title} · {track.artist}</span>
+          <a href={track.rights.licenseUrl} target="_blank" rel="noreferrer">CC BY 4.0</a>
+          <a href={track.rights.sourceUrl} target="_blank" rel="noreferrer">{track.rights.sourceName}</a>
+        </div>}
       </div></div>
     </section>
 
