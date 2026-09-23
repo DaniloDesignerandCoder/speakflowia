@@ -8,6 +8,7 @@ import "./progress.css";
 type Progress = { conversations_count:number; total_minutes:number; streak_days:number; last_practice_date:string|null };
 type LearningSession = { id?:string; mode:string|null; duration_seconds:number|null; summary:string|null; skills_practiced:string|null; positive_point:string|null; improvement_point:string|null; next_recommendation:string|null; created_at:string };
 type LearningInsight = { id?:string; level:string|null; original_text:string|null; corrected_text:string|null; tip:string|null; skill_category:string|null; created_at:string };
+type LearningPlan = { primary_goal:string|null; priority_skills:string|null; current_focus:string|null; next_milestone:string|null; coach_strategy:string|null; updated_at:string|null };
 
 const emptyProgress: Progress = { conversations_count:0,total_minutes:0,streak_days:0,last_practice_date:null };
 
@@ -19,19 +20,21 @@ export default function ProgressPage(){
  const [progress,setProgress]=useState<Progress>(emptyProgress);
  const [sessions,setSessions]=useState<LearningSession[]>([]);
  const [insights,setInsights]=useState<LearningInsight[]>([]);
+ const [learningPlan,setLearningPlan]=useState<LearningPlan|null>(null);
  const [loading,setLoading]=useState(true);
  const [errorMessage,setErrorMessage]=useState("");
 
  useEffect(()=>{async function load(){
   const {data:{session}}=await supabase.auth.getSession();
   if(!session){router.replace("/login");return}
-  const [p,s,i]=await Promise.all([
+  const [p,s,i,lp]=await Promise.all([
    supabase.from("progress").select("conversations_count, total_minutes, streak_days, last_practice_date").eq("user_id",session.user.id).single(),
    supabase.from("learning_sessions").select("id, mode, duration_seconds, summary, skills_practiced, positive_point, improvement_point, next_recommendation, created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(30),
-   supabase.from("learning_insights").select("id, level, original_text, corrected_text, tip, skill_category, created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(30)
+   supabase.from("learning_insights").select("id, level, original_text, corrected_text, tip, skill_category, created_at").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(30),
+   supabase.from("learning_plans").select("primary_goal, priority_skills, current_focus, next_milestone, coach_strategy, updated_at").eq("user_id",session.user.id).maybeSingle()
   ]);
-  if(p.data)setProgress(p.data); if(s.data)setSessions(s.data); if(i.data)setInsights(i.data);
-  if(p.error||s.error||i.error){console.error("Erro ao carregar progresso:",{progress:p.error,sessions:s.error,insights:i.error});setErrorMessage("Parte dos seus dados não pôde ser carregada agora.")}
+  if(p.data)setProgress(p.data); if(s.data)setSessions(s.data); if(i.data)setInsights(i.data); if(lp.data)setLearningPlan(lp.data);
+  if(p.error||s.error||i.error||lp.error){console.error("Erro ao carregar progresso:",{progress:p.error,sessions:s.error,insights:i.error,learningPlan:lp.error});setErrorMessage("Parte dos seus dados não pôde ser carregada agora.")}
   setLoading(false);
  }load()},[router]);
 
@@ -65,6 +68,7 @@ export default function ProgressPage(){
       <article><span>SEQUÊNCIA</span><strong>{progress.streak_days}<b> dias</b></strong><small>de constância</small></article>
       <article><span>ÚLTIMA PRÁTICA</span><strong className="metric-date">{formatDate(progress.last_practice_date)}</strong><small>registro mais recente</small></article>
      </section>
+     {learningPlan&&<section className="progress-card learning-plan"><div className="learning-plan-heading"><div><span>SEU PLANO DE APRENDIZADO</span><h2>Seu próximo passo, com direção.</h2><p>O SpeakFlow adapta esta rota conforme você pratica e evolui.</p></div><img src="/speakflow-logo.png" alt=""/></div><div className="learning-plan-grid"><article className="learning-plan-goal"><span>OBJETIVO ATUAL</span><h3>{learningPlan.primary_goal}</h3></article><article><span>FOCO AGORA</span><p>{learningPlan.current_focus}</p></article><article><span>PRÓXIMA CONQUISTA</span><p>{learningPlan.next_milestone}</p></article><article><span>DIREÇÃO DO COACH</span><p>{learningPlan.coach_strategy}</p></article></div>{learningPlan.priority_skills&&<div className="learning-plan-skills"><span>HABILIDADES PRIORITÁRIAS</span><p>{learningPlan.priority_skills}</p></div>}</section>}
      <section className="progress-card progress-modes"><div className="progress-card-heading"><div><span>MODOS DE TREINO</span><h2>Sua prática por modalidade</h2></div><small>Baseado nas sessões concluídas</small></div><div className="mode-summary-grid"><article><div className="mode-summary-top"><span>CONVERSAÇÃO</span><b>Speaking</b></div><strong>{modeSummary.conversation.sessions}</strong><p>{modeSummary.conversation.sessions===1?"sessão concluída":"sessões concluídas"} · {Math.round(modeSummary.conversation.seconds/60)} min</p></article><article><div className="mode-summary-top"><span>VOCABULÁRIO</span><b>Vocabulary</b></div><strong>{modeSummary.vocabulary.sessions}</strong><p>{modeSummary.vocabulary.sessions===1?"sessão concluída":"sessões concluídas"} · {Math.round(modeSummary.vocabulary.seconds/60)} min</p></article><article><div className="mode-summary-top"><span>PRONÚNCIA</span><b>Pronunciation</b></div><strong>{modeSummary.pronunciation.sessions}</strong><p>{modeSummary.pronunciation.sessions===1?"sessão concluída":"sessões concluídas"} · {Math.round(modeSummary.pronunciation.seconds/60)} min</p></article></div></section>
      <section className="progress-grid">
       <article className="progress-card"><div className="progress-card-heading"><div><span>ATIVIDADE</span><h2>Últimos 7 dias</h2></div><small>Média: {avg} min/sessão</small></div><div className="activity-chart">{activity.map(d=><div className="activity-day" key={d.key}><div className="activity-track"><div className="activity-bar" style={{height:`${Math.max(d.minutes?12:2,(d.minutes/maxActivity)*100)}%`}}/></div><strong>{d.minutes}</strong><span>{d.label}</span></div>)}</div></article>
