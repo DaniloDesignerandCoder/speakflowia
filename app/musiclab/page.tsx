@@ -41,6 +41,9 @@ export default function MusicLab() {
   const [audioCurrentTime,setAudioCurrentTime]=useState(0);
   const [audioDuration,setAudioDuration]=useState(0);
   const [audioError,setAudioError]=useState("");
+  const [shadowPhase,setShadowPhase]=useState<"idle"|"model"|"speak"|"result">("idle");
+  const [shadowListening,setShadowListening]=useState(false);
+  const [shadowResult,setShadowResult]=useState<{heard:string;score:number}|null>(null);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -154,6 +157,17 @@ export default function MusicLab() {
     audioRafRef.current=requestAnimationFrame(sampleTrackAudio);
   }
 
+  function speechScore(target:string,heard:string){
+    const clean=(value:string)=>value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s]/g,"").replace(/\s+/g," ").trim();
+    const expected=clean(target).split(" ").filter(Boolean); const actual=clean(heard).split(" ").filter(Boolean); if(!expected.length)return 0;
+    const matrix=Array.from({length:expected.length+1},()=>Array(actual.length+1).fill(0));
+    for(let i=0;i<=expected.length;i++)matrix[i][0]=i; for(let j=0;j<=actual.length;j++)matrix[0][j]=j;
+    for(let i=1;i<=expected.length;i++)for(let j=1;j<=actual.length;j++){const cost=expected[i-1]===actual[j-1]?0:1;matrix[i][j]=Math.min(matrix[i-1][j]+1,matrix[i][j-1]+1,matrix[i-1][j-1]+cost);}
+    return Math.max(0,Math.round((1-matrix[expected.length][actual.length]/expected.length)*100));
+  }
+
+  function resetShadow(){setShadowPhase("idle");setShadowListening(false);setShadowResult(null);}
+
   function chooseTrack(id:string){
     stopTrackAudio();
     window.speechSynthesis?.cancel();
@@ -161,12 +175,14 @@ export default function MusicLab() {
     setStep(0);
     setRevealed(false);
     setAudioError("");
+    resetShadow();
   }
 
   function movePhrase(direction:number){
     setStep(current=>(current+direction+track.phrases.length)%track.phrases.length);
     setRevealed(false);
     if(!track.audioUrl)setPlaying(false);
+    resetShadow();
   }
 
   async function playLicensedTrack(){
@@ -236,8 +252,11 @@ export default function MusicLab() {
     }
   }
 
-  async function speak(text:string){
-    if(trackAudioRef.current)stopTrackAudio();
+  async function speak(text:string,onDone?:()=>void,preserveTrack=false){
+    if(trackAudioRef.current){
+      if(preserveTrack){trackAudioRef.current.pause();if(audioRafRef.current!==null){cancelAnimationFrame(audioRafRef.current);audioRafRef.current=null;}audioEnergyRef.current=0;shellRef.current?.style.setProperty("--audio-energy","0");setPlaying(false);}
+      else stopTrackAudio();
+    }
     setPlaying(true);
     try{
       const {data:{session}}=await supabase.auth.getSession();
@@ -250,13 +269,33 @@ export default function MusicLab() {
       analyser.fftSize=256; analyser.smoothingTimeConstant=.78; source.connect(analyser); analyser.connect(context.destination);
       const data=new Uint8Array(analyser.frequencyBinCount); let audioRaf=0;
       const sample=()=>{analyser.getByteFrequencyData(data);let sum=0;for(let i=0;i<data.length;i++)sum+=data[i];audioEnergyRef.current=sum/(data.length*255);if(audio.duration&&Number.isFinite(audio.duration)){audioProgressRef.current=audio.currentTime/audio.duration;activeWordRef.current=Math.min(phrase.line.split(/\s+/).length-1,Math.floor(audioProgressRef.current*phrase.line.split(/\s+/).length));shellRef.current?.style.setProperty("--audio-progress",String(audioProgressRef.current));shellRef.current?.style.setProperty("--audio-energy",String(audioEnergyRef.current))}audioRaf=requestAnimationFrame(sample)};
-      const cleanup=()=>{cancelAnimationFrame(audioRaf);audioEnergyRef.current=0;audioProgressRef.current=0;activeWordRef.current=0;URL.revokeObjectURL(audioUrl);void context.close();setPlaying(false)};
+      const cleanup=()=>{cancelAnimationFrame(audioRaf);audioEnergyRef.current=0;audioProgressRef.current=0;activeWordRef.current=0;URL.revokeObjectURL(audioUrl);void context.close();setPlaying(false);onDone?.()};
       audio.addEventListener("ended",cleanup,{once:true}); audio.addEventListener("error",cleanup,{once:true});
       await context.resume(); audioRaf=requestAnimationFrame(sample); await audio.play(); return;
     }catch{
       if(!("speechSynthesis" in window)){setPlaying(false);return;}
-      window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(text); utterance.lang="en-US"; utterance.rate=.88; utterance.onend=()=>setPlaying(false); utterance.onerror=()=>setPlaying(false); window.speechSynthesis.speak(utterance);
+      window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(text); utterance.lang="en-US"; utterance.rate=.88; utterance.onend=()=>{setPlaying(false);onDone?.()}; utterance.onerror=()=>{setPlaying(false);onDone?.()}; window.speechSynthesis.speak(utterance);
     }
+  }
+
+  function startShadow(){
+    setShadowResult(null); setShadowPhase("model");
+    void speak(phrase.line,()=>setShadowPhase("speak"),true);
+  }
+
+  function recordShadow(){
+    const Recognition=(window as any).SpeechRecognition||(window as any).webkitSpeechRecognition;
+    if(!Recognition){setAudioError("O reconhecimento de voz não está disponível neste navegador.");return;}
+    const recognition=new Recognition(); recognition.lang="en-US"; recognition.interimResults=false; recognition.continuous=false;
+    recognition.onstart=()=>setShadowListening(true);
+    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;setShadowResult({heard,score:speechScore(phrase.line,heard)});setShadowPhase("result");};
+    recognition.onerror=()=>setShadowListening(false); recognition.onend=()=>setShadowListening(false); recognition.start();
+  }
+
+  async function returnToMusic(){
+    const audio=trackAudioRef.current;
+    if(audio&&track.audioUrl){try{await audioContextRef.current?.resume();setPlaying(true);await audio.play();sampleTrackAudio();}catch{setAudioError("Não foi possível retomar a música.");}}
+    resetShadow();
   }
 
   return <main ref={shellRef} onPointerMove={moveLight} className={playing?"musiclab-shell is-playing":"musiclab-shell"}>
@@ -320,6 +359,13 @@ export default function MusicLab() {
         <div className="ml-discovery">
           <button onClick={()=>setRevealed(v=>!v)}><span>{revealed?"FECHAR CAMADA":"DESCOBRIR A FRASE"}</span><b>{revealed?"−":"+"}</b></button>
           {revealed&&<div className="ml-discovery-content"><div><span>SENTIDO</span><strong>{phrase.meaning}</strong></div><div><span>POR DENTRO DO INGLÊS</span><p>{phrase.note}</p></div></div>}
+        </div>
+        <div className={"ml-shadow " + (shadowPhase!=="idle"?"active":"")}>
+          <div className="ml-shadow-head"><span>SHADOW MODE</span><small>OUÇA · REPITA · VOLTE À MÚSICA</small></div>
+          {shadowPhase==="idle"&&<button className="ml-shadow-start" onClick={startShadow}><span>Treinar esta frase com o Coach</span><b>🎙</b></button>}
+          {shadowPhase==="model"&&<div className="ml-shadow-state"><span>01 · LISTEN</span><strong>Ouça o modelo do SpeakFlow Coach…</strong></div>}
+          {shadowPhase==="speak"&&<div className="ml-shadow-state"><span>02 · SPEAK</span><strong>Agora é sua vez.</strong><button onClick={recordShadow} disabled={shadowListening}>{shadowListening?"● Ouvindo…":"🎙 Repetir frase"}</button></div>}
+          {shadowPhase==="result"&&shadowResult&&<div className="ml-shadow-result"><span>03 · RESULT</span><strong>{shadowResult.score}%</strong><p>Reconhecido: “{shadowResult.heard}”</p><small>Correspondência das palavras reconhecidas com a frase-alvo.</small><button onClick={returnToMusic}>{track.audioUrl?"Voltar para a música":"Concluir prática"} <b>→</b></button></div>}
         </div>
         <button className="ml-next" onClick={()=>movePhrase(1)}><span>Continuar a sessão</span><b>→</b></button>
       </div>
