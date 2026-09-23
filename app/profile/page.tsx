@@ -3,6 +3,14 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
+const levelLabels: Record<string, string> = {
+  beginner: "Beginner · Iniciante",
+  elementary: "Elementary · Básico",
+  intermediate: "Intermediate · Intermediário",
+  upper_intermediate: "Upper Intermediate · Intermediário avançado",
+  advanced: "Advanced · Avançado",
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const [name, setName] = useState("Usuário SpeakFlow");
@@ -33,14 +41,6 @@ export default function ProfilePage() {
           .eq("user_id", session.user.id)
           .maybeSingle(),
       ]);
-
-      const labels: Record<string, string> = {
-        beginner: "Beginner · Iniciante",
-        elementary: "Elementary · Básico",
-        intermediate: "Intermediate · Intermediário",
-        upper_intermediate: "Upper Intermediate · Intermediário avançado",
-        advanced: "Advanced · Avançado",
-      };
 
       setName(data?.full_name || session.user.user_metadata?.full_name || "Usuário SpeakFlow");
       setEmail(session.user.email || "");
@@ -128,7 +128,7 @@ export default function ProfilePage() {
         <article><strong>{stats.streak}</strong><span>Dias de sequência</span></article>
       </div>
       <div className="profile-grid">
-        <article className="profile-settings-card"><div className="profile-card-heading"><span>PERFIL DE APRENDIZADO</span><button type="button" className="profile-edit" onClick={() => setEditing((value) => !value)}>{editing ? "Cancelar" : "Editar"}</button></div>{editing ? <div className="profile-edit-form"><label><span>Nome</span><input value={name} maxLength={60} onChange={(e) => setName(e.target.value)} /></label><label><span>Nível</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option value="beginner">Beginner · Iniciante</option><option value="elementary">Elementary · Básico</option><option value="intermediate">Intermediate · Intermediário</option><option value="upper_intermediate">Upper Intermediate · Intermediário avançado</option><option value="advanced">Advanced · Avançado</option></select></label><button type="button" className="profile-save" disabled={saving || !name.trim()} onClick={saveProfile}>{saving ? "Salvando..." : "Salvar alterações"}</button></div> : <><strong>{labels[level] || labels.intermediate}</strong><p>O Coach adapta vocabulário, perguntas e feedback ao seu nível.</p></>}</article>
+        <article className="profile-settings-card"><div className="profile-card-heading"><span>PERFIL DE APRENDIZADO</span><button type="button" className="profile-edit" onClick={() => setEditing((value) => !value)}>{editing ? "Cancelar" : "Editar"}</button></div>{editing ? <div className="profile-edit-form"><label><span>Nome</span><input value={name} maxLength={60} onChange={(e) => setName(e.target.value)} /></label><label><span>Nível</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option value="beginner">Beginner · Iniciante</option><option value="elementary">Elementary · Básico</option><option value="intermediate">Intermediate · Intermediário</option><option value="upper_intermediate">Upper Intermediate · Intermediário avançado</option><option value="advanced">Advanced · Avançado</option></select></label><button type="button" className="profile-save" disabled={saving || !name.trim()} onClick={saveProfile}>{saving ? "Salvando..." : "Salvar alterações"}</button></div> : <><strong>{levelLabels[level] || levelLabels.intermediate}</strong><p>O Coach adapta vocabulário, perguntas e feedback ao seu nível.</p></>}</article>
         <article><span>CONTA</span><strong>Conta ativa</strong><p>Seu progresso fica vinculado a este perfil.</p></article>
       </div>
       <div className="profile-actions">
