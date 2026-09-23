@@ -245,21 +245,34 @@ export default function Home() {
 
             <div className="dashboard-hero-copy">
 
+              <div className="dashboard-hero-brand">
+                <img src="/speakflow-logo.png" alt="" aria-hidden="true" />
+                <div>
+                  <strong>Speak<span>Flow</span></strong>
+                  <small>AI ENGLISH COACH</small>
+                </div>
+              </div>
+
               <div className="dashboard-eyebrow">
-                SPEAKFLOW IA
+                SUA FLUÊNCIA. EM MOVIMENTO.
               </div>
 
               <h1>
-                O poder da IA
+                Fale inglês.
                 <br />
-                guiando sua <em>fluência.</em>
+                <em>Viva sem traduzir.</em>
               </h1>
 
               <p>
-                Pratique inglês em uma experiência criada
-                para acompanhar sua evolução e transformar
-                cada sessão em aprendizado.
+                Conversas reais, feedback inteligente e uma IA que transforma
+                cada prática em evolução.
               </p>
+
+              <div className="dashboard-hero-proof">
+                <span><i /> Coach com IA</span>
+                <span><i /> Feedback em tempo real</span>
+                <span><i /> Progresso inteligente</span>
+              </div>
 
               <button
                 className="dashboard-primary"
@@ -286,6 +299,11 @@ export default function Home() {
     aria-hidden="true"
   />
 </div>
+              <div className="ai-status">
+                <i />
+                SPEAKFLOW AI
+                <span>ONLINE</span>
+              </div>
 
               <div className="ai-wave">
                 <i />
