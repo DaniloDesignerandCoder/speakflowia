@@ -3723,3 +3723,20 @@ img {
 .profile-edit-form input:focus,.profile-edit-form select:focus{border-color:rgba(129,156,255,.5)}
 .profile-save{min-height:42px;border:0;border-radius:11px;background:#637cff;color:#fff;font-size:9px;font-weight:800;cursor:pointer}
 .profile-save:disabled{opacity:.5;cursor:default}
+
+.profile-journey{margin-top:14px;padding:22px;border:1px solid rgba(129,156,255,.1);border-radius:20px;background:rgba(129,156,255,.025)}
+.profile-journey-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.profile-journey-heading span,.profile-journey-insight span{color:#819cff;font-size:8px;font-weight:800;letter-spacing:1.4px}
+.profile-journey-heading h2{margin:6px 0 0;font-size:18px}
+.profile-journey-heading>strong{color:#aebcff;font-size:10px}
+.profile-level-track{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:20px}
+.profile-level-step{position:relative;display:grid;justify-items:center;gap:7px;color:rgba(255,255,255,.28);text-align:center;font-size:7px;font-weight:700}
+.profile-level-step i{width:27px;height:27px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:50%;background:#0a0f1c;font-style:normal}
+.profile-level-step.completed,.profile-level-step.current{color:#aebcff}
+.profile-level-step.completed i{border-color:rgba(129,156,255,.25);background:rgba(99,124,255,.12)}
+.profile-level-step.current i{border-color:rgba(129,156,255,.6);background:#637cff;color:#fff}
+.profile-journey-insight{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.06)}
+.profile-journey-insight strong{display:block;margin-top:7px;font-size:13px}
+.profile-journey-insight p{max-width:500px;margin:6px 0 0;color:rgba(255,255,255,.36);font-size:9px;line-height:1.55}
+.profile-journey-insight button{flex:0 0 auto;border:1px solid rgba(129,156,255,.16);border-radius:10px;background:rgba(129,156,255,.07);color:#aebcff;padding:9px 11px;font-size:8px;font-weight:800;cursor:pointer}
+@media(max-width:700px){.profile-journey{padding:18px}.profile-journey-heading{align-items:flex-start;flex-direction:column}.profile-level-track{gap:3px}.profile-level-step{font-size:6px}.profile-level-step i{width:24px;height:24px}.profile-journey-insight{align-items:stretch;flex-direction:column}.profile-journey-insight button{align-self:flex-start}}
