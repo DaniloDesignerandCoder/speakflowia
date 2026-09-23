@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
+const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
+
 const levelLabels: Record<string, string> = {
   beginner: "Beginner · Iniciante",
   elementary: "Elementary · Básico",
@@ -21,6 +23,7 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [userId, setUserId] = useState("");
   const [stats, setStats] = useState({ sessions: 0, minutes: 0, streak: 0 });
+  const [focusSkills, setFocusSkills] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -31,7 +34,7 @@ export default function ProfilePage() {
       if (!session) { router.replace("/login"); return; }
 
       setUserId(session.user.id);
-      const [{ data }, { data: progress }] = await Promise.all([
+      const [{ data }, { data: progress }, { data: insights }] = await Promise.all([
         supabase.from("profiles")
           .select("full_name, preferred_level, avatar_url")
           .eq("id", session.user.id)
@@ -40,6 +43,11 @@ export default function ProfilePage() {
           .select("conversations_count, total_minutes, streak_days")
           .eq("user_id", session.user.id)
           .maybeSingle(),
+        supabase.from("learning_insights")
+          .select("skill_category")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(20),
       ]);
 
       setName(data?.full_name || session.user.user_metadata?.full_name || "Usuário SpeakFlow");
@@ -51,6 +59,12 @@ export default function ProfilePage() {
         streak: progress?.streak_days || 0,
       });
       setLevel(data?.preferred_level || "intermediate");
+      const counts = (insights || []).reduce((acc: Record<string, number>, item: { skill_category?: string | null }) => {
+        const skill = item.skill_category?.trim();
+        if (skill) acc[skill] = (acc[skill] || 0) + 1;
+        return acc;
+      }, {});
+      setFocusSkills(Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([skill]) => skill));
       setLoading(false);
     }
     loadProfile();
@@ -131,6 +145,14 @@ export default function ProfilePage() {
         <article className="profile-settings-card"><div className="profile-card-heading"><span>PERFIL DE APRENDIZADO</span><button type="button" className="profile-edit" onClick={() => setEditing((value) => !value)}>{editing ? "Cancelar" : "Editar"}</button></div>{editing ? <div className="profile-edit-form"><label><span>Nome</span><input value={name} maxLength={60} onChange={(e) => setName(e.target.value)} /></label><label><span>Nível</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option value="beginner">Beginner · Iniciante</option><option value="elementary">Elementary · Básico</option><option value="intermediate">Intermediate · Intermediário</option><option value="upper_intermediate">Upper Intermediate · Intermediário avançado</option><option value="advanced">Advanced · Avançado</option></select></label><button type="button" className="profile-save" disabled={saving || !name.trim()} onClick={saveProfile}>{saving ? "Salvando..." : "Salvar alterações"}</button></div> : <><strong>{levelLabels[level] || levelLabels.intermediate}</strong><p>O Coach adapta vocabulário, perguntas e feedback ao seu nível.</p></>}</article>
         <article><span>CONTA</span><strong>Conta ativa</strong><p>Seu progresso fica vinculado a este perfil.</p></article>
       </div>
+      <section className="profile-journey">
+        <div className="profile-journey-heading"><div><span>SUA JORNADA</span><h2>Evolução no SpeakFlow</h2></div><strong>{levelLabels[level] || levelLabels.intermediate}</strong></div>
+        <div className="profile-level-track">{levelOrder.map((item, index) => { const currentIndex = levelOrder.indexOf(level); const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "future"; return <div key={item} className={`profile-level-step ${state}`}><i>{index < currentIndex ? "✓" : index + 1}</i><span>{levelLabels[item].split(" · ")[0]}</span></div>; })}</div>
+        <div className="profile-journey-insight">
+          <div><span>FOCOS IDENTIFICADOS</span><strong>{focusSkills.length ? focusSkills.join(" · ") : "Sua jornada está começando"}</strong><p>{focusSkills.length ? "Baseado nos padrões recentes dos seus feedbacks. Continue praticando para refinar seu perfil de aprendizagem." : "À medida que você pratica, o SpeakFlow identifica padrões reais nos seus feedbacks e destaca habilidades para desenvolver."}</p></div>
+          <button type="button" onClick={() => router.push("/progress")}>Ver progresso →</button>
+        </div>
+      </section>
       <div className="profile-actions">
         <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach →</button>
         <button className="profile-logout" onClick={signOut}>Sair da conta</button>
