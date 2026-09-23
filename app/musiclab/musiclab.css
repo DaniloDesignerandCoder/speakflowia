@@ -65,3 +65,8 @@
 .ml-timeline span{width:calc(var(--audio-progress,0) * 100%)!important;box-shadow:0 0 calc(8px + var(--audio-energy,0) * 30px) rgba(145,158,255,.8)}
 .is-playing .ml-focus{transform:perspective(1100px) translateZ(calc(var(--audio-energy,0) * 18px));border-color:rgba(139,154,255,calc(.1 + var(--audio-energy,0) * .32))}
 .is-playing .ml-webgl-world{filter:saturate(calc(1.05 + var(--audio-energy,0) * .8)) brightness(calc(1 + var(--audio-energy,0) * .35))}
+
+
+/* Preserve natural spacing between reactive phrase words */
+.ml-live-words span{margin-right:.24em}
+.ml-live-words span:last-child{margin-right:0}
