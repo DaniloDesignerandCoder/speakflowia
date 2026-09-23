@@ -49,3 +49,11 @@
 @keyframes ml-depth-drift{0%,100%{transform:translate3d(0,0,0);opacity:.18}50%{transform:translate3d(18px,-14px,40px);opacity:.5}}
 @keyframes ml-orbit-flat{to{transform:rotate(347deg)}}@keyframes ml-orbit-flat2{to{transform:rotate(381deg)}}
 @media(max-width:800px){.ml-spatial-title{right:-28vw;top:12%;font-size:90px}.ml-depth-label{display:none}.ml-player-wrap:before{width:360px;height:110px}.ml-player-wrap:after{width:320px;height:90px}.ml-stage:before{width:110vw;height:110vw;right:-50vw;top:62%}}
+
+/* Real-time WebGL world */
+.ml-webgl-world{position:fixed;z-index:0;inset:0;pointer-events:none;opacity:.92}
+.ml-webgl-world canvas{display:block;width:100%;height:100%}
+.musiclab-shell:after{content:"";position:fixed;z-index:0;inset:0;pointer-events:none;background:radial-gradient(circle at 72% 45%,transparent 0 18%,rgba(5,7,12,.12) 42%,rgba(5,7,12,.78) 88%)}
+.ml-stage-copy,.ml-player-wrap,.musiclab-topbar,.ml-workspace,.musiclab-footer{position:relative;z-index:3}
+.is-playing .ml-webgl-world{filter:saturate(1.35) brightness(1.12)}
+@media(max-width:800px){.ml-webgl-world{opacity:.68}.musiclab-shell:after{background:linear-gradient(to bottom,rgba(5,7,12,.16),rgba(5,7,12,.7))}}
