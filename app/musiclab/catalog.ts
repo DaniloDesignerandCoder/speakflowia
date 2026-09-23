@@ -52,7 +52,7 @@ export function attributionFor(track: MusicTrack) {
   return `${track.title} — ${track.artist} · ${track.rights.license} · ${track.rights.sourceName}`;
 }
 
-export const approvedMusicCatalog: MusicTrack[] = [
+export const approvedMusicCatalog: MusicTrack[] = ([
   {
     id: "the-circle-kira-daly",
     title: "The Circle",
@@ -124,4 +124,4 @@ export const approvedMusicCatalog: MusicTrack[] = [
       verifiedAt: "2026-09-23",
     },
   },
-].filter(isRightsApproved);
+] satisfies MusicTrack[]).filter(isRightsApproved);
