@@ -40,6 +40,12 @@ export default function Home() {
     streak_days: 0,
   });
 
+  const [currentLevel, setCurrentLevel] = useState({
+    id: "intermediate",
+    label: "Intermediate",
+    description: "Intermediário",
+  });
+
   const [learningFocus, setLearningFocus] = useState({
     skill: "Seu aprendizado",
     tip: "Continue praticando para o SpeakFlow identificar seu próximo foco.",
@@ -66,7 +72,7 @@ export default function Home() {
       setProgress(data);
     }
 
-    const [sessionsResult, insightsResult] = await Promise.all([
+    const [sessionsResult, insightsResult, profileResult] = await Promise.all([
       supabase
         .from("learning_sessions")
         .select("duration_seconds")
@@ -79,7 +85,23 @@ export default function Home() {
         .eq("user_id", session.user.id)
         .order("created_at", { ascending: false })
         .limit(30),
+      supabase
+        .from("profiles")
+        .select("preferred_level")
+        .eq("id", session.user.id)
+        .maybeSingle(),
     ]);
+
+    const levelMap: Record<string, { label: string; description: string }> = {
+      beginner: { label: "Beginner", description: "Iniciante" },
+      elementary: { label: "Elementary", description: "Básico" },
+      intermediate: { label: "Intermediate", description: "Intermediário" },
+      upper_intermediate: { label: "Upper Intermediate", description: "Intermediário avançado" },
+      advanced: { label: "Advanced", description: "Avançado" },
+    };
+    const levelId = profileResult.data?.preferred_level ?? "intermediate";
+    const levelInfo = levelMap[levelId] ?? levelMap.intermediate;
+    setCurrentLevel({ id: levelId, ...levelInfo });
 
     const sessions = sessionsResult.data ?? [];
     const insights = insightsResult.data ?? [];
@@ -391,6 +413,25 @@ export default function Home() {
 
           </section>
 
+
+          <section className="dashboard-level-journey">
+            <div className="dashboard-level-main">
+              <span className="dashboard-label">SEU NÍVEL ATUAL</span>
+              <div className="dashboard-level-title">
+                <div className="dashboard-level-orb">✦</div>
+                <div>
+                  <h2>{currentLevel.label}</h2>
+                  <p>{currentLevel.description}</p>
+                </div>
+              </div>
+            </div>
+            <div className="dashboard-level-adaptive">
+              <span>APRENDIZADO ADAPTATIVO</span>
+              <strong>Seu Coach acompanha seu ritmo.</strong>
+              <p>Vocabulário, perguntas e feedback são ajustados ao seu nível durante os treinos.</p>
+              <button onClick={() => router.push("/coach")}>Treinar neste nível <span>→</span></button>
+            </div>
+          </section>
 
           <section className="dashboard-learning-focus">
             <div className="dashboard-focus-copy">
