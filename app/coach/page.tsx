@@ -129,6 +129,7 @@ export default function CoachPage() {
   const [pronunciationResult, setPronunciationResult] = useState<{ heard: string; score: number } | null>(null);
   const [pronunciationAttempts, setPronunciationAttempts] = useState<PronunciationAttempt[]>([]);
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
+  const [sessionCompleted, setSessionCompleted] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
   const [finishStage, setFinishStage] = useState(0);
 
@@ -235,6 +236,7 @@ export default function CoachPage() {
     setPronunciationResult(null);
     setPronunciationAttempts([]);
     setSessionSummary(null);
+    setSessionCompleted(false);
     setShowExitGuard(false);
     setStarted(true);
 
@@ -454,6 +456,7 @@ export default function CoachPage() {
     void progressUpdate;
 
     setSessionSummary(generatedSummary);
+    setSessionCompleted(true);
     setStarted(false);
     setInput("");
     setPronunciationResult(null);
@@ -498,13 +501,13 @@ export default function CoachPage() {
           </div>
         </header>
 
-        {!started && sessionSummary ? (
+        {!started && sessionCompleted ? (
           <section className="session-summary">
             <div className="session-summary-hero">
               <div className="session-summary-mark">✦</div>
               <span className="coach-label">SESSÃO CONCLUÍDA</span>
               <h1>Seu treino virou<br /><em>próximo passo.</em></h1>
-              <p>{sessionSummary.summary}</p>
+              <p>{sessionSummary?.summary ?? "Sua sessão foi salva com sucesso. O SpeakFlow registrou esta prática no seu histórico de aprendizado."}</p>
               <div className="session-summary-meta">
                 <span>{currentLevel?.label}</span>
                 <span>{isPronunciation ? "Pronúncia" : isVocabulary ? "Vocabulário" : "Conversação"}</span>
@@ -515,19 +518,19 @@ export default function CoachPage() {
             <div className="session-summary-grid">
               <article>
                 <span>HABILIDADES PRATICADAS</span>
-                <strong>{sessionSummary.skills_practiced}</strong>
+                <strong>{sessionSummary?.skills_practiced ?? "Prática registrada no seu histórico."}</strong>
               </article>
               <article>
                 <span>PONTO POSITIVO</span>
-                <strong>{sessionSummary.positive_point}</strong>
+                <strong>{sessionSummary?.positive_point ?? "Você concluiu mais uma sessão de prática."}</strong>
               </article>
               <article>
                 <span>PRÓXIMA EVOLUÇÃO</span>
-                <strong>{sessionSummary.improvement_point}</strong>
+                <strong>{sessionSummary?.improvement_point ?? "Continue praticando para consolidar sua evolução."}</strong>
               </article>
               <article className="session-summary-next">
                 <span>RECOMENDAÇÃO DO COACH</span>
-                <strong>{sessionSummary.next_recommendation}</strong>
+                <strong>{sessionSummary?.next_recommendation ?? "Faça uma nova sessão quando estiver pronto para continuar."}</strong>
               </article>
             </div>
 
