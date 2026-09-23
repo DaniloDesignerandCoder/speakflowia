@@ -3668,3 +3668,19 @@ img {
 .onboarding-result>strong { display:block; color:#aab8ff; font-size:14px; }
 .onboarding-orb { width:76px; height:76px; display:grid; place-items:center; margin:22px auto 10px; border:1px solid rgba(129,156,255,.3); border-radius:50%; background:radial-gradient(circle,rgba(129,156,255,.24),rgba(129,156,255,.04)); color:#b8c5ff; font-size:28px; box-shadow:0 0 55px rgba(100,125,255,.18); }
 @media(max-width:700px){.onboarding-card{padding:24px 18px;border-radius:23px}.onboarding-brand{margin-bottom:28px}.onboarding-options button{padding:13px;font-size:12px}.onboarding-primary{width:100%}}
+
+
+/* =========================================================
+   HOME — ADAPTIVE LEVEL JOURNEY
+   ========================================================= */
+.dashboard-level-journey { margin-top:18px; padding:22px 24px; display:grid; grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr); gap:20px; align-items:center; border:1px solid rgba(129,156,255,.13); border-radius:20px; background:radial-gradient(circle at 12% 50%,rgba(104,126,255,.11),transparent 32%),rgba(255,255,255,.022); }
+.dashboard-level-title { display:flex; align-items:center; gap:14px; margin-top:12px; }
+.dashboard-level-orb { width:48px; height:48px; display:grid; place-items:center; flex:0 0 48px; border:1px solid rgba(129,156,255,.28); border-radius:15px; background:rgba(129,156,255,.08); color:#a9b8ff; box-shadow:inset 0 0 20px rgba(129,156,255,.06); }
+.dashboard-level-title h2 { margin:0; font-size:24px; letter-spacing:-.7px; }
+.dashboard-level-title p { margin:4px 0 0; color:#91a8ff; font-size:9px; font-weight:700; letter-spacing:.7px; }
+.dashboard-level-adaptive { padding-left:22px; border-left:1px solid rgba(255,255,255,.06); }
+.dashboard-level-adaptive>span { color:#819cff; font-size:7px; font-weight:800; letter-spacing:1.4px; }
+.dashboard-level-adaptive strong { display:block; margin-top:7px; font-size:13px; }
+.dashboard-level-adaptive p { max-width:520px; margin:6px 0 0; color:rgba(255,255,255,.38); font-size:9px; line-height:1.6; }
+.dashboard-level-adaptive button { margin-top:12px; padding:8px 11px; display:inline-flex; gap:10px; border:1px solid rgba(129,156,255,.18); border-radius:10px; background:rgba(129,156,255,.08); color:#aebcff; font-size:8px; font-weight:700; }
+@media(max-width:760px){.dashboard-level-journey{grid-template-columns:1fr;padding:19px 16px;text-align:center}.dashboard-level-title{justify-content:center}.dashboard-level-adaptive{padding:16px 0 0;border-left:0;border-top:1px solid rgba(255,255,255,.06)}.dashboard-level-adaptive p{margin:6px auto 0}}
