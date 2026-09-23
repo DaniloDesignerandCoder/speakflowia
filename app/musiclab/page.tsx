@@ -55,6 +55,14 @@ export default function MusicLab() {
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
 
+  useEffect(()=>()=>{ 
+    if(audioRafRef.current!==null)cancelAnimationFrame(audioRafRef.current);
+    trackAudioRef.current?.pause();
+    if(audioContextRef.current)void audioContextRef.current.close();
+    audioEnergyRef.current=0;
+    audioProgressRef.current=0;
+  },[]);
+
   useEffect(()=>{
     const host=webglRef.current; if(!host) return;
     const scene=new THREE.Scene();
