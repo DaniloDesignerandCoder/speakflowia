@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import * as THREE from "three";
 import "./musiclab.css";
 
 type Track = {
@@ -40,8 +41,41 @@ export default function MusicLab() {
   const [playing,setPlaying]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
+  const webglRef=useRef<HTMLDivElement>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
+
+  useEffect(()=>{
+    const host=webglRef.current; if(!host) return;
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(52,innerWidth/innerHeight,.1,100);
+    camera.position.set(0,0,8);
+    const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:"high-performance"});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.8)); renderer.setSize(innerWidth,innerHeight);
+    renderer.outputColorSpace=THREE.SRGBColorSpace; host.appendChild(renderer.domElement);
+
+    const group=new THREE.Group(); scene.add(group);
+    const geo=new THREE.IcosahedronGeometry(2.15,4);
+    const mat=new THREE.MeshPhysicalMaterial({color:0x6f79ff,wireframe:true,transparent:true,opacity:.18,roughness:.28,metalness:.25});
+    const core=new THREE.Mesh(geo,mat); group.add(core);
+    const shell=new THREE.Mesh(new THREE.IcosahedronGeometry(2.42,2),new THREE.MeshBasicMaterial({color:0xa873ff,wireframe:true,transparent:true,opacity:.055}));
+    group.add(shell);
+    const ringMat=new THREE.MeshBasicMaterial({color:0x8fa0ff,transparent:true,opacity:.13,side:THREE.DoubleSide});
+    [2.9,3.35,3.8].forEach((radius,i)=>{const ring=new THREE.Mesh(new THREE.TorusGeometry(radius,.008,6,180),ringMat.clone());ring.rotation.set(1.1+i*.28,.2+i*.5,i*.65);group.add(ring)});
+    const count=900, positions=new Float32Array(count*3);
+    for(let i=0;i<count;i++){const radius=3+Math.random()*6,theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);positions[i*3]=radius*Math.sin(phi)*Math.cos(theta);positions[i*3+1]=radius*Math.sin(phi)*Math.sin(theta);positions[i*3+2]=radius*Math.cos(phi)}
+    const pgeo=new THREE.BufferGeometry();pgeo.setAttribute("position",new THREE.BufferAttribute(positions,3));
+    const points=new THREE.Points(pgeo,new THREE.PointsMaterial({color:0xaeb8ff,size:.018,transparent:true,opacity:.38,sizeAttenuation:true}));scene.add(points);
+    const light=new THREE.PointLight(0x7d82ff,8,18);light.position.set(2,2,4);scene.add(light);
+    group.position.set(innerWidth<800?0:2.45,0,0); points.position.copy(group.position);
+    let mx=0,my=0,raf=0;
+    const pointer=(e:PointerEvent)=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2};
+    const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);group.position.x=innerWidth<800?0:2.45;points.position.x=group.position.x};
+    const clock=new THREE.Clock();
+    const render=()=>{const t=clock.getElapsedTime(),speed=playing?.008:.0025;core.rotation.x+=speed;core.rotation.y+=speed*1.4;shell.rotation.y-=speed*.7;group.rotation.z=Math.sin(t*.18)*.08;group.rotation.y+=(mx*.12-group.rotation.y)*.018;group.rotation.x+=(-my*.08-group.rotation.x)*.018;const scale=playing?1+Math.sin(t*7)*.035:1+Math.sin(t*.9)*.012;core.scale.setScalar(scale);points.rotation.y+=playing?.0018:.00035;points.rotation.x=Math.sin(t*.08)*.08;renderer.render(scene,camera);raf=requestAnimationFrame(render)};
+    addEventListener("pointermove",pointer,{passive:true});addEventListener("resize",resize);render();
+    return()=>{cancelAnimationFrame(raf);removeEventListener("pointermove",pointer);removeEventListener("resize",resize);host.removeChild(renderer.domElement);geo.dispose();mat.dispose();pgeo.dispose();renderer.dispose()};
+  },[playing]);
 
   useEffect(()=>{
     const canvas=canvasRef.current; if(!canvas) return;
@@ -86,6 +120,7 @@ export default function MusicLab() {
   }
 
   return <main ref={shellRef} onPointerMove={moveLight} className={playing?"musiclab-shell is-playing":"musiclab-shell"}>
+    <div ref={webglRef} className="ml-webgl-world" aria-hidden="true"/>
     <canvas ref={canvasRef} className="ml-particle-field" aria-hidden="true"/>
     <div className="ml-cursor-light"/>
     <div className="ml-grid"/>
@@ -101,8 +136,8 @@ export default function MusicLab() {
     <section className="ml-stage">
       <div className="ml-depth-label depth-a">01 / SOUND</div><div className="ml-depth-label depth-b">02 / LANGUAGE</div><div className="ml-depth-label depth-c">03 / VOICE</div>
       <div className="ml-stage-copy">
-        <span className="ml-kicker">IMMERSIVE ENGLISH STUDIO</span>
-        <h1>Não estude uma frase.<br/><em>Entre nela.</em></h1>
+        <span className="ml-kicker">REAL-TIME LANGUAGE SPACE</span>
+        <h1>O inglês não está<br/><em>na tela.</em> Está no espaço.</h1>
         <p>Escute, perceba o ritmo e descubra o inglês dentro do contexto. Cada faixa é um pequeno ambiente de aprendizagem.</p>
         <div className="ml-journey"><b>LISTEN</b><i/><span>DISCOVER</span><i/><span>SHADOW</span></div>
       </div>
