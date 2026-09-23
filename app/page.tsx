@@ -355,7 +355,7 @@ export default function Home() {
                 <div className="live-music-footer"><span>LISTEN</span><span>DISCOVER</span><span>SHADOW</span></div>
               </div>
               <div className="live-demo-switch" aria-hidden="true"><i className={heroExperience === "coach" ? "active" : ""} /><i className={heroExperience === "musiclab" ? "active" : ""} /></div>
-            </div>>
+            </div>
 
           </section>
 
