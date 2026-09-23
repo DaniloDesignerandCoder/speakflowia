@@ -3740,3 +3740,18 @@ img {
 .profile-journey-insight p{max-width:500px;margin:6px 0 0;color:rgba(255,255,255,.36);font-size:9px;line-height:1.55}
 .profile-journey-insight button{flex:0 0 auto;border:1px solid rgba(129,156,255,.16);border-radius:10px;background:rgba(129,156,255,.07);color:#aebcff;padding:9px 11px;font-size:8px;font-weight:800;cursor:pointer}
 @media(max-width:700px){.profile-journey{padding:18px}.profile-journey-heading{align-items:flex-start;flex-direction:column}.profile-level-track{gap:3px}.profile-level-step{font-size:6px}.profile-level-step i{width:24px;height:24px}.profile-journey-insight{align-items:stretch;flex-direction:column}.profile-journey-insight button{align-self:flex-start}}
+
+.profile-achievements{margin-top:14px;padding:22px;border:1px solid rgba(129,156,255,.1);border-radius:20px;background:rgba(255,255,255,.018)}
+.profile-achievements-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.profile-achievements-heading span{color:#819cff;font-size:8px;font-weight:800;letter-spacing:1.4px}
+.profile-achievements-heading h2{margin:6px 0 0;font-size:18px}
+.profile-achievements-heading>strong{padding:7px 10px;border:1px solid rgba(129,156,255,.14);border-radius:9px;background:rgba(129,156,255,.06);color:#aebcff;font-size:9px}
+.profile-achievement-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:18px}
+.profile-achievement-grid article{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid rgba(255,255,255,.055);border-radius:14px;background:rgba(255,255,255,.018)}
+.profile-achievement-grid article>i{width:32px;height:32px;display:grid;place-items:center;flex:0 0 32px;border-radius:10px;font-style:normal;font-size:9px;font-weight:900}
+.profile-achievement-grid article.unlocked>i{border:1px solid rgba(129,156,255,.35);background:rgba(99,124,255,.16);color:#aebcff}
+.profile-achievement-grid article.locked{opacity:.42}
+.profile-achievement-grid article.locked>i{border:1px solid rgba(255,255,255,.08);background:#0a0f1c;color:rgba(255,255,255,.45)}
+.profile-achievement-grid article strong{display:block;font-size:10px}
+.profile-achievement-grid article p{margin:4px 0 0;color:rgba(255,255,255,.34);font-size:8px;line-height:1.45}
+@media(max-width:700px){.profile-achievements{padding:18px}.profile-achievement-grid{grid-template-columns:1fr}}
