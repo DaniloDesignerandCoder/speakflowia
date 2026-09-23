@@ -57,3 +57,11 @@
 .ml-stage-copy,.ml-player-wrap,.musiclab-topbar,.ml-workspace,.musiclab-footer{position:relative;z-index:3}
 .is-playing .ml-webgl-world{filter:saturate(1.35) brightness(1.12)}
 @media(max-width:800px){.ml-webgl-world{opacity:.68}.musiclab-shell:after{background:linear-gradient(to bottom,rgba(5,7,12,.16),rgba(5,7,12,.7))}}
+
+/* Neural audio reactive language layer */
+.ml-live-words span{display:inline-block;position:relative;transition:transform .22s ease,opacity .22s ease,filter .22s ease,text-shadow .22s ease;transform-origin:center bottom}
+.is-playing .ml-live-words span{opacity:.34;filter:blur(.35px)}
+.is-playing .ml-live-words span.active{opacity:1;filter:none;transform:translate3d(0,-5px,38px) scale(1.08);color:#eef1ff;text-shadow:0 0 24px rgba(145,158,255,.62),0 0 60px rgba(118,96,255,.3)}
+.ml-timeline span{width:calc(var(--audio-progress,0) * 100%)!important;box-shadow:0 0 calc(8px + var(--audio-energy,0) * 30px) rgba(145,158,255,.8)}
+.is-playing .ml-focus{transform:perspective(1100px) translateZ(calc(var(--audio-energy,0) * 18px));border-color:rgba(139,154,255,calc(.1 + var(--audio-energy,0) * .32))}
+.is-playing .ml-webgl-world{filter:saturate(calc(1.05 + var(--audio-energy,0) * .8)) brightness(calc(1 + var(--audio-energy,0) * .35))}
