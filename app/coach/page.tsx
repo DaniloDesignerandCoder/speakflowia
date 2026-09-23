@@ -131,11 +131,14 @@ export default function CoachPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, preferred_level")
         .eq("id", session.user.id)
         .single();
 
       if (profile?.full_name) setUserName(profile.full_name);
+      if (profile?.preferred_level && levels.some((item) => item.id === profile.preferred_level)) {
+        setLevel(profile.preferred_level);
+      }
       setAuthChecking(false);
     }
 
@@ -151,6 +154,20 @@ export default function CoachPage() {
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/login");
+  }
+
+  async function selectLevel(nextLevel: string) {
+    setLevel(nextLevel);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ preferred_level: nextLevel })
+      .eq("id", session.user.id);
+
+    if (error) console.error("Erro ao salvar nível preferido:", error);
   }
 
   function startSession() {
@@ -396,7 +413,7 @@ export default function CoachPage() {
                   <button
                     key={item.id}
                     className={level === item.id ? "level-option selected" : "level-option"}
-                    onClick={() => setLevel(item.id)}
+                    onClick={() => selectLevel(item.id)}
                   >
                     <strong>{item.label}</strong>
                     <span>{item.description}</span>
