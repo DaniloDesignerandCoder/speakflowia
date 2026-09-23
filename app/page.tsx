@@ -370,11 +370,6 @@ export default function Home() {
                 </h2>
               </div>
 
-              <span className="dashboard-ready">
-                <i />
-                Treino disponível
-              </span>
-
             </div>
 
 
@@ -478,10 +473,6 @@ export default function Home() {
                   SpeakFlow Coach
                 </strong>
 
-                <span>
-                  <i />
-                  Modo prática
-                </span>
               </div>
 
             </div>
