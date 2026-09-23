@@ -502,12 +502,12 @@ export default function Home() {
 
 
             <div className="dashboard-stat">
-  <strong>{progress.conversations_count}</strong>
+  <strong>{learningFocus.sessions}</strong>
   <span>SESSÕES</span>
 </div>
 
             <div className="dashboard-stat">
-  <strong>{progress.total_minutes}</strong>
+  <strong>{learningFocus.minutes}</strong>
   <span>MINUTOS</span>
 </div>
 
