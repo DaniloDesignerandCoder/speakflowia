@@ -34,6 +34,11 @@ const modules = [
 export default function Home() {
   const router = useRouter();
 
+  const [userProfile, setUserProfile] = useState({
+    name: "Minha conta",
+    email: "",
+  });
+
   const [progress, setProgress] = useState({
     conversations_count: 0,
     total_minutes: 0,
@@ -61,6 +66,11 @@ export default function Home() {
     } = await supabase.auth.getSession();
 
     if (!session) return;
+
+    setUserProfile({
+      name: session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "Minha conta",
+      email: session.user.email ?? "",
+    });
 
     const { data } = await supabase
       .from("progress")
@@ -261,7 +271,7 @@ export default function Home() {
   />
 </span>
             <span className="dashboard-profile-name">
-              Minha conta
+              {userProfile.name}
             </span>
 
             <span>⌄</span>
