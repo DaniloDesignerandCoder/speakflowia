@@ -77,3 +77,13 @@
 .ml-disc{width:204px;height:204px}
 .ml-disc img{width:104px;height:104px}
 @media(max-width:800px){.ml-orbit{width:225px;height:225px}.ml-disc{width:176px;height:176px}.ml-disc img{width:92px;height:92px}}
+
+
+/* Shadow speaking loop */
+.ml-shadow{margin-top:18px;padding:16px;border:1px solid rgba(132,157,255,.12);border-radius:18px;background:linear-gradient(135deg,rgba(105,126,255,.055),rgba(255,255,255,.018));transition:.35s ease}
+.ml-shadow.active{border-color:rgba(132,157,255,.25);box-shadow:0 18px 55px rgba(0,0,0,.18),inset 0 0 40px rgba(103,126,255,.035)}
+.ml-shadow-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.ml-shadow-head span{color:#9bacff;font-size:7px;font-weight:900;letter-spacing:1.6px}.ml-shadow-head small{color:rgba(255,255,255,.22);font-size:6px;letter-spacing:1px}
+.ml-shadow-start,.ml-shadow-state button,.ml-shadow-result button{width:100%;border:0;border-radius:13px;background:rgba(119,140,255,.1);color:#e8ecff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;font:inherit;font-size:10px;cursor:pointer}.ml-shadow-start:hover,.ml-shadow-state button:hover,.ml-shadow-result button:hover{background:rgba(119,140,255,.16)}
+.ml-shadow-state,.ml-shadow-result{padding:5px 1px}.ml-shadow-state>span,.ml-shadow-result>span{display:block;color:#8298ff;font-size:7px;font-weight:800;letter-spacing:1.4px}.ml-shadow-state>strong{display:block;margin:8px 0 13px;font-size:13px}.ml-shadow-state button:disabled{opacity:.7}
+.ml-shadow-result>strong{display:block;margin:5px 0;font-size:30px;letter-spacing:-1.5px}.ml-shadow-result p{margin:0 0 5px;color:rgba(255,255,255,.65);font-size:10px;line-height:1.5}.ml-shadow-result small{display:block;margin-bottom:13px;color:rgba(255,255,255,.28);font-size:7px;line-height:1.5}
+@media(max-width:700px){.ml-shadow{padding:14px}.ml-shadow-head{align-items:flex-start;flex-direction:column;gap:4px}.ml-shadow-start,.ml-shadow-state button,.ml-shadow-result button{min-height:46px;font-size:10px}}
