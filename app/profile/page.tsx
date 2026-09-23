@@ -118,6 +118,16 @@ export default function ProfilePage() {
     router.refresh();
   }
 
+  const achievements = [
+    { icon: "01", title: "Primeiro passo", description: "Conclua sua primeira sessão.", unlocked: stats.sessions >= 1 },
+    { icon: "05", title: "Em movimento", description: "Complete 5 sessões de prática.", unlocked: stats.sessions >= 5 },
+    { icon: "10", title: "Consistência", description: "Complete 10 sessões de prática.", unlocked: stats.sessions >= 10 },
+    { icon: "30", title: "Meia hora de inglês", description: "Acumule 30 minutos de prática.", unlocked: stats.minutes >= 30 },
+    { icon: "03", title: "Ritmo de estudo", description: "Mantenha uma sequência de 3 dias.", unlocked: stats.streak >= 3 },
+    { icon: "07", title: "Semana em fluxo", description: "Mantenha uma sequência de 7 dias.", unlocked: stats.streak >= 7 },
+  ];
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
+
   if (loading) return <main className="profile-shell"><p>Carregando seu perfil...</p></main>;
 
   return <main className="profile-shell">
@@ -151,6 +161,20 @@ export default function ProfilePage() {
         <div className="profile-journey-insight">
           <div><span>FOCOS IDENTIFICADOS</span><strong>{focusSkills.length ? focusSkills.join(" · ") : "Sua jornada está começando"}</strong><p>{focusSkills.length ? "Baseado nos padrões recentes dos seus feedbacks. Continue praticando para refinar seu perfil de aprendizagem." : "À medida que você pratica, o SpeakFlow identifica padrões reais nos seus feedbacks e destaca habilidades para desenvolver."}</p></div>
           <button type="button" onClick={() => router.push("/progress")}>Ver progresso →</button>
+        </div>
+      </section>
+      <section className="profile-achievements">
+        <div className="profile-achievements-heading">
+          <div><span>CONQUISTAS</span><h2>Marcos da sua prática</h2></div>
+          <strong>{unlockedAchievements}/{achievements.length}</strong>
+        </div>
+        <div className="profile-achievement-grid">
+          {achievements.map((achievement) => (
+            <article key={achievement.title} className={achievement.unlocked ? "unlocked" : "locked"}>
+              <i>{achievement.unlocked ? "✓" : achievement.icon}</i>
+              <div><strong>{achievement.title}</strong><p>{achievement.description}</p></div>
+            </article>
+          ))}
         </div>
       </section>
       <div className="profile-actions">
