@@ -96,6 +96,9 @@ export default function CoachPage() {
   const isPronunciation = trainingMode === "pronunciation";
 
   const [level, setLevel] = useState("intermediate");
+  const [learningGoal, setLearningGoal] = useState("conversation");
+  const [correctionStyle, setCorrectionStyle] = useState("balanced");
+  const [conversationPace, setConversationPace] = useState("natural");
   const [started, setStarted] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -132,12 +135,15 @@ export default function CoachPage() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("full_name, preferred_level, avatar_url")
+        .select("full_name, preferred_level, avatar_url, learning_goal, correction_style, conversation_pace")
         .eq("id", session.user.id)
         .single();
 
       if (profile?.full_name) setUserName(profile.full_name);
       if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+      if (profile?.learning_goal) setLearningGoal(profile.learning_goal);
+      if (profile?.correction_style) setCorrectionStyle(profile.correction_style);
+      if (profile?.conversation_pace) setConversationPace(profile.conversation_pace);
       if (profile?.preferred_level && levels.some((item) => item.id === profile.preferred_level)) {
         setLevel(profile.preferred_level);
       }
@@ -199,7 +205,7 @@ export default function CoachPage() {
     window.speechSynthesis.cancel();
     const speech = new SpeechSynthesisUtterance(text);
     speech.lang = "en-US";
-    speech.rate = isPronunciation ? 0.82 : 0.95;
+    speech.rate = isPronunciation ? 0.82 : conversationPace === "relaxed" ? 0.85 : conversationPace === "challenging" ? 1.05 : 0.95;
     speech.pitch = 1;
     const voices = window.speechSynthesis.getVoices();
     const englishVoice = voices.find((voice) => voice.lang.toLowerCase().startsWith("en"));
@@ -257,7 +263,7 @@ export default function CoachPage() {
 
     try {
       const { data, error } = await supabase.functions.invoke("speakflow-coach", {
-        body: { level, mode: trainingMode, messages, message: text },
+        body: { level, mode: trainingMode, messages, message: text, learningGoal, correctionStyle, conversationPace },
       });
 
       if (error) throw error;
