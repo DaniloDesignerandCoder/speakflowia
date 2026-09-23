@@ -70,3 +70,10 @@
 /* Preserve natural spacing between reactive phrase words */
 .ml-live-words span{margin-right:.24em}
 .ml-live-words span:last-child{margin-right:0}
+
+
+/* Larger MusicLab rotating sound core */
+.ml-orbit{width:238px;height:238px}
+.ml-disc{width:182px;height:182px}
+.ml-disc img{width:62px;height:62px}
+@media(max-width:800px){.ml-orbit{width:205px;height:205px}.ml-disc{width:156px;height:156px}.ml-disc img{width:56px;height:56px}}
