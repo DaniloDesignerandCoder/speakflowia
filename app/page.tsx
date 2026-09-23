@@ -40,6 +40,13 @@ export default function Home() {
     streak_days: 0,
   });
 
+  const [learningFocus, setLearningFocus] = useState({
+    skill: "Seu aprendizado",
+    tip: "Continue praticando para o SpeakFlow identificar seu próximo foco.",
+    sessions: 0,
+    minutes: 0,
+  });
+
   useEffect(() => {
     async function loadProgress() {
     const {
@@ -57,6 +64,51 @@ export default function Home() {
     if (data) {
       setProgress(data);
     }
+
+    const [sessionsResult, insightsResult] = await Promise.all([
+      supabase
+        .from("learning_sessions")
+        .select("duration_seconds")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("learning_insights")
+        .select("skill_category, tip")
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false })
+        .limit(30),
+    ]);
+
+    const sessions = sessionsResult.data ?? [];
+    const insights = insightsResult.data ?? [];
+    const minutes = Math.round(
+      sessions.reduce((sum, item) => sum + Math.max(0, item.duration_seconds ?? 0), 0) / 60
+    );
+
+    const normalizeSkill = (value: string | null) => {
+      const raw = value?.trim().toLowerCase() ?? "";
+      if (raw.includes("grammar") || raw.includes("tense") || raw.includes("verb") || raw.includes("article") || raw.includes("preposition")) return "Gramática";
+      if (raw.includes("vocab") || raw.includes("word")) return "Vocabulário";
+      if (raw.includes("sentence")) return "Estrutura de frases";
+      if (raw.includes("conversation")) return "Conversação";
+      return "Seu aprendizado";
+    };
+
+    const counts = new Map<string, number>();
+    insights.forEach((item) => {
+      const skill = normalizeSkill(item.skill_category);
+      if (skill !== "Seu aprendizado") counts.set(skill, (counts.get(skill) ?? 0) + 1);
+    });
+
+    const skill = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Seu aprendizado";
+
+    setLearningFocus({
+      skill,
+      tip: insights[0]?.tip ?? "Continue praticando para o SpeakFlow identificar seu próximo foco.",
+      sessions: sessions.length,
+      minutes,
+    });
   }
 
   loadProgress();
@@ -314,6 +366,24 @@ export default function Home() {
 
             </div>
 
+          </section>
+
+
+          <section className="dashboard-learning-focus">
+            <div className="dashboard-focus-copy">
+              <span className="dashboard-label">CONTINUE DE ONDE PAROU</span>
+              <h2>{learningFocus.skill}</h2>
+              <p>{learningFocus.tip}</p>
+              <button className="dashboard-focus-action" onClick={() => router.push("/coach")}>
+                Continuar praticando <span>→</span>
+              </button>
+            </div>
+
+            <div className="dashboard-focus-stats">
+              <div><strong>{learningFocus.sessions}</strong><span>SESSÕES</span></div>
+              <div><strong>{learningFocus.minutes}</strong><span>MINUTOS</span></div>
+              <button onClick={() => router.push("/progress")}>Ver progresso <span>↗</span></button>
+            </div>
           </section>
 
 
