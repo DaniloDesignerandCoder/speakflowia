@@ -73,7 +73,7 @@
 
 
 /* Larger MusicLab rotating sound core */
-.ml-orbit{width:238px;height:238px}
-.ml-disc{width:182px;height:182px}
-.ml-disc img{width:62px;height:62px}
-@media(max-width:800px){.ml-orbit{width:205px;height:205px}.ml-disc{width:156px;height:156px}.ml-disc img{width:56px;height:56px}}
+.ml-orbit{width:258px;height:258px}
+.ml-disc{width:204px;height:204px}
+.ml-disc img{width:104px;height:104px}
+@media(max-width:800px){.ml-orbit{width:225px;height:225px}.ml-disc{width:176px;height:176px}.ml-disc img{width:92px;height:92px}}
