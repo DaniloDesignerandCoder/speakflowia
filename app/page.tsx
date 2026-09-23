@@ -15,11 +15,11 @@ const modules = [
   },
   {
     title: "Pronúncia",
-    subtitle: "Speaking",
+    subtitle: "Pronunciation",
     description:
       "Treine sua fala e desenvolva uma pronúncia mais natural.",
     icon: "◎",
-    route: "/coach?mode=conversation",
+    route: "/coach?mode=pronunciation",
   },
   {
     title: "Vocabulário",
@@ -88,6 +88,7 @@ export default function Home() {
 
     const normalizeSkill = (value: string | null) => {
       const raw = value?.trim().toLowerCase() ?? "";
+      if (raw.includes("pronun")) return "Pronúncia";
       if (raw.includes("grammar") || raw.includes("tense") || raw.includes("verb") || raw.includes("article") || raw.includes("preposition")) return "Gramática";
       if (raw.includes("vocab") || raw.includes("word")) return "Vocabulário";
       if (raw.includes("sentence")) return "Estrutura de frases";
