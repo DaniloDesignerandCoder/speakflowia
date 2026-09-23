@@ -42,6 +42,9 @@ export default function MusicLab() {
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
+  const audioEnergyRef=useRef(0);
+  const audioProgressRef=useRef(0);
+  const activeWordRef=useRef(0);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
 
@@ -72,7 +75,7 @@ export default function MusicLab() {
     const pointer=(e:PointerEvent)=>{mx=(e.clientX/innerWidth-.5)*2;my=(e.clientY/innerHeight-.5)*2};
     const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);group.position.x=innerWidth<800?0:2.45;points.position.x=group.position.x};
     const clock=new THREE.Clock();
-    const render=()=>{const t=clock.getElapsedTime(),speed=playing?.008:.0025;core.rotation.x+=speed;core.rotation.y+=speed*1.4;shell.rotation.y-=speed*.7;group.rotation.z=Math.sin(t*.18)*.08;group.rotation.y+=(mx*.12-group.rotation.y)*.018;group.rotation.x+=(-my*.08-group.rotation.x)*.018;const scale=playing?1+Math.sin(t*7)*.035:1+Math.sin(t*.9)*.012;core.scale.setScalar(scale);points.rotation.y+=playing?.0018:.00035;points.rotation.x=Math.sin(t*.08)*.08;renderer.render(scene,camera);raf=requestAnimationFrame(render)};
+    const render=()=>{const t=clock.getElapsedTime(),energy=audioEnergyRef.current,speed=playing?.006+energy*.018:.0025;core.rotation.x+=speed;core.rotation.y+=speed*1.4;shell.rotation.y-=speed*.7;group.rotation.z=Math.sin(t*.18)*.08;group.rotation.y+=(mx*.12-group.rotation.y)*.018;group.rotation.x+=(-my*.08-group.rotation.x)*.018;const scale=playing?1+energy*.22+Math.sin(t*7)*.018:1+Math.sin(t*.9)*.012;core.scale.setScalar(scale);(mat as THREE.MeshPhysicalMaterial).opacity=.14+energy*.42;light.intensity=6+energy*22;points.rotation.y+=playing?.0008+energy*.004:.00035;points.rotation.x=Math.sin(t*.08)*.08;renderer.render(scene,camera);raf=requestAnimationFrame(render)};
     addEventListener("pointermove",pointer,{passive:true});addEventListener("resize",resize);render();
     return()=>{cancelAnimationFrame(raf);removeEventListener("pointermove",pointer);removeEventListener("resize",resize);host.removeChild(renderer.domElement);geo.dispose();mat.dispose();pgeo.dispose();renderer.dispose()};
   },[playing]);
@@ -110,9 +113,14 @@ export default function MusicLab() {
       const response=await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-voice`,{method:"POST",headers:{Authorization:`Bearer ${session.access_token}`,apikey:process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,"Content-Type":"application/json"},body:JSON.stringify({text})});
       if(!response.ok) throw new Error("Neural voice unavailable");
       const blob=await response.blob(); const audioUrl=URL.createObjectURL(blob); const audio=new Audio(audioUrl);
-      audio.addEventListener("ended",()=>{URL.revokeObjectURL(audioUrl);setPlaying(false);},{once:true});
-      audio.addEventListener("error",()=>setPlaying(false),{once:true});
-      await audio.play(); return;
+      const AudioContextClass=window.AudioContext||(window as typeof window & {webkitAudioContext:typeof AudioContext}).webkitAudioContext;
+      const context=new AudioContextClass(); const source=context.createMediaElementSource(audio); const analyser=context.createAnalyser();
+      analyser.fftSize=256; analyser.smoothingTimeConstant=.78; source.connect(analyser); analyser.connect(context.destination);
+      const data=new Uint8Array(analyser.frequencyBinCount); let audioRaf=0;
+      const sample=()=>{analyser.getByteFrequencyData(data);let sum=0;for(let i=0;i<data.length;i++)sum+=data[i];audioEnergyRef.current=sum/(data.length*255);if(audio.duration&&Number.isFinite(audio.duration)){audioProgressRef.current=audio.currentTime/audio.duration;activeWordRef.current=Math.min(phrase.line.split(/\s+/).length-1,Math.floor(audioProgressRef.current*phrase.line.split(/\s+/).length));shellRef.current?.style.setProperty("--audio-progress",String(audioProgressRef.current));shellRef.current?.style.setProperty("--audio-energy",String(audioEnergyRef.current))}audioRaf=requestAnimationFrame(sample)};
+      const cleanup=()=>{cancelAnimationFrame(audioRaf);audioEnergyRef.current=0;audioProgressRef.current=0;activeWordRef.current=0;URL.revokeObjectURL(audioUrl);void context.close();setPlaying(false)};
+      audio.addEventListener("ended",cleanup,{once:true}); audio.addEventListener("error",cleanup,{once:true});
+      await context.resume(); audioRaf=requestAnimationFrame(sample); await audio.play(); return;
     }catch{
       if(!("speechSynthesis" in window)){setPlaying(false);return;}
       window.speechSynthesis.cancel(); const utterance=new SpeechSynthesisUtterance(text); utterance.lang="en-US"; utterance.rate=.88; utterance.onend=()=>setPlaying(false); utterance.onerror=()=>setPlaying(false); window.speechSynthesis.speak(utterance);
@@ -168,7 +176,7 @@ export default function MusicLab() {
         <div className="ml-focus-head"><div><span>NOW LISTENING</span><small>{track.focus}</small></div><b>{String(step+1).padStart(2,"0")}</b></div>
         <div className="ml-phrase">
           <div className={playing?"ml-pulse active":"ml-pulse"}><i/><i/><i/><i/><i/></div>
-          <blockquote>{phrase.line}</blockquote>
+          <blockquote className="ml-live-words">{phrase.line.split(/\s+/).map((word,index)=><span key={`${step}-${index}`} className={playing&&index===activeWordRef.current?"active":""}>{word} </span>)}</blockquote>
           <button className="ml-hear" onClick={()=>speak(phrase.line)}>{playing?"Reproduzindo…":"Ouvir novamente"}</button>
         </div>
         <div className="ml-discovery">
