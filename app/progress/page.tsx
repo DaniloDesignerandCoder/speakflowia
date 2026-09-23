@@ -40,6 +40,9 @@ export default function ProgressPage(){
  const skillEvolution=useMemo(()=>{const now=Date.now();const recentCutoff=now-7*24*60*60*1000;const previousCutoff=now-14*24*60*60*1000;const normalize=(value:string|null)=>{const raw=value?.trim().toLowerCase()||"";if(!raw)return "Outros";if(raw.includes("pronun")||raw.includes("pronunciation"))return "Pronúncia";if(raw.includes("gram")||raw.includes("grammar")||raw.includes("past_tense")||raw.includes("past tense")||raw.includes("present_tense")||raw.includes("present tense")||raw.includes("future_tense")||raw.includes("future tense")||raw.includes("verb")||raw.includes("tense"))return "Gramática";if(raw.includes("vocab")||raw.includes("word choice"))return "Vocabulário";if(raw.includes("flu")||raw.includes("fluency"))return "Fluência";if(raw.includes("listen")||raw.includes("compreens"))return "Compreensão";if(raw.includes("speak")||raw.includes("conversation")||raw.includes("conversa"))return "Conversação";return "Outros"};const map=new Map<string,{recent:number;previous:number}>();insights.forEach(x=>{const time=new Date(x.created_at).getTime();const name=normalize(x.skill_category);const entry=map.get(name)??{recent:0,previous:0};if(time>=recentCutoff)entry.recent+=1;else if(time>=previousCutoff)entry.previous+=1;map.set(name,entry)});return map},[insights]);
  const activity=useMemo(()=>{const days=Array.from({length:7},(_,n)=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-(6-n));return{key:d.toISOString().split("T")[0],label:new Intl.DateTimeFormat("pt-BR",{weekday:"short"}).format(d).replace(".",""),minutes:0}});sessions.forEach(x=>{const k=new Date(x.created_at).toISOString().split("T")[0];const d=days.find(y=>y.key===k);if(d)d.minutes+=(x.duration_seconds??0)/60});days.forEach(d=>{d.minutes=Math.round(d.minutes)});return days},[sessions]);
  const maxActivity=Math.max(1,...activity.map(x=>x.minutes));
+ const sessionTotalSeconds=sessions.reduce((sum,x)=>sum+Math.max(0,x.duration_seconds??0),0);
+ const sessionTotalMinutes=Math.round(sessionTotalSeconds/60);
+ const sessionCount=sessions.length;
  const avg=sessions.length?Math.max(1,Math.round(sessions.reduce((a,x)=>a+(x.duration_seconds??0),0)/sessions.length/60)):0;
 
  return <main className="progress-shell">
@@ -55,8 +58,8 @@ export default function ProgressPage(){
     {loading?<section className="progress-state">Carregando sua jornada...</section>:<>
      {errorMessage&&<div className="progress-alert">{errorMessage}</div>}
      <section className="progress-metrics">
-      <article><span>SESSÕES</span><strong>{progress.conversations_count}</strong><small>conversas concluídas</small></article>
-      <article><span>TEMPO TOTAL</span><strong>{progress.total_minutes}<b> min</b></strong><small>de prática acumulada</small></article>
+      <article><span>SESSÕES</span><strong>{sessionCount}</strong><small>conversas concluídas</small></article>
+      <article><span>TEMPO TOTAL</span><strong>{sessionTotalMinutes}<b> min</b></strong><small>de prática acumulada</small></article>
       <article><span>SEQUÊNCIA</span><strong>{progress.streak_days}<b> dias</b></strong><small>de constância</small></article>
       <article><span>ÚLTIMA PRÁTICA</span><strong className="metric-date">{formatDate(progress.last_practice_date)}</strong><small>registro mais recente</small></article>
      </section>
