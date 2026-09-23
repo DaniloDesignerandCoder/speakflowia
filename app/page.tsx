@@ -259,11 +259,6 @@ export default function Home() {
 
           <div className="dashboard-topbar-spacer" />
 
-          <div className="dashboard-online">
-            <i />
-            App ativo
-          </div>
-
           <button
             className="dashboard-profile"
             onClick={() => router.push("/profile")}
