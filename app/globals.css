@@ -3713,3 +3713,13 @@ img {
 .dashboard-avatar img{width:100%;height:100%;object-fit:cover;object-position:center}
 .student-avatar img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
 .coach-avatar img{width:72%;height:72%;object-fit:contain;object-position:center}
+
+.profile-card-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.profile-edit{border:1px solid rgba(129,156,255,.16);border-radius:9px;background:rgba(129,156,255,.07);color:#aebcff;padding:7px 10px;font-size:8px;font-weight:800;cursor:pointer}
+.profile-edit-form{display:grid;gap:12px;margin-top:15px}
+.profile-edit-form label{display:grid;gap:6px}
+.profile-edit-form label>span{color:rgba(255,255,255,.4);font-size:8px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.profile-edit-form input,.profile-edit-form select{width:100%;min-height:42px;padding:0 12px;border:1px solid rgba(129,156,255,.14);border-radius:11px;outline:none;background:#0a0f1c;color:#f5f7ff;font-size:11px}
+.profile-edit-form input:focus,.profile-edit-form select:focus{border-color:rgba(129,156,255,.5)}
+.profile-save{min-height:42px;border:0;border-radius:11px;background:#637cff;color:#fff;font-size:9px;font-weight:800;cursor:pointer}
+.profile-save:disabled{opacity:.5;cursor:default}
