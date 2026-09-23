@@ -12,3 +12,22 @@
 .mode-summary-grid article>strong{display:block;margin-top:17px;font-size:29px;letter-spacing:-1px}
 .mode-summary-grid article>p{margin:5px 0 0;color:#ffffff4d;font-size:9px}
 @media(max-width:560px){.mode-summary-grid{grid-template-columns:1fr}}
+
+/* PROGRESS — INTELLIGENT SESSION HISTORY */
+.session-history{display:grid;gap:12px}
+.session-history-card{padding:18px;border:1px solid #ffffff0d;border-radius:17px;background:#0000001f}
+.session-history-card.has-summary{padding:21px;border-color:#819cff1c;background:linear-gradient(145deg,#7188ff0a,#00000024)}
+.session-history-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.session-history-top>div{display:flex;align-items:center;gap:11px}
+.session-history-top strong{display:block;font-size:11px}
+.session-history-top small{display:block;margin-top:4px;color:#ffffff45;font-size:8px}
+.session-skill{max-width:45%;padding:6px 9px;border:1px solid #819cff1c;border-radius:999px;background:#718aff0d;color:#9eb0ff;font-size:7px;font-weight:800;text-align:right}
+.session-history-summary{margin:17px 0 0;padding-top:16px;border-top:1px solid #ffffff0f;color:#ffffffa1;font-size:11px;line-height:1.65}
+.session-history-details{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px}
+.session-history-details>div{padding:14px;border:1px solid #ffffff0d;border-radius:13px;background:#ffffff05}
+.session-history-details span,.session-history-next span{color:#819cff;font-size:7px;font-weight:800;letter-spacing:1.1px}
+.session-history-details p,.session-history-next p{margin:7px 0 0;color:#ffffff78;font-size:9px;line-height:1.55}
+.session-history-next{margin-top:10px;padding:15px;border:1px solid #819cff17;border-radius:13px;background:#718aff0a}
+.session-history-next p{color:#b9c4ff}
+.session-history-legacy{margin:14px 0 0;color:#ffffff4d;font-size:9px}
+@media(max-width:760px){.session-history-top{gap:10px}.session-skill{max-width:48%;font-size:6px}.session-history-details{grid-template-columns:1fr}.session-history-card,.session-history-card.has-summary{padding:16px}}
