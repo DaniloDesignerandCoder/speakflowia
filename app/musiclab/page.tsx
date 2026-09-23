@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import "./musiclab.css";
@@ -38,12 +38,19 @@ export default function MusicLab() {
   const [step,setStep]=useState(0);
   const [revealed,setRevealed]=useState(false);
   const [playing,setPlaying]=useState(false);
+  const shellRef=useRef<HTMLElement>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
 
   const track=useMemo(()=>tracks.find(item=>item.id===selectedId)??tracks[0],[selectedId]);
   const phrase=track.phrases[step];
   const progress=((step+1)/track.phrases.length)*100;
+
+  function moveLight(e: React.PointerEvent<HTMLElement>){
+    const rect=e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--mx",`${e.clientX-rect.left}px`);
+    e.currentTarget.style.setProperty("--my",`${e.clientY-rect.top}px`);
+  }
 
   function chooseTrack(id:string){setSelectedId(id);setStep(0);setRevealed(false);setPlaying(false);}
   function movePhrase(direction:number){setStep(current=>(current+direction+track.phrases.length)%track.phrases.length);setRevealed(false);setPlaying(false);}
@@ -65,7 +72,11 @@ export default function MusicLab() {
     }
   }
 
-  return <main className={playing?"musiclab-shell is-playing":"musiclab-shell"}>
+  return <main ref={shellRef} onPointerMove={moveLight} className={playing?"musiclab-shell is-playing":"musiclab-shell"}>
+    <div className="ml-cursor-light"/>
+    <div className="ml-grid"/>
+    <div className="ml-scanline"/>
+    <div className="ml-floatwords" aria-hidden="true"><span>LISTEN</span><span>FLOW</span><span>ENGLISH</span><span>RHYTHM</span><span>SPEAK</span></div>
     <div className="ml-aurora ml-a"/><div className="ml-aurora ml-b"/>
     <header className="musiclab-topbar">
       <button className="musiclab-back" onClick={()=>router.push("/")} aria-label="Voltar">←</button>
@@ -81,7 +92,7 @@ export default function MusicLab() {
         <div className="ml-journey"><b>LISTEN</b><i/><span>DISCOVER</span><i/><span>SHADOW</span></div>
       </div>
 
-      <div className="ml-player">
+      <div className="ml-player-wrap"><div className="ml-ring r1"/><div className="ml-ring r2"/><div className="ml-ring r3"/><div className="ml-player">
         <div className="ml-orbit"><div className="ml-disc"><img src="/speakflow-logo.png" alt=""/></div></div>
         <div className="ml-player-copy"><span>{track.mood}</span><h2>{track.title}</h2><p>{track.artist}</p></div>
         <div className="ml-spectrum" aria-hidden="true">{Array.from({length:34}).map((_,i)=><i key={i}/>)}</div>
@@ -92,7 +103,7 @@ export default function MusicLab() {
           <button onClick={()=>movePhrase(1)} aria-label="Próxima">›</button>
         </div>
         <div className="ml-player-meta"><span>{step+1}/{track.phrases.length}</span><span>{track.level}</span><span>{track.duration}</span></div>
-      </div>
+      </div></div>
     </section>
 
     <section className="ml-workspace">
@@ -103,7 +114,7 @@ export default function MusicLab() {
         </button>)}
       </aside>
 
-      <div className="ml-focus">
+      <div className="ml-focus"><div className="ml-hud-corner c1"/><div className="ml-hud-corner c2"/><div className="ml-hud-corner c3"/><div className="ml-hud-corner c4"/>
         <div className="ml-focus-head"><div><span>NOW LISTENING</span><small>{track.focus}</small></div><b>{String(step+1).padStart(2,"0")}</b></div>
         <div className="ml-phrase">
           <div className={playing?"ml-pulse active":"ml-pulse"}><i/><i/><i/><i/><i/></div>
