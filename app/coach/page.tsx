@@ -538,12 +538,16 @@ export default function CoachPage() {
                   >
                     {message.role === "coach" && (
                       <div className="message-avatar coach-avatar">
-                        <img src={avatarUrl || "/speakflow-logo.png"} alt={avatarUrl ? "Foto do perfil" : ""} />
+                        <img src="/speakflow-logo.png" alt="SpeakFlow Coach" />
                       </div>
                     )}
                     {message.role === "student" && (
                       <div className="message-avatar student-avatar">
-                        <span>{userName ? userName.charAt(0).toUpperCase() : "U"}</span>
+                        {avatarUrl ? (
+                          <img src={avatarUrl} alt="Foto do perfil" />
+                        ) : (
+                          <span>{userName ? userName.charAt(0).toUpperCase() : "U"}</span>
+                        )}
                       </div>
                     )}
                     <span className="message-label">{message.role === "coach" ? "SPEAKFLOW COACH" : "YOU"}</span>
