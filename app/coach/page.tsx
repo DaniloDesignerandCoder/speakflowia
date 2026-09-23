@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 type Feedback = {
@@ -47,9 +47,7 @@ const levels = [
 
 export default function CoachPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const requestedMode = searchParams.get("mode");
-  const trainingMode = requestedMode === "vocabulary" ? "vocabulary" : "conversation";
+  const [trainingMode, setTrainingMode] = useState<"conversation" | "vocabulary">("conversation");
   const isVocabulary = trainingMode === "vocabulary";
 
   const [level, setLevel] = useState("intermediate");
@@ -64,6 +62,11 @@ export default function CoachPage() {
   const [authChecking, setAuthChecking] = useState(true);
   const [userName, setUserName] = useState("");
   
+
+useEffect(() => {
+  const requestedMode = new URLSearchParams(window.location.search).get("mode");
+  setTrainingMode(requestedMode === "vocabulary" ? "vocabulary" : "conversation");
+}, []);
 
 useEffect(() => {
   async function checkAuth() {
