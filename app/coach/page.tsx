@@ -387,8 +387,7 @@ export default function CoachPage() {
             </div>
           </div>
           <div className="coach-status">
-            <i />
-            <span>{userName ? userName.split(" ")[0] : "Conta conectada"}</span>
+            <span>{userName ? userName.split(" ")[0] : "Minha conta"}</span>
             <button type="button" onClick={handleLogout} className="coach-logout">Sair</button>
           </div>
         </header>
