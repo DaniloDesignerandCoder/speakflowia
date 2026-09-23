@@ -28,6 +28,7 @@ export default function ProfilePage() {
   const [correctionStyle, setCorrectionStyle] = useState("balanced");
   const [conversationPace, setConversationPace] = useState("natural");
   const [savingPreferences, setSavingPreferences] = useState(false);
+  const [preferencesMessage, setPreferencesMessage] = useState("");
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -122,10 +123,11 @@ export default function ProfilePage() {
   async function savePreferences() {
     if (!userId) return;
     setSavingPreferences(true);
-    setMessage("");
+    setPreferencesMessage("");
     const { error } = await supabase.from("profiles").update({ learning_goal: learningGoal, correction_style: correctionStyle, conversation_pace: conversationPace }).eq("id", userId);
-    setMessage(error ? "Não foi possível salvar suas preferências." : "Preferências de aprendizado atualizadas.");
+    setPreferencesMessage(error ? "Não foi possível salvar. Tente novamente." : "✓ Preferências atualizadas");
     setSavingPreferences(false);
+    window.setTimeout(() => setPreferencesMessage(""), 3000);
   }
 
   async function signOut() {
@@ -169,7 +171,7 @@ export default function ProfilePage() {
       </div>
       <div className="profile-grid">
         <article className="profile-settings-card"><div className="profile-card-heading"><span>PERFIL DE APRENDIZADO</span><button type="button" className="profile-edit" onClick={() => setEditing((value) => !value)}>{editing ? "Cancelar" : "Editar"}</button></div>{editing ? <div className="profile-edit-form"><label><span>Nome</span><input value={name} maxLength={60} onChange={(e) => setName(e.target.value)} /></label><label><span>Nível</span><select value={level} onChange={(e) => setLevel(e.target.value)}><option value="beginner">Beginner · Iniciante</option><option value="elementary">Elementary · Básico</option><option value="intermediate">Intermediate · Intermediário</option><option value="upper_intermediate">Upper Intermediate · Intermediário avançado</option><option value="advanced">Advanced · Avançado</option></select></label><button type="button" className="profile-save" disabled={saving || !name.trim()} onClick={saveProfile}>{saving ? "Salvando..." : "Salvar alterações"}</button></div> : <><strong>{levelLabels[level] || levelLabels.intermediate}</strong><p>O Coach adapta vocabulário, perguntas e feedback ao seu nível.</p></>}</article>
-        <article><span>CONTA</span><strong>Conta ativa</strong><p>Seu progresso fica vinculado a este perfil.</p></article>
+        <article><span>CONTA</span><strong>{email}</strong><p>Seu histórico de aprendizado e progresso ficam vinculados a este perfil.</p></article>
       </div>
       <section className="profile-journey">
         <div className="profile-journey-heading"><div><span>SUA JORNADA</span><h2>Evolução no SpeakFlow</h2></div><strong>{levelLabels[level] || levelLabels.intermediate}</strong></div>
@@ -200,7 +202,7 @@ export default function ProfilePage() {
           <label><span>ESTILO DE CORREÇÃO</span><select value={correctionStyle} onChange={(e) => setCorrectionStyle(e.target.value)}><option value="essential">Essencial</option><option value="balanced">Equilibrado</option><option value="detailed">Detalhado</option></select></label>
           <label><span>RITMO DA CONVERSA</span><select value={conversationPace} onChange={(e) => setConversationPace(e.target.value)}><option value="relaxed">Tranquilo</option><option value="natural">Natural</option><option value="challenging">Desafiador</option></select></label>
         </div>
-        <button type="button" className="profile-preferences-save" disabled={savingPreferences} onClick={savePreferences}>{savingPreferences ? "Salvando..." : "Salvar preferências"}</button>
+        <div className="profile-preferences-actions"><button type="button" className="profile-preferences-save" disabled={savingPreferences} onClick={savePreferences}>{savingPreferences ? "Salvando..." : "Salvar preferências"}</button>{preferencesMessage && <span className={preferencesMessage.startsWith("✓") ? "profile-preferences-feedback success" : "profile-preferences-feedback error"}>{preferencesMessage}</span>}</div>
       </section>
       <div className="profile-actions">
         <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach →</button>
