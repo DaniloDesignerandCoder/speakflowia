@@ -268,12 +268,6 @@ export default function Home() {
                 cada prática em evolução.
               </p>
 
-              <div className="dashboard-hero-proof">
-                <span><i /> Coach com IA</span>
-                <span><i /> Feedback em tempo real</span>
-                <span><i /> Progresso inteligente</span>
-              </div>
-
               <button
                 className="dashboard-primary"
                 onClick={() => router.push("/coach")}
@@ -285,34 +279,36 @@ export default function Home() {
             </div>
 
 
-            <div
-              className="dashboard-ai-visual"
-              aria-hidden="true"
-            >
-              <div className="ai-ring ai-ring-one" />
-              <div className="ai-ring ai-ring-two" />
-
-              <div className="ai-face">
-  <img
-    src="/speakflow-logo.png"
-    alt=""
-    aria-hidden="true"
-  />
-</div>
-              <div className="ai-status">
-                <i />
-                SPEAKFLOW AI
-                <span>ONLINE</span>
+            <div className="dashboard-live-demo" aria-label="Demonstração do SpeakFlow Coach">
+              <div className="live-demo-brand">
+                <img src="/speakflow-logo.png" alt="" aria-hidden="true" />
+                <div>
+                  <strong>SpeakFlow Coach</strong>
+                  <span>CONVERSAÇÃO</span>
+                </div>
               </div>
 
-              <div className="ai-wave">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
+              <div className="live-demo-conversation">
+                <div className="live-demo-message student">
+                  <span>YOU</span>
+                  <p>Yesterday I go to school.</p>
+                </div>
+
+                <div className="live-demo-message coach">
+                  <span>SPEAKFLOW</span>
+                  <p>Almost! Try: “Yesterday I went to school.”</p>
+                </div>
+
+                <div className="live-demo-insight">
+                  <span>✦ SMART FEEDBACK</span>
+                  <strong>went</strong>
+                  <small>past tense of “go”</small>
+                </div>
+              </div>
+
+              <div className="live-demo-caption">
+                <span>Speak naturally.</span>
+                <span>Learn while you talk.</span>
               </div>
             </div>
 
