@@ -3963,3 +3963,7 @@ button:focus-visible{outline:none;box-shadow:inset 0 0 0 1px rgba(145,168,255,.3
 
 /* Keep touch/focus feedback inside interactive controls */
 button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
+
+.coach-icon-spin{animation:coach-icon-spin .85s linear infinite}
+@keyframes coach-icon-spin{to{transform:rotate(360deg)}}
+.conversation-status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#70dca7;box-shadow:0 0 8px rgba(112,220,167,.35)}
