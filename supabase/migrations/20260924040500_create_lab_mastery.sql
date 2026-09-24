@@ -5,11 +5,11 @@ create table if not exists public.lab_mastery (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   lab text not null check (lab in ('vocabulary', 'pronunciation')),
-  item_key text not null,
-  item_text text not null,
-  source_insight_id uuid null,
-  attempts integer not null default 0 check (attempts >= 0),
-  successes integer not null default 0 check (successes >= 0),
+  item_key text not null check (char_length(item_key) between 1 and 160),
+  item_text text not null check (char_length(item_text) between 1 and 500),
+  source_insight_id uuid null references public.learning_insights(id) on delete set null,
+  attempts integer not null default 0 check (attempts between 0 and 100000),
+  successes integer not null default 0 check (successes between 0 and attempts),
   last_score integer null check (last_score between 0 and 100),
   best_score integer null check (best_score between 0 and 100),
   status text not null default 'new' check (status in ('new', 'learning', 'review', 'mastered')),
@@ -22,28 +22,39 @@ create table if not exists public.lab_mastery (
 create index if not exists lab_mastery_user_lab_idx
   on public.lab_mastery (user_id, lab, status);
 
+create index if not exists lab_mastery_source_insight_idx
+  on public.lab_mastery (source_insight_id)
+  where source_insight_id is not null;
+
 alter table public.lab_mastery enable row level security;
+
+revoke all on table public.lab_mastery from anon;
+grant select, insert, update, delete on table public.lab_mastery to authenticated;
 
 drop policy if exists "Users can view own lab mastery" on public.lab_mastery;
 create policy "Users can view own lab mastery"
   on public.lab_mastery for select
-  using (auth.uid() = user_id);
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can insert own lab mastery" on public.lab_mastery;
 create policy "Users can insert own lab mastery"
   on public.lab_mastery for insert
-  with check (auth.uid() = user_id);
+  to authenticated
+  with check ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can update own lab mastery" on public.lab_mastery;
 create policy "Users can update own lab mastery"
   on public.lab_mastery for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+  to authenticated
+  using ((select auth.uid()) = user_id)
+  with check ((select auth.uid()) = user_id);
 
 drop policy if exists "Users can delete own lab mastery" on public.lab_mastery;
 create policy "Users can delete own lab mastery"
   on public.lab_mastery for delete
-  using (auth.uid() = user_id);
+  to authenticated
+  using ((select auth.uid()) = user_id);
 
 create or replace function public.set_lab_mastery_updated_at()
 returns trigger
