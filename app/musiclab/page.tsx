@@ -85,6 +85,7 @@ export default function MusicLab() {
   const audioAnalyserRef=useRef<AnalyserNode|null>(null);
   const audioRafRef=useRef<number|null>(null);
   const audioTrackIdRef=useRef<string|null>(null);
+  const spectrumRef=useRef<HTMLDivElement|null>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");void loadAdaptiveCue();});},[router]);
 
@@ -177,6 +178,25 @@ export default function MusicLab() {
     let sum=0;
     for(let i=0;i<data.length;i++)sum+=data[i];
     audioEnergyRef.current=sum/(data.length*255);
+    const bars=spectrumRef.current?.children;
+    if(bars?.length){
+      const nyquist=(audioContextRef.current?.sampleRate??44100)/2;
+      for(let i=0;i<bars.length;i++){
+        const curve=i/(bars.length-1);
+        const hz=45+Math.pow(curve,1.75)*11000;
+        const bin=Math.min(data.length-1,Math.max(0,Math.round(hz/nyquist*data.length)));
+        const start=Math.max(0,bin-1),end=Math.min(data.length-1,bin+2);
+        let peak=0;
+        for(let j=start;j<=end;j++)peak=Math.max(peak,data[j]);
+        const bassWeight=hz<220?1.3:hz<900?1.08:.9;
+        const level=Math.min(1,(peak/255)*bassWeight);
+        const height=3+level*31;
+        const bar=bars[i] as HTMLElement;
+        bar.style.height=`${height}px`;
+        bar.style.opacity=String(.25+level*.75);
+        bar.style.transform=`scaleY(${.88+level*.18})`;
+      }
+    }
     if(audio.duration&&Number.isFinite(audio.duration)){
       audioProgressRef.current=audio.currentTime/audio.duration;
       setAudioCurrentTime(audio.currentTime);
@@ -497,7 +517,7 @@ export default function MusicLab() {
       <div className="ml-player-wrap"><div className="ml-spatial-title">SOUND<br/>CORE</div><div className="ml-ring r1"/><div className="ml-ring r2"/><div className="ml-ring r3"/><div className="ml-player">
         <div className="ml-orbit"><div className="ml-disc"><img src="/speakflow-logo.png" alt=""/></div></div>
         <div className="ml-player-copy"><span>{track.mood}</span><h2>{track.title}</h2><p>{track.artist}</p></div>
-        <div className="ml-spectrum" aria-hidden="true">{Array.from({length:34}).map((_,i)=><i key={i}/>)}</div>
+        <div ref={spectrumRef} className="ml-spectrum" aria-hidden="true">{Array.from({length:24}).map((_,i)=><i key={i}/>)}</div>
         <div className="ml-timeline"><span style={{width:`${progress}%`}}/></div>
         <div className="ml-controls">
           <button onClick={()=>movePhrase(-1)} aria-label="Anterior">Anterior</button>
