@@ -49,6 +49,8 @@ export default function MusicLab() {
   const [sessionComplete,setSessionComplete]=useState(false);
   const [sessionSaving,setSessionSaving]=useState(false);
   const [adaptiveCue,setAdaptiveCue]=useState<{title:string;detail:string}|null>(null);
+  const [adaptiveMode,setAdaptiveMode]=useState<"guided"|"free">("guided");
+  const [recommendedPhrase,setRecommendedPhrase]=useState(0);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -317,6 +319,9 @@ export default function MusicLab() {
       const detail=musicInsight?.tip||plan?.current_focus||plan?.next_milestone||"Ouça a frase uma vez, depois repita tentando preservar o ritmo natural.";
       const title=musicInsight?"Seu último insight MusicLab":plan?.current_focus?"Seu foco adaptativo":"Foco desta sessão";
       setAdaptiveCue({title,detail});
+      const text=`${musicInsight?.tip??""} ${plan?.current_focus??""} ${plan?.priority_skills??""}`.toLowerCase();
+      const phraseIndex=text.includes("ritmo")||text.includes("flu")?Math.min(2,track.phrases.length-1):text.includes("vocab")||text.includes("word")?Math.min(1,track.phrases.length-1):0;
+      setRecommendedPhrase(phraseIndex);
     }catch(error){console.error("Não foi possível carregar o foco adaptativo do MusicLab:",error);}
   }
 
@@ -385,6 +390,12 @@ export default function MusicLab() {
           <a href={track.rights.sourceUrl} target="_blank" rel="noreferrer">{track.rights.sourceName}</a>
         </div>}
       </div></div>
+    </section>
+
+    <section className="ml-adaptive-route" aria-label="Rota de prática MusicLab">
+      <div className="ml-route-head"><div><span>PERSONAL SESSION</span><strong>{adaptiveMode==="guided"?"Rota guiada pelo seu aprendizado":"Exploração livre"}</strong></div><div className="ml-route-toggle"><button className={adaptiveMode==="guided"?"active":""} onClick={()=>setAdaptiveMode("guided")}>Guiada</button><button className={adaptiveMode==="free"?"active":""} onClick={()=>setAdaptiveMode("free")}>Livre</button></div></div>
+      {adaptiveMode==="guided"&&<div className="ml-route-body"><div><span>RECOMENDAÇÃO</span><p>Comece pela frase {recommendedPhrase+1} desta experiência. O SpeakFlow selecionou este ponto a partir do seu foco recente.</p></div><button onClick={()=>{setStep(recommendedPhrase);setRevealed(false);resetShadow();document.querySelector(".ml-focus")?.scrollIntoView({behavior:"smooth",block:"center"});}}>Ir para prática recomendada <b>↓</b></button></div>}
+      {adaptiveMode==="free"&&<p className="ml-route-free">Explore a faixa no seu ritmo. Seus resultados continuam alimentando o aprendizado adaptativo.</p>}
     </section>
 
     <section className="ml-adaptive-cue" aria-label="Foco adaptativo do MusicLab">
