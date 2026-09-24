@@ -1,4 +1,5 @@
 export type SpeakFlowPlan = "free" | "pro";
+export type SubscriptionStatus = "none" | "pending" | "active" | "past_due" | "canceled" | "expired";
 
 export type SpeakFlowEntitlements = {
   plan: SpeakFlowPlan;
@@ -19,6 +20,12 @@ export type SpeakFlowAccessState = {
   usage: SpeakFlowMonthlyUsage;
 };
 
+export type BillingState = {
+  plan: SpeakFlowPlan;
+  subscriptionStatus: SubscriptionStatus;
+  currentPeriodEnd: string | null;
+};
+
 export type UsageLevel = "available" | "near_limit" | "limit_reached";
 export type UsageResource = "coach" | "voice";
 export type UsageAction = "allow" | "warn" | "block";
@@ -37,6 +44,17 @@ export type UsageStatus = {
   percentUsed: number;
   level: UsageLevel;
 };
+
+export const DEFAULT_BILLING_STATE: BillingState = {
+  plan: "free",
+  subscriptionStatus: "none",
+  currentPeriodEnd: null,
+};
+
+export function resolveEffectivePlan(billing: BillingState): SpeakFlowPlan {
+  if (billing.plan === "pro" && billing.subscriptionStatus === "active") return "pro";
+  return "free";
+}
 
 export const SPEAKFLOW_PLAN_LIMITS: Record<SpeakFlowPlan, SpeakFlowEntitlements> = {
   free: {
