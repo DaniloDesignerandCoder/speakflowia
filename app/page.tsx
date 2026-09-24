@@ -233,7 +233,7 @@ export default function Home() {
             MusicLab™
           </button>
 
-          <button className="dashboard-menu-item">
+          <button className="dashboard-menu-item" onClick={() => router.push("/settings")}>
             <span>⚙</span>
             Configurações
           </button>
