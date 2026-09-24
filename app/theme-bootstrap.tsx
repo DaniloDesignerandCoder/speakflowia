@@ -9,6 +9,8 @@ export default function ThemeBootstrap(){
       const theme=saved==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):saved;
       document.documentElement.dataset.theme=theme;
       document.documentElement.style.colorScheme=theme;
+      document.documentElement.dataset.textSize=localStorage.getItem("speakflow-text-size")||"normal";
+      document.documentElement.dataset.reduceMotion=localStorage.getItem("speakflow-reduce-motion")||"system";
     };
     apply();
     const media=window.matchMedia("(prefers-color-scheme: light)");
