@@ -74,7 +74,7 @@ export default function OnboardingPage() {
         <span>SEU PONTO DE PARTIDA</span><div className="onboarding-orb">✦</div><h1>{result[1]}</h1><strong>{result[2]}</strong>
         <p>O SpeakFlow usará este nível para ajustar vocabulário, complexidade, perguntas e feedback. Você poderá alterá-lo depois.</p>
         {saveError && <p role="alert">{saveError}</p>}
-        <button className="onboarding-primary" disabled={saving} onClick={finish}>{saving ? "Personalizando..." : "Começar minha jornada →"}</button>
+        <button className="onboarding-primary" disabled={saving} onClick={finish}>{saving ? "Personalizando..." : "Começar minha jornada"}</button>
       </div>}
     </section>
   </main>;
