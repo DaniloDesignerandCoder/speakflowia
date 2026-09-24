@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, LogOut, Sparkles } from "lucide-react";
+import { ArrowLeft, Gauge, LogOut, Sparkles } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -468,7 +468,7 @@ export default function CoachPage() {
             </button>
 
             <div className="coach-tip">
-              <span><Sparkles /></span>
+              <span><Gauge /></span>
               Escolha seu nível e converse no seu ritmo. Seus insights podem alimentar os Labs especializados.
             </div>
           </section>
