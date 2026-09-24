@@ -542,7 +542,7 @@ export default function MusicLab() {
         {track.rights?.attributionRequired&&<div className="ml-attribution" aria-label="Atribuição da música licenciada">
           <span>{track.title} · {track.artist}</span>
           <a href={track.rights.licenseUrl} target="_blank" rel="noreferrer">CC BY 4.0</a>
-          <a href={track.rights.sourceUrl} target="_blank" rel="noreferrer">{track.rights.sourceName}</a>
+          <a href={track.rights.sourceUrl} target="_blank" rel="noreferrer">Fonte original</a>
         </div>}
       </div></div>
     </section>
