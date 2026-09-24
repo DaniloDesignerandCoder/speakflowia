@@ -584,11 +584,11 @@ export default function Home() {
         <footer className="dashboard-footer">
 
           <span>
-            SpeakFlow IA
+            © 2026 SpeakFlow IA. Todos os direitos reservados.
           </span>
 
           <span>
-            O poder da IA guiando sua fluência em inglês.
+            Conteúdo, identidade visual e materiais educacionais protegidos.
           </span>
 
         </footer>
