@@ -15,8 +15,9 @@ export default function SettingsPage(){
   const [saving,setSaving]=useState(false);
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(true);
+  const [theme,setTheme]=useState<"dark"|"light"|"system">("dark");
 
-  useEffect(()=>{(async()=>{
+  useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){router.replace("/login");return;}
     setUserId(session.user.id);setEmail(session.user.email??"");
@@ -32,6 +33,12 @@ export default function SettingsPage(){
     setSaving(false);window.setTimeout(()=>setMessage(""),3500);
   }
 
+  function applyTheme(value:"dark"|"light"|"system"){
+    setTheme(value);localStorage.setItem("speakflow-theme",value);
+    const resolved=value==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):value;
+    document.documentElement.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;
+  }
+
   async function signOut(){await supabase.auth.signOut();router.replace("/login");router.refresh();}
 
   if(loading)return <main className="settings-shell"><p className="settings-loading">Carregando configurações…</p></main>;
@@ -40,15 +47,24 @@ export default function SettingsPage(){
     <aside className="settings-nav">
       <button className="settings-back" onClick={()=>router.push("/")}>← Início</button>
       <div className="settings-brand"><img src="/speakflow-logo.png" alt="SpeakFlow"/><div><strong>Speak<span>Flow</span></strong><small>SETTINGS</small></div></div>
-      <nav><a href="#learning" className="active"><i>✦</i><span>Aprendizado</span></a><a href="#account"><i>◎</i><span>Conta</span></a><a href="#privacy"><i>◇</i><span>Privacidade</span></a></nav>
+      <nav><a href="#appearance" className="active"><i>◐</i><span>Aparência</span></a><a href="#learning"><i>✦</i><span>Aprendizado</span></a><a href="#account"><i>◎</i><span>Conta</span></a><a href="#privacy"><i>◇</i><span>Privacidade</span></a></nav>
       <div className="settings-nav-foot"><span>PERSONALIZAÇÃO</span><p>Suas escolhas moldam a experiência do Coach.</p></div>
     </aside>
 
     <section className="settings-main">
       <header><div><span>CONFIGURAÇÕES</span><h1>Seu SpeakFlow.<br/><em>Do seu jeito.</em></h1><p>Ajuste como a inteligência conversa, corrige e evolui com você.</p></div><button onClick={()=>router.push("/profile")}>Ver perfil →</button></header>
 
+      <section id="appearance" className="settings-section">
+        <div className="settings-section-title"><span>01</span><div><small>ACCESSIBILITY & APPEARANCE</small><h2>Aparência</h2><p>Escolha o contraste visual mais confortável para usar a SpeakFlow.</p></div></div>
+        <div className="settings-theme-picker" role="group" aria-label="Tema da aplicação">
+          <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"/><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?"✓":""}</b></button>
+          <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"/><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?"✓":""}</b></button>
+          <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?"✓":""}</b></button>
+        </div>
+      </section>
+
       <section id="learning" className="settings-section">
-        <div className="settings-section-title"><span>01</span><div><small>LEARNING ENGINE</small><h2>Experiência de aprendizado</h2><p>Essas preferências são usadas pelo Coach para adaptar suas sessões.</p></div></div>
+        <div className="settings-section-title"><span>02</span><div><small>LEARNING ENGINE</small><h2>Experiência de aprendizado</h2><p>Essas preferências são usadas pelo Coach para adaptar suas sessões.</p></div></div>
         <div className="settings-grid">
           <label><span>OBJETIVO PRINCIPAL</span><strong>O que você quer desenvolver?</strong><select value={learningGoal} onChange={e=>setLearningGoal(e.target.value)}><option value="conversation">Conversação</option><option value="pronunciation">Pronúncia</option><option value="vocabulary">Vocabulário</option><option value="professional">Inglês profissional</option></select></label>
           <label><span>ESTILO DE CORREÇÃO</span><strong>Como o Coach deve intervir?</strong><select value={correctionStyle} onChange={e=>setCorrectionStyle(e.target.value)}><option value="gentle">Suave · menos interrupções</option><option value="balanced">Equilibrado</option><option value="direct">Direto · corrija com frequência</option></select></label>
@@ -59,12 +75,12 @@ export default function SettingsPage(){
       </section>
 
       <section id="account" className="settings-section">
-        <div className="settings-section-title"><span>02</span><div><small>ACCOUNT</small><h2>Conta</h2><p>Identidade usada para manter seu histórico e aprendizado sincronizados.</p></div></div>
+        <div className="settings-section-title"><span>03</span><div><small>ACCOUNT</small><h2>Conta</h2><p>Identidade usada para manter seu histórico e aprendizado sincronizados.</p></div></div>
         <div className="settings-account"><div><span>E-MAIL</span><strong>{email}</strong><small>Conta autenticada no SpeakFlow</small></div><button onClick={()=>router.push("/profile")}>Gerenciar perfil</button></div>
       </section>
 
       <section id="privacy" className="settings-section">
-        <div className="settings-section-title"><span>03</span><div><small>PRIVACY & SESSION</small><h2>Privacidade e sessão</h2><p>Controle básico da sua sessão neste dispositivo.</p></div></div>
+        <div className="settings-section-title"><span>04</span><div><small>PRIVACY & SESSION</small><h2>Privacidade e sessão</h2><p>Controle básico da sua sessão neste dispositivo.</p></div></div>
         <div className="settings-privacy"><div><strong>Sair deste dispositivo</strong><p>Encerra sua sessão atual. Seu progresso permanece associado à sua conta.</p></div><button onClick={signOut}>Sair da conta</button></div>
       </section>
     </section>
