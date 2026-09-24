@@ -434,6 +434,16 @@ export default function MusicLab() {
           <button onClick={()=>setRevealed(v=>!v)}><span>{revealed?"FECHAR CAMADA":"DESCOBRIR A FRASE"}</span><b>{revealed?"−":"+"}</b></button>
           {revealed&&<div className="ml-discovery-content"><div><span>SENTIDO</span><strong>{phrase.meaning}</strong></div><div><span>POR DENTRO DO INGLÊS</span><p>{phrase.note}</p></div></div>}
         </div>
+        {track.lesson&&<section className="ml-song-study">
+          <div className="ml-study-head"><span>SONG INTELLIGENCE</span><strong>Entenda o inglês por dentro da música</strong><small>Vocabulário · mensagem · padrões · listening</small></div>
+          <div className="ml-study-grid">
+            <article className="ml-study-message"><span>MENSAGEM CENTRAL</span><p>{track.lesson.centralMessage}</p></article>
+            <article><span>VOCABULÁRIO-CHAVE</span><div className="ml-vocab-list">{track.lesson.vocabulary.map(item=><div key={item.term}><strong>{item.term}</strong><p>{item.meaning}</p><small>{item.usage}</small></div>)}</div></article>
+            <article><span>INGLÊS EM USO</span>{track.lesson.languagePatterns.map(item=><div className="ml-pattern" key={item.pattern}><strong>{item.pattern}</strong><p>{item.explanation}</p><small>{item.example}</small></div>)}</article>
+            <article><span>MISSÃO DE LISTENING</span>{track.lesson.listeningGoals.map((goal,index)=><p className="ml-study-task" key={goal}><b>0{index+1}</b>{goal}</p>)}</article>
+          </div>
+          <div className="ml-reflection"><span>THINK IN ENGLISH</span>{track.lesson.reflectionPrompts.map(prompt=><p key={prompt}>{prompt}</p>)}</div>
+        </section>}
         <div className={"ml-shadow " + (shadowPhase!=="idle"?"active":"")}>
           <div className="ml-shadow-head"><span>SHADOW MODE</span><small>OUÇA · REPITA · VOLTE À MÚSICA</small></div>
           {shadowPhase==="idle"&&<button className="ml-shadow-start" onClick={startShadow}><span>Treinar esta frase com o Coach</span><b>🎙</b></button>}
