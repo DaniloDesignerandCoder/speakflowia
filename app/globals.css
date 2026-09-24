@@ -2382,9 +2382,16 @@ img {
 }
 
 .coach-tip span {
+  display: inline-flex;
   margin-right: 7px;
-
   color: #8da2ff;
+  vertical-align: middle;
+}
+
+.coach-tip span svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 1.8;
 }
 
 
@@ -2819,21 +2826,33 @@ img {
 }
 .coach-logout {
   margin-left: 8px;
-  padding: 5px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.72);
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  border: 1px solid rgba(126, 148, 255, 0.14);
+  border-radius: 9px;
+  background: rgba(110, 128, 255, 0.035);
+  color: rgba(255, 255, 255, 0.62);
   font: inherit;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease, color .18s ease;
+}
+
+.coach-logout svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 1.8;
 }
 
 .coach-logout:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(126, 148, 255, 0.1);
+  border-color: rgba(130, 148, 255, 0.34);
   color: #fff;
+  transform: translateY(-1px);
 }
 .voice-toggle {
   width: 42px;
