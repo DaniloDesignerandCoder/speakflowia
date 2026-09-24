@@ -60,6 +60,10 @@ export default function MusicLab() {
   const [studyXp,setStudyXp]=useState(0);
   const [completedStudyTabs,setCompletedStudyTabs]=useState<string[]>([]);
   const [studySaved,setStudySaved]=useState(false);
+  const [recallIndex,setRecallIndex]=useState(0);
+  const [recallAnswer,setRecallAnswer]=useState<string|null>(null);
+  const [recallScore,setRecallScore]=useState(0);
+  const [recallComplete,setRecallComplete]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -196,6 +200,18 @@ export default function MusicLab() {
     }catch(error){console.error("Erro ao salvar aprendizado Song Intelligence:",error);}
   }
 
+  function answerRecall(answer:string){
+    if(!track.lesson||recallAnswer)return;
+    const item=track.lesson.vocabulary[recallIndex];
+    const correct=answer===item.term; setRecallAnswer(answer); if(correct)setRecallScore(score=>score+1);
+  }
+
+  function nextRecall(){
+    if(!track.lesson)return;
+    if(recallIndex>=track.lesson.vocabulary.length-1){setRecallComplete(true);setStudyXp(xp=>xp+20);return;}
+    setRecallIndex(index=>index+1);setRecallAnswer(null);
+  }
+
   function learnWord(term:string){setLearnedWords(words=>{if(words.includes(term))return words.filter(word=>word!==term);setStudyXp(xp=>xp+5);return [...words,term];});}
 
   function startMission(){setStep(recommendedPhrase);setRevealed(false);resetShadow();setMissionStarted(true);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);document.querySelector(".ml-focus")?.scrollIntoView({behavior:"smooth",block:"center"});}
@@ -209,7 +225,7 @@ export default function MusicLab() {
     setStep(0);
     setRevealed(false);
     setAudioError("");
-    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);setStudyTab("message");setLearnedWords([]);setStudyXp(0);setCompletedStudyTabs([]);setStudySaved(false);
+    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);setStudyTab("message");setLearnedWords([]);setStudyXp(0);setCompletedStudyTabs([]);setStudySaved(false);setRecallIndex(0);setRecallAnswer(null);setRecallScore(0);setRecallComplete(false);
     resetShadow();
   }
 
@@ -467,7 +483,7 @@ export default function MusicLab() {
             {studyTab==="vocabulary"&&<article><span>VOCABULÁRIO-CHAVE</span><div className="ml-vocab-cards">{track.lesson.vocabulary.map(item=><button key={item.term} className={learnedWords.includes(item.term)?"learned":""} onClick={()=>learnWord(item.term)}><strong>{item.term}</strong><p>{item.meaning}</p><small>{item.usage}</small><em>{learnedWords.includes(item.term)?"✓ EXPLORADA":"TOQUE PARA MARCAR"}</em></button>)}</div>{learnedWords.length===track.lesson.vocabulary.length&&<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("vocabulary",20);setStudyTab("patterns")}}>Concluir vocabulário +20 XP <b>→</b></button>}</article>}
             {studyTab==="patterns"&&<article><span>INGLÊS EM USO</span>{track.lesson.languagePatterns.map(item=><div className="ml-pattern" key={item.pattern}><strong>{item.pattern}</strong><p>{item.explanation}</p><small>{item.example}</small><button onClick={()=>speak(item.example)}>▶ Ouvir exemplo</button></div>)}<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("patterns",15);setStudyTab("listening")}}>Entendi os padrões +15 XP <b>→</b></button></article>}
             {studyTab==="listening"&&<article><span>MISSÃO DE LISTENING</span><h3>Volte à faixa com uma intenção específica.</h3>{track.lesson.listeningGoals.map((goal,index)=><p className="ml-study-task" key={goal}><b>0{index+1}</b>{goal}</p>)}<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("listening",20);setStudyTab("reflection")}}>Concluir listening +20 XP <b>→</b></button></article>}
-            {studyTab==="reflection"&&<article><span>THINK IN ENGLISH</span><h3>Transforme compreensão em produção.</h3>{track.lesson.reflectionPrompts.map((prompt,index)=><div className="ml-reflection-prompt" key={prompt}><b>0{index+1}</b><p>{prompt}</p></div>)}{!completedStudyTabs.includes("reflection")?<button className="ml-layer-complete" onClick={()=>completeStudyLayer("reflection",25)}>Finalizar Song Intelligence +25 XP</button>:<div className="ml-study-finished"><span>✦ SONG INTELLIGENCE COMPLETE</span><strong>{studyXp} XP conquistados nesta experiência</strong><p>Agora leve esse conhecimento para o Shadow Mode e transforme compreensão em fala.</p>{studySaved&&<em>✓ Vocabulário e listening adicionados ao seu aprendizado adaptativo</em>}</div>}</article>}
+            {studyTab==="reflection"&&<article><span>THINK IN ENGLISH</span><h3>Transforme compreensão em produção.</h3>{track.lesson.reflectionPrompts.map((prompt,index)=><div className="ml-reflection-prompt" key={prompt}><b>0{index+1}</b><p>{prompt}</p></div>)}{!completedStudyTabs.includes("reflection")?<button className="ml-layer-complete" onClick={()=>completeStudyLayer("reflection",25)}>Finalizar Song Intelligence +25 XP</button>:<div className="ml-study-finished"><span>✦ SONG INTELLIGENCE COMPLETE</span><strong>{studyXp} XP conquistados nesta experiência</strong><p>Agora teste o que ficou na memória antes de levar esse conhecimento para o Shadow Mode.</p>{studySaved&&<em>✓ Vocabulário e listening adicionados ao seu aprendizado adaptativo</em>}</div>}{!recallComplete?<div className="ml-recall"><div className="ml-recall-head"><span>ACTIVE RECALL</span><strong>{recallIndex+1}/{track.lesson.vocabulary.length}</strong></div><p>Qual palavra corresponde a: <b>{track.lesson.vocabulary[recallIndex].meaning}</b>?</p><div className="ml-recall-options">{track.lesson.vocabulary.map(item=><button key={item.term} disabled={Boolean(recallAnswer)} className={recallAnswer===item.term?(item.term===track.lesson!.vocabulary[recallIndex].term?"correct":"wrong"):""} onClick={()=>answerRecall(item.term)}>{item.term}</button>)}</div>{recallAnswer&&<div className="ml-recall-feedback"><strong>{recallAnswer===track.lesson.vocabulary[recallIndex].term?"✓ Correto":"Tente guardar esta associação"}</strong><small>{track.lesson.vocabulary[recallIndex].usage}</small><button onClick={nextRecall}>{recallIndex===track.lesson.vocabulary.length-1?"Ver resultado":"Próxima palavra →"}</button></div>}</div>:<div className="ml-recall-complete"><span>MEMORY CHECK</span><strong>{recallScore}/{track.lesson.vocabulary.length}</strong><p>{recallScore===track.lesson.vocabulary.length?"Excelente retenção inicial. Agora use essas palavras em contexto.":recallScore>=Math.ceil(track.lesson.vocabulary.length*.6)?"Boa retenção. Reforce as palavras que ainda não vieram automaticamente.":"Volte ao vocabulário depois da música e faça uma nova recuperação ativa."}</p></div>}</article>}
           </div>
         </section>}
         <div className={"ml-shadow " + (shadowPhase!=="idle"?"active":"")}>
