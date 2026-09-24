@@ -589,8 +589,10 @@ export default function Home() {
             © 2026 SpeakFlow IA. Todos os direitos reservados.
           </span>
 
-          <span>
-            Conteúdo, identidade visual e materiais educacionais protegidos.
+          <span className="dashboard-footer-links">
+            <button type="button" onClick={() => router.push("/privacy")}>Política de Privacidade</button>
+            <span aria-hidden="true">·</span>
+            <span>Conteúdo, identidade visual e materiais educacionais protegidos.</span>
           </span>
 
         </footer>
