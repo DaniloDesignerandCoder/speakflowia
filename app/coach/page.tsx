@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Gauge, Sparkles } from "lucide-react";
+import { ArrowLeft, Gauge, LoaderCircle, Mic2, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -520,7 +520,7 @@ export default function CoachPage() {
                         aria-label="Ouvir novamente"
                         title="Ouvir novamente"
                       >
-                        🔊
+                        <Volume2 />
                       </button>
                     )}
                     {message.role === "coach" && message.feedback && (
@@ -562,7 +562,7 @@ export default function CoachPage() {
                   aria-label={isListening ? "Ouvindo sua voz" : "Falar em inglês"}
                   title={isListening ? "Ouvindo..." : "Falar em inglês"}
                 >
-                  {isListening ? "●" : "🎙️"}
+                  {isListening ? <LoaderCircle className="coach-icon-spin" /> : <Mic2 />}
                 </button>
                 <button
                   className="send-button"
@@ -570,7 +570,7 @@ export default function CoachPage() {
                   disabled={!input.trim() || isReplying}
                   aria-label="Enviar mensagem"
                 >
-                  →
+                  <Send />
                 </button>
               </div>
             </div>
@@ -588,12 +588,12 @@ export default function CoachPage() {
                 aria-label={voiceEnabled ? "Desativar voz" : "Ativar voz"}
                 title={voiceEnabled ? "Desativar voz" : "Ativar voz"}
               >
-                {isSpeaking ? "◉" : voiceEnabled ? "🔊" : "🔇"}
+                {isSpeaking ? <LoaderCircle className="coach-icon-spin" /> : voiceEnabled ? <Volume2 /> : <VolumeX />}
               </button>
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : "Finalizar sessão"}
+                {isFinishing ? (finishStage <= 1 ? "Analisando sua prática..." : finishStage === 2 ? "Atualizando seu aprendizado..." : "Preparando seu progresso...") : "Finalizar sessão"}
               </button>
-              <div className="conversation-note"><span>●</span> Sessão de prática em andamento.</div>
+              <div className="conversation-note"><span className="conversation-status-dot" /> Sessão de prática em andamento.</div>
             </div>
           </section>
         )}
