@@ -1,0 +1,1 @@
+alter table public.progress add column if not exists last_practice_date date;;
