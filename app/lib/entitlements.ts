@@ -20,6 +20,8 @@ export type SpeakFlowAccessState = {
 };
 
 export type UsageLevel = "available" | "near_limit" | "limit_reached";
+export type UsageResource = "coach" | "voice";
+export type UsageAction = "allow" | "warn" | "block";
 
 export type UsageStatus = {
   used: number;
@@ -67,6 +69,24 @@ export function getUsageStatus(used: number, limit: number): UsageStatus {
   else if (percentUsed >= 80) level = "near_limit";
 
   return { used: safeUsed, limit: safeLimit, remaining, percentUsed, level };
+}
+
+export function getUsageAction(status: UsageStatus): UsageAction {
+  if (status.level === "limit_reached") return "block";
+  if (status.level === "near_limit") return "warn";
+  return "allow";
+}
+
+export function getUsageMessage(resource: UsageResource, status: UsageStatus) {
+  if (status.level === "available") return null;
+
+  const label = resource === "coach" ? "interações com o Coach" : "caracteres de voz neural";
+
+  if (status.level === "near_limit") {
+    return `Você ainda tem ${status.remaining.toLocaleString("pt-BR")} ${label} neste ciclo.`;
+  }
+
+  return `Seu limite mensal de ${label} foi atingido.`;
 }
 
 export function getAccessUsageStatus(state: SpeakFlowAccessState) {
