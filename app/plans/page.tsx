@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import "./plans.css";
 
 const proFeatures = [
   "Coach com experiência completa",
