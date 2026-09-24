@@ -44,6 +44,7 @@ export default function MusicLab() {
   const [shadowPhase,setShadowPhase]=useState<"idle"|"model"|"speak"|"result">("idle");
   const [shadowListening,setShadowListening]=useState(false);
   const [shadowResult,setShadowResult]=useState<{heard:string;score:number}|null>(null);
+  const [shadowSaved,setShadowSaved]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -166,7 +167,7 @@ export default function MusicLab() {
     return Math.max(0,Math.round((1-matrix[expected.length][actual.length]/expected.length)*100));
   }
 
-  function resetShadow(){setShadowPhase("idle");setShadowListening(false);setShadowResult(null);}
+  function resetShadow(){setShadowPhase("idle");setShadowListening(false);setShadowResult(null);setShadowSaved(false);}
 
   function chooseTrack(id:string){
     stopTrackAudio();
@@ -283,12 +284,21 @@ export default function MusicLab() {
     void speak(phrase.line,()=>setShadowPhase("speak"),true);
   }
 
+  async function saveShadowInsight(heard:string,score:number){
+    try{
+      const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
+      const tip=score>=90?"Ótima correspondência. Repita mantendo o mesmo ritmo e naturalidade.":score>=70?"Boa correspondência. Repita prestando atenção às palavras que o reconhecimento não captou.":"Ouça o modelo novamente e repita em blocos curtos, mantendo o ritmo da frase.";
+      const {error}=await supabase.from("learning_insights").insert({user_id:session.user.id,level:track.level.toLowerCase().replace(/\s+/g,"_"),original_text:heard,corrected_text:phrase.line,tip,skill_category:"Pronúncia · MusicLab"});
+      if(error)throw error; setShadowSaved(true);
+    }catch(error){console.error("Erro ao salvar insight do MusicLab:",error);}
+  }
+
   function recordShadow(){
     const Recognition=(window as any).SpeechRecognition||(window as any).webkitSpeechRecognition;
     if(!Recognition){setAudioError("O reconhecimento de voz não está disponível neste navegador.");return;}
     const recognition=new Recognition(); recognition.lang="en-US"; recognition.interimResults=false; recognition.continuous=false;
     recognition.onstart=()=>setShadowListening(true);
-    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;setShadowResult({heard,score:speechScore(phrase.line,heard)});setShadowPhase("result");};
+    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;const score=speechScore(phrase.line,heard);setShadowResult({heard,score});setShadowPhase("result");void saveShadowInsight(heard,score);};
     recognition.onerror=()=>setShadowListening(false); recognition.onend=()=>setShadowListening(false); recognition.start();
   }
 
@@ -365,7 +375,7 @@ export default function MusicLab() {
           {shadowPhase==="idle"&&<button className="ml-shadow-start" onClick={startShadow}><span>Treinar esta frase com o Coach</span><b>🎙</b></button>}
           {shadowPhase==="model"&&<div className="ml-shadow-state"><span>01 · LISTEN</span><strong>Ouça o modelo do SpeakFlow Coach…</strong></div>}
           {shadowPhase==="speak"&&<div className="ml-shadow-state"><span>02 · SPEAK</span><strong>Agora é sua vez.</strong><button onClick={recordShadow} disabled={shadowListening}>{shadowListening?"● Ouvindo…":"🎙 Repetir frase"}</button></div>}
-          {shadowPhase==="result"&&shadowResult&&<div className="ml-shadow-result"><span>03 · RESULT</span><strong>{shadowResult.score}%</strong><p>Reconhecido: “{shadowResult.heard}”</p><small>Correspondência das palavras reconhecidas com a frase-alvo.</small><button onClick={returnToMusic}>{track.audioUrl?"Voltar para a música":"Concluir prática"} <b>→</b></button></div>}
+          {shadowPhase==="result"&&shadowResult&&<div className="ml-shadow-result"><span>03 · RESULT</span><strong>{shadowResult.score}%</strong><p>Reconhecido: “{shadowResult.heard}”</p><small>Correspondência das palavras reconhecidas com a frase-alvo.</small>{shadowSaved&&<em className="ml-shadow-saved">✦ Aprendizado salvo no seu perfil</em>}<button onClick={returnToMusic}>{track.audioUrl?"Voltar para a música":"Concluir prática"} <b>→</b></button></div>}
         </div>
         <button className="ml-next" onClick={()=>movePhrase(1)}><span>Continuar a sessão</span><b>→</b></button>
       </div>
