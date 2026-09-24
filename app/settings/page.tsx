@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Check, CircleCheck } from "lucide-react";
+import { ArrowLeft, BrainCircuit, Check, CircleCheck, CircleUserRound, Palette, ShieldCheck } from "lucide-react";
 
 export default function SettingsPage(){
   const router=useRouter();
@@ -87,7 +87,7 @@ export default function SettingsPage(){
     <aside className="settings-nav">
       <button type="button" className="settings-back" onClick={()=>router.push("/")} aria-label="Voltar ao início"><ArrowLeft /> Início</button>
       <div className="settings-brand"><img src="/speakflow-logo.png" alt=""/><div><strong>Speak<span>Flow</span></strong><small>SETTINGS</small></div></div>
-      <nav aria-label="Seções das configurações"><a href="#appearance" className={activeSection==="appearance"?"active":""} aria-current={activeSection==="appearance"?"location":undefined}><i aria-hidden="true">◐</i><span>Aparência</span></a><a href="#learning" className={activeSection==="learning"?"active":""} aria-current={activeSection==="learning"?"location":undefined}><i aria-hidden="true">✦</i><span>Aprendizado</span></a><a href="#account" className={activeSection==="account"?"active":""} aria-current={activeSection==="account"?"location":undefined}><i aria-hidden="true">◎</i><span>Conta</span></a><a href="#privacy" className={activeSection==="privacy"?"active":""} aria-current={activeSection==="privacy"?"location":undefined}><i aria-hidden="true">◇</i><span>Privacidade</span></a></nav>
+      <nav aria-label="Seções das configurações"><a href="#appearance" className={activeSection==="appearance"?"active":""} aria-current={activeSection==="appearance"?"location":undefined}><i aria-hidden="true"><Palette /></i><span>Aparência</span></a><a href="#learning" className={activeSection==="learning"?"active":""} aria-current={activeSection==="learning"?"location":undefined}><i aria-hidden="true"><BrainCircuit /></i><span>Aprendizado</span></a><a href="#account" className={activeSection==="account"?"active":""} aria-current={activeSection==="account"?"location":undefined}><i aria-hidden="true"><CircleUserRound /></i><span>Conta</span></a><a href="#privacy" className={activeSection==="privacy"?"active":""} aria-current={activeSection==="privacy"?"location":undefined}><i aria-hidden="true"><ShieldCheck /></i><span>Privacidade</span></a></nav>
       <div className="settings-nav-foot"><span>PERSONALIZAÇÃO</span><p>Suas escolhas moldam a experiência do Coach.</p></div>
     </aside>
 
