@@ -16,8 +16,10 @@ export default function SettingsPage(){
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(true);
   const [theme,setTheme]=useState<"dark"|"light"|"system">("dark");
+  const [textSize,setTextSize]=useState<"normal"|"large">("normal");
+  const [reduceMotion,setReduceMotion]=useState<"system"|"on"|"off">("system");
 
-  useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);(async()=>{
+  useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);setTextSize((localStorage.getItem("speakflow-text-size")||"normal") as "normal"|"large");setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){router.replace("/login");return;}
     setUserId(session.user.id);setEmail(session.user.email??"");
@@ -38,6 +40,9 @@ export default function SettingsPage(){
     const resolved=value==="system"?(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"):value;
     document.documentElement.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;
   }
+
+  function applyTextSize(value:"normal"|"large"){setTextSize(value);localStorage.setItem("speakflow-text-size",value);document.documentElement.dataset.textSize=value;}
+  function applyMotion(value:"system"|"on"|"off"){setReduceMotion(value);localStorage.setItem("speakflow-reduce-motion",value);document.documentElement.dataset.reduceMotion=value;}
 
   async function signOut(){await supabase.auth.signOut();router.replace("/login");router.refresh();}
 
@@ -60,6 +65,10 @@ export default function SettingsPage(){
           <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"/><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?"✓":""}</b></button>
           <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"/><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?"✓":""}</b></button>
           <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?"✓":""}</b></button>
+        </div>
+        <div className="settings-accessibility">
+          <div><span>TEXT SIZE</span><strong>Tamanho do texto</strong><p>Aumente a leitura sem alterar o conteúdo.</p><div className="settings-segmented" role="group" aria-label="Tamanho do texto"><button aria-pressed={textSize==="normal"} className={textSize==="normal"?"selected":""} onClick={()=>applyTextSize("normal")}>Normal</button><button aria-pressed={textSize==="large"} className={textSize==="large"?"selected":""} onClick={()=>applyTextSize("large")}>Maior</button></div></div>
+          <div><span>MOTION</span><strong>Movimento e animações</strong><p>Reduza efeitos visuais quando precisar de uma experiência mais estável.</p><div className="settings-segmented" role="group" aria-label="Movimento e animações"><button aria-pressed={reduceMotion==="system"} className={reduceMotion==="system"?"selected":""} onClick={()=>applyMotion("system")}>Sistema</button><button aria-pressed={reduceMotion==="on"} className={reduceMotion==="on"?"selected":""} onClick={()=>applyMotion("on")}>Reduzir</button><button aria-pressed={reduceMotion==="off"} className={reduceMotion==="off"?"selected":""} onClick={()=>applyMotion("off")}>Completo</button></div></div>
         </div>
       </section>
 
