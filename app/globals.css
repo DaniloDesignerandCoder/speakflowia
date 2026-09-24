@@ -3821,3 +3821,48 @@ img {
 :root[data-theme="light"] .settings-theme-picker>button.selected{background:#edf1ff;border-color:#7f96ff}
 :root[data-theme="light"] .dashboard-menu-item{color:#667188}:root[data-theme="light"] .dashboard-menu-item.active,:root[data-theme="light"] .dashboard-menu-item:hover{color:#4059c7;background:#edf1ff}
 @media(max-width:760px){.settings-theme-picker{grid-template-columns:1fr}}
+
+
+/* Light mode contrast hardening */
+:root[data-theme="light"] body,
+:root[data-theme="light"] button,
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea{color:#172033}
+:root[data-theme="light"] .dashboard-shell :is(h1,h2,h3,strong,b),
+:root[data-theme="light"] .profile-shell :is(h1,h2,h3,strong,b),
+:root[data-theme="light"] .progress-shell :is(h1,h2,h3,strong,b),
+:root[data-theme="light"] .settings-shell :is(h1,h2,h3,strong,b),
+:root[data-theme="light"] .onboarding-shell :is(h1,h2,h3,strong,b){color:#172033}
+:root[data-theme="light"] .dashboard-shell p,
+:root[data-theme="light"] .profile-shell p,
+:root[data-theme="light"] .progress-shell p,
+:root[data-theme="light"] .settings-shell p,
+:root[data-theme="light"] .onboarding-shell p{color:#536078}
+:root[data-theme="light"] .dashboard-shell small,
+:root[data-theme="light"] .profile-shell small,
+:root[data-theme="light"] .progress-shell small,
+:root[data-theme="light"] .settings-shell small,
+:root[data-theme="light"] .onboarding-shell small{color:#5c6880}
+:root[data-theme="light"] .dashboard-shell [class*="eyebrow"],
+:root[data-theme="light"] .dashboard-shell [class*="label"],
+:root[data-theme="light"] .profile-shell article>span,
+:root[data-theme="light"] .progress-shell article>span,
+:root[data-theme="light"] .settings-section-title small,
+:root[data-theme="light"] .settings-grid label>span{color:#4059c7}
+:root[data-theme="light"] .dashboard-profile-name,
+:root[data-theme="light"] .dashboard-brand strong,
+:root[data-theme="light"] .dashboard-mobile-brand strong,
+:root[data-theme="light"] .profile-brand strong,
+:root[data-theme="light"] .settings-brand strong{color:#172033}
+:root[data-theme="light"] .dashboard-sidebar-footer small,
+:root[data-theme="light"] .dashboard-brand small,
+:root[data-theme="light"] .settings-brand small,
+:root[data-theme="light"] .settings-nav-foot p{color:#657087}
+:root[data-theme="light"] ::placeholder{color:#707b90;opacity:1}
+:root[data-theme="light"] a{color:#314dbd}
+:root[data-theme="light"] .profile-back,
+:root[data-theme="light"] .settings-back{color:#4f5d75}
+:root[data-theme="light"] .settings-save-row button,
+:root[data-theme="light"] .profile-save,
+:root[data-theme="light"] .profile-primary{color:#fff}
