@@ -11,6 +11,14 @@ export type MusicRights = {
   verifiedAt: string;
 };
 
+export type MusicLesson = {
+  centralMessage: string;
+  vocabulary: { term: string; meaning: string; usage: string }[];
+  languagePatterns: { pattern: string; explanation: string; example: string }[];
+  listeningGoals: string[];
+  reflectionPrompts: string[];
+};
+
 export type MusicPhrase = {
   line: string;
   meaning: string;
@@ -27,6 +35,7 @@ export type MusicTrack = {
   mood: string;
   description: string;
   phrases: MusicPhrase[];
+  lesson?: MusicLesson;
   audioUrl?: string;
   artworkUrl?: string;
   rights?: MusicRights;
@@ -63,6 +72,23 @@ export const approvedMusicCatalog: MusicTrack[] = ([
     mood: "Acoustic Pop",
     description: "Faixa vocal real selecionada para uma jornada de listening, ritmo, pronúncia, vocabulário e compreensão.",
     audioUrl: "https://njoisdldoellzuqxkyuk.supabase.co/storage/v1/object/public/musiclab-audio/Kira_Daly_-_The_Circle.mp3",
+    lesson: {
+      centralMessage: "Descubra a mensagem central da canção pela escuta: observe ideias que retornam, mudanças de emoção e como voz e instrumentos ajudam a construir significado.",
+      vocabulary: [
+        {term:"circle",meaning:"círculo; também pode representar ciclo ou algo que retorna",usage:"Use em frases sobre repetição, grupos ou movimentos circulares."},
+        {term:"connection",meaning:"conexão, vínculo",usage:"Útil para falar sobre relações entre pessoas, ideias e experiências."},
+        {term:"change",meaning:"mudança; mudar",usage:"Pode funcionar como substantivo ou verbo dependendo da frase."},
+        {term:"return",meaning:"retorno; retornar",usage:"Observe quando a ideia envolve voltar a um ponto, lugar ou estado anterior."},
+        {term:"feeling",meaning:"sentimento, sensação",usage:"Combine com adjetivos para descrever a atmosfera percebida na música."}
+      ],
+      languagePatterns: [
+        {pattern:"Notice how …",explanation:"Estrutura útil para chamar atenção para como algo acontece.",example:"Notice how the mood changes."},
+        {pattern:"It feels …",explanation:"Forma natural de expressar uma percepção ou impressão.",example:"It feels calm at first."},
+        {pattern:"The song suggests …",explanation:"Permite interpretar uma ideia sem tratá-la como fato absoluto.",example:"The song suggests a sense of movement."}
+      ],
+      listeningGoals:["Identificar palavras ou ideias recorrentes sem depender de uma transcrição completa.","Perceber contraste entre trechos mais suaves e mais intensos.","Relacionar tom de voz, instrumentação e possíveis mudanças de significado."],
+      reflectionPrompts:["Que ideia parece voltar ao longo da música?","Qual emoção você percebe com mais força?","Resuma em inglês, com suas próprias palavras, o que você acha que a música comunica."]
+    },
     phrases: [
       {
         line: "Listen for the pulse before focusing on individual words.",
