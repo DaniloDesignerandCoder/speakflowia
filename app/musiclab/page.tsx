@@ -183,13 +183,16 @@ export default function MusicLab() {
       const nyquist=(audioContextRef.current?.sampleRate??44100)/2;
       for(let i=0;i<bars.length;i++){
         const curve=i/(bars.length-1);
-        const hz=45+Math.pow(curve,1.75)*11000;
-        const bin=Math.min(data.length-1,Math.max(0,Math.round(hz/nyquist*data.length)));
-        const start=Math.max(0,bin-1),end=Math.min(data.length-1,bin+2);
-        let peak=0;
-        for(let j=start;j<=end;j++)peak=Math.max(peak,data[j]);
-        const bassWeight=hz<180?1.85:hz<420?1.48:hz<1200?1.2:1.02;
-        const raw=(peak/255)*bassWeight;
+        const hz=70+Math.pow(curve,1.55)*10930;
+        const bin=Math.min(data.length-1,Math.max(1,Math.round(hz/nyquist*data.length)));
+        const radius=hz<260?3:hz<1200?2:1;
+        const start=Math.max(1,bin-radius),end=Math.min(data.length-1,bin+radius);
+        let peak=0,bandSum=0;
+        for(let j=start;j<=end;j++){peak=Math.max(peak,data[j]);bandSum+=data[j];}
+        const average=bandSum/(end-start+1);
+        const bandLevel=(peak*.68+average*.32)/255;
+        const bassWeight=hz<180?2.05:hz<420?1.58:hz<1200?1.22:1.02;
+        const raw=bandLevel*bassWeight;
         const level=Math.min(1,Math.pow(raw,0.62));
         const height=2+level*34;
         const bar=bars[i] as HTMLElement;
