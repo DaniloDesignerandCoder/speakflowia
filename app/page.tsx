@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "./lib/supabase";
+import { SpeakFlowIcon, type SpeakFlowIconName } from "./speakflow-icon";
 
-const modules = [
+const modules: Array<{ title: string; subtitle: string; description: string; icon: SpeakFlowIconName; route: string }> = [
   {
     title: "Conversação",
     subtitle: "Speaking",
     description:
       "Pratique situações reais em inglês com seu Coach.",
-    icon: "◌",
+    icon: "conversation",
     route: "/coach?mode=conversation",
   },
   {
@@ -18,7 +19,7 @@ const modules = [
     subtitle: "Pronunciation",
     description:
       "Treine sua fala e desenvolva uma pronúncia mais natural.",
-    icon: "◎",
+    icon: "pronunciation",
     route: "/pronunciation",
   },
   {
@@ -26,7 +27,7 @@ const modules = [
     subtitle: "Vocabulary",
     description:
       "Amplie seu repertório através de situações práticas.",
-    icon: "Aa",
+    icon: "vocabulary",
     route: "/vocabulary",
   },
   {
@@ -34,7 +35,7 @@ const modules = [
     subtitle: "Music × Language",
     description:
       "Aprenda inglês ouvindo música em uma experiência audiovisual interativa.",
-    icon: "♫",
+    icon: "music",
     route: "/musiclab",
   },
 ];
@@ -205,7 +206,7 @@ export default function Home() {
           aria-label="Menu principal"
         >
           <button className="dashboard-menu-item active">
-            <span>⌂</span>
+            <span><SpeakFlowIcon name="home" /></span>
             Início
           </button>
 
@@ -213,7 +214,7 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/coach")}
           >
-            <span>✦</span>
+            <span><SpeakFlowIcon name="coach" /></span>
             Coach
           </button>
 
@@ -221,7 +222,7 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/progress")}
           >
-            <span>▥</span>
+            <span><SpeakFlowIcon name="progress" /></span>
             Progresso
           </button>
 
@@ -229,17 +230,17 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/musiclab")}
           >
-            <span>♫</span>
+            <span><SpeakFlowIcon name="music" /></span>
             MusicLab™
           </button>
 
           <button className="dashboard-menu-item" onClick={() => router.push("/plans")}>
-            <span>◇</span>
+            <span><SpeakFlowIcon name="plans" /></span>
             Planos
           </button>
 
           <button className="dashboard-menu-item" onClick={() => router.push("/settings")}>
-            <span>⚙</span>
+            <span><SpeakFlowIcon name="settings" /></span>
             Configurações
           </button>
         </nav>
@@ -397,7 +398,7 @@ export default function Home() {
                   <div className="dashboard-module-top">
 
                     <span className="dashboard-module-icon">
-                      {module.icon}
+                      <SpeakFlowIcon name={module.icon} />
                     </span>
 
                     <span>
