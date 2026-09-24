@@ -20,6 +20,7 @@ export default function SettingsPage(){
   const [reduceMotion,setReduceMotion]=useState<"system"|"on"|"off">("system");
   const [securityMessage,setSecurityMessage]=useState("");
   const [securityLoading,setSecurityLoading]=useState(false);
+  const [privacyMessage,setPrivacyMessage]=useState("");
 
   useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);const savedScale=Math.min(130,Math.max(90,Number(localStorage.getItem("speakflow-text-scale")||100)));setTextScale(savedScale);document.documentElement.style.setProperty("--sf-text-scale",String(savedScale/100));setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
@@ -60,6 +61,16 @@ export default function SettingsPage(){
     const {error}=await supabase.auth.signOut({scope:"global"});
     if(error){setSecurityMessage("Não foi possível encerrar as sessões agora.");setSecurityLoading(false);return;}
     router.replace("/login");router.refresh();
+  }
+
+  function clearLocalPreferences(){
+    ["speakflow-theme","speakflow-text-scale","speakflow-reduce-motion"].forEach(key=>localStorage.removeItem(key));
+    document.documentElement.dataset.theme="dark";
+    document.documentElement.style.colorScheme="dark";
+    document.documentElement.style.setProperty("--sf-text-scale","1");
+    document.documentElement.dataset.reduceMotion="system";
+    setTheme("dark");setTextScale(100);setReduceMotion("system");
+    setPrivacyMessage("Preferências locais deste dispositivo foram restauradas.");
   }
 
   async function signOut(){await supabase.auth.signOut();router.replace("/login");router.refresh();}
@@ -112,8 +123,13 @@ export default function SettingsPage(){
       </section>
 
       <section id="privacy" className="settings-section">
-        <div className="settings-section-title"><span>04</span><div><small>PRIVACY & SESSION</small><h2>Privacidade e sessão</h2><p>Controle básico da sua sessão neste dispositivo.</p></div></div>
-        <div className="settings-privacy"><div><strong>Sair deste dispositivo</strong><p>Encerra sua sessão atual. Seu progresso permanece associado à sua conta.</p></div><button onClick={signOut}>Sair da conta</button></div>
+        <div className="settings-section-title"><span>04</span><div><small>PRIVACY & SESSION</small><h2>Privacidade e sessão</h2><p>Controle o que fica neste dispositivo e quando sua sessão deve terminar.</p></div></div>
+        <div className="settings-privacy-center">
+          <article><div><span>SESSÃO ATUAL</span><strong>Sair deste dispositivo</strong><p>Encerra somente esta sessão. Seu perfil, progresso e histórico permanecem associados à sua conta.</p></div><button onClick={signOut}>Sair da conta</button></article>
+          <article><div><span>DADOS LOCAIS</span><strong>Restaurar preferências deste dispositivo</strong><p>Remove tema, tamanho de texto e preferência de movimento salvos localmente. Não apaga seu aprendizado.</p></div><button onClick={clearLocalPreferences}>Restaurar</button></article>
+          <article className="settings-privacy-info"><div><span>APRENDIZADO</span><strong>Seus dados continuam vinculados à sua conta</strong><p>Sessões e progresso usados para personalizar o SpeakFlow não são removidos ao limpar preferências locais ou sair.</p></div><b aria-hidden="true">✓</b></article>
+        </div>
+        {privacyMessage&&<div className="settings-security-message" role="status" aria-live="polite">{privacyMessage}</div>}
       </section>
     </section>
   </main>;
