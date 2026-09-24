@@ -20,6 +20,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Preflight Supabase migrations access
+        shell: bash
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: njoisdldoellzuqxkyuk
+        run: |
+          set -euo pipefail
+          RESPONSE_FILE="$(mktemp)"
+          HTTP_CODE="$(curl --silent --show-error --output "$RESPONSE_FILE" --write-out "%{http_code}" "https://api.supabase.com/v1/projects/$PROJECT_REF/database/migrations" --header "Authorization: Bearer $SUPABASE_ACCESS_TOKEN")"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "Supabase migrations preflight failed (HTTP $HTTP_CODE)."
+            cat "$RESPONSE_FILE"
+            exit 1
+          fi
+
+          echo "Supabase migrations preflight succeeded (HTTP 200)."
+
       - name: Apply pending migrations through Supabase Management API
         shell: bash
         env:
