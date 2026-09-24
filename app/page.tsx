@@ -19,7 +19,7 @@ const modules = [
     description:
       "Treine sua fala e desenvolva uma pronúncia mais natural.",
     icon: "◎",
-    route: "/coach?mode=pronunciation",
+    route: "/pronunciation",
   },
   {
     title: "Vocabulário",
@@ -27,7 +27,7 @@ const modules = [
     description:
       "Amplie seu repertório através de situações práticas.",
     icon: "Aa",
-    route: "/coach?mode=vocabulary",
+    route: "/vocabulary",
   },
   {
     title: "MusicLab™",
@@ -161,9 +161,9 @@ export default function Home() {
     const skill = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Seu aprendizado";
     const route =
       skill === "Pronúncia"
-        ? "/coach?mode=pronunciation"
+        ? "/pronunciation"
         : skill === "Vocabulário"
-          ? "/coach?mode=vocabulary"
+          ? "/vocabulary"
           : "/coach?mode=conversation";
 
     setLearningFocus({
