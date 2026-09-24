@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "./lib/supabase";
-import { AudioLines, BookOpenText, ChartNoAxesColumnIncreasing, House, Layers3, MessageCircleMore, Mic2, Settings2, type LucideIcon } from "lucide-react";
+import { AudioLines, BookOpenText, ChartNoAxesColumnIncreasing, House, Layers3, MessageCircleMore, Mic2, Settings2, UserRound, type LucideIcon } from "lucide-react";
 
 const modules: Array<{ title: string; subtitle: string; description: string; icon: LucideIcon; route: string }> = [
   {
@@ -239,9 +239,14 @@ export default function Home() {
             Planos
           </button>
 
-          <button className="dashboard-menu-item" onClick={() => router.push("/settings")}>
+          <button className="dashboard-menu-item dashboard-settings-item" onClick={() => router.push("/settings")}>
             <span><Settings2 /></span>
             Configurações
+          </button>
+
+          <button className="dashboard-menu-item dashboard-account-item" onClick={() => router.push("/profile")}>
+            <span><UserRound /></span>
+            Conta
           </button>
         </nav>
 
