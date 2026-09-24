@@ -72,3 +72,9 @@ button:not(:disabled):hover{
 }
 button:not(:disabled):active{transform:translateY(0) scale(.99)}
 button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
+
+/* Lucide icon alignment for saved learning reports */
+.session-icon svg{width:16px;height:16px;stroke-width:1.8}
+.progress-tip{display:flex;align-items:flex-start;gap:7px}.progress-tip svg{width:14px;height:14px;flex:0 0 auto;margin-top:1px;stroke-width:1.8;color:#91a9ff}
+.smart-summary-next small svg,.session-history-next>span svg{width:13px;height:13px;flex:0 0 auto;stroke-width:1.8}
+.smart-summary-next small,.session-history-next>span{display:flex;align-items:center;gap:7px}
