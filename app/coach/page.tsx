@@ -132,6 +132,7 @@ export default function CoachPage() {
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
   const [finishStage, setFinishStage] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
 
   const currentPhrases = pronunciationPhrases[level] ?? pronunciationPhrases.intermediate;
   const pronunciationTarget = currentPhrases[pronunciationIndex % currentPhrases.length];
@@ -256,17 +257,41 @@ export default function CoachPage() {
     ]);
   }
 
-  function speakText(text: string) {
-    if (!voiceEnabled || typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "en-US";
-    speech.rate = isPronunciation ? 0.82 : conversationPace === "relaxed" ? 0.85 : conversationPace === "challenging" ? 1.05 : 0.95;
-    speech.pitch = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoice = voices.find((voice) => voice.lang.toLowerCase().startsWith("en"));
-    if (englishVoice) speech.voice = englishVoice;
-    window.speechSynthesis.speak(speech);
+  async function speakText(text: string) {
+    if (!voiceEnabled || typeof window === "undefined") return;
+    setIsSpeaking(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("No active session");
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-voice`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+      if (!response.ok) throw new Error("Neural voice unavailable");
+      const blob = await response.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      const cleanup = () => { URL.revokeObjectURL(audioUrl); setIsSpeaking(false); };
+      audio.addEventListener("ended", cleanup, { once: true });
+      audio.addEventListener("error", cleanup, { once: true });
+      await audio.play();
+      return;
+    } catch {
+      if (!("speechSynthesis" in window)) { setIsSpeaking(false); return; }
+      window.speechSynthesis.cancel();
+      const speech = new SpeechSynthesisUtterance(text);
+      speech.lang = "en-US";
+      speech.rate = isPronunciation ? 0.82 : conversationPace === "slow" ? 0.85 : conversationPace === "fast" ? 1.05 : 0.95;
+      speech.pitch = 1;
+      speech.onend = () => setIsSpeaking(false);
+      speech.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(speech);
+    }
   }
 
   function startListening() {
@@ -774,7 +799,7 @@ export default function CoachPage() {
                 aria-label={voiceEnabled ? "Desativar voz" : "Ativar voz"}
                 title={voiceEnabled ? "Desativar voz" : "Ativar voz"}
               >
-                {voiceEnabled ? "🔊" : "🔇"}
+                {isSpeaking ? "◉" : voiceEnabled ? "🔊" : "🔇"}
               </button>
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
                 {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : "Finalizar sessão"}
