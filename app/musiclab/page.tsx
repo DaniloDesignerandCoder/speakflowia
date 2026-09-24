@@ -86,6 +86,7 @@ export default function MusicLab() {
   const audioRafRef=useRef<number|null>(null);
   const audioTrackIdRef=useRef<string|null>(null);
   const spectrumRef=useRef<HTMLDivElement|null>(null);
+  const spectrumMotionRef=useRef<number[]>(Array(16).fill(.18));
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");void loadAdaptiveCue();});},[router]);
 
@@ -183,22 +184,28 @@ export default function MusicLab() {
       const nyquist=(audioContextRef.current?.sampleRate??44100)/2;
       for(let i=0;i<bars.length;i++){
         const curve=i/(bars.length-1);
-        const hz=70+Math.pow(curve,1.55)*10930;
-        const bin=Math.min(data.length-1,Math.max(1,Math.round(hz/nyquist*data.length)));
-        const radius=hz<260?3:hz<1200?2:1;
-        const start=Math.max(1,bin-radius),end=Math.min(data.length-1,bin+radius);
+        const lowHz=65+Math.pow(curve,1.45)*9800;
+        const highCurve=(i+1)/bars.length;
+        const highHz=65+Math.pow(highCurve,1.45)*9800;
+        const start=Math.max(1,Math.floor(lowHz/nyquist*data.length));
+        const end=Math.min(data.length-1,Math.max(start+1,Math.ceil(highHz/nyquist*data.length)));
         let peak=0,bandSum=0;
         for(let j=start;j<=end;j++){peak=Math.max(peak,data[j]);bandSum+=data[j];}
         const average=bandSum/(end-start+1);
-        const bandLevel=(peak*.68+average*.32)/255;
-        const bassWeight=hz<180?2.05:hz<420?1.58:hz<1200?1.22:1.02;
-        const raw=bandLevel*bassWeight;
-        const level=Math.min(1,Math.pow(raw,0.62));
-        const height=2+level*34;
+        const centerHz=(lowHz+highHz)/2;
+        const bassWeight=centerHz<180?2.12:centerHz<420?1.62:centerHz<1200?1.24:1.04;
+        const raw=((peak*.62+average*.38)/255)*bassWeight;
+        const signal=Math.min(1,Math.pow(raw,0.58));
+        const previous=spectrumMotionRef.current[i]??.18;
+        const floor=.12+audioEnergyRef.current*.32;
+        const target=Math.max(floor,signal);
+        const level=previous+(target-previous)*(target>previous?.62:.28);
+        spectrumMotionRef.current[i]=level;
+        const height=3+level*33;
         const bar=bars[i] as HTMLElement;
         bar.style.height=`${height}px`;
-        bar.style.opacity=String(.25+level*.75);
-        bar.style.transform=`scaleY(${.88+level*.18})`;
+        bar.style.opacity=String(.34+level*.66);
+        bar.style.transform=`scaleY(${.92+level*.14})`;
       }
     }
     if(audio.duration&&Number.isFinite(audio.duration)){
@@ -523,7 +530,7 @@ export default function MusicLab() {
       <div className="ml-player-wrap"><div className="ml-spatial-title">SOUND<br/>CORE</div><div className="ml-ring r1"/><div className="ml-ring r2"/><div className="ml-ring r3"/><div className="ml-player">
         <div className="ml-orbit"><div className="ml-disc"><img src="/speakflow-logo.png" alt=""/></div></div>
         <div className="ml-player-copy"><span>{track.mood}</span><h2>{track.title}</h2><p>{track.artist}</p></div>
-        <div ref={spectrumRef} className="ml-spectrum" aria-hidden="true">{Array.from({length:24}).map((_,i)=><i key={i}/>)}</div>
+        <div ref={spectrumRef} className="ml-spectrum" aria-hidden="true">{Array.from({length:16}).map((_,i)=><i key={i}/>)}</div>
         <div className="ml-timeline"><span style={{width:`${progress}%`}}/></div>
         <div className="ml-controls">
           <button onClick={()=>movePhrase(-1)} aria-label="Anterior">Anterior</button>
