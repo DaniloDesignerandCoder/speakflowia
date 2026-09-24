@@ -3967,3 +3967,11 @@ button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
 
 .coach-icon-spin{animation:coach-icon-spin .85s linear infinite}
 @keyframes coach-icon-spin{to{transform:rotate(360deg)}}
+
+
+/* SpeakFlow legal footer */
+.dashboard-footer-links{display:inline-flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.dashboard-footer-links button{width:auto;min-height:0;padding:0;border:0;background:transparent;color:inherit;font:inherit;letter-spacing:inherit;cursor:pointer;text-decoration:none}
+.dashboard-footer-links button:hover{background:transparent;border-color:transparent;color:#8fa0ff;box-shadow:none}
+.dashboard-footer-links button:focus-visible{outline:1px solid rgba(145,168,255,.55);outline-offset:3px;border-radius:2px}
+@media(max-width:760px){.dashboard-footer-links{justify-content:flex-start}}
