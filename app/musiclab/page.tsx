@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft } from "lucide-react";
 import * as THREE from "three";
 import "./musiclab.css";
 import { approvedMusicCatalog, attributionFor, type MusicTrack } from "./catalog";
@@ -479,7 +480,7 @@ export default function MusicLab() {
     <div className="ml-floatwords" aria-hidden="true"><span>LISTEN</span><span>FLOW</span><span>ENGLISH</span><span>RHYTHM</span><span>SPEAK</span></div>
     <div className="ml-aurora ml-a"/><div className="ml-aurora ml-b"/>
     <header className="musiclab-topbar">
-      <button className="musiclab-back" onClick={()=>router.push("/")} aria-label="Voltar">←</button>
+      <button className="musiclab-back" onClick={()=>router.push("/")} aria-label="Voltar"><ArrowLeft /></button>
       <div className="musiclab-brand"><img src="/speakflow-logo.png" alt="SpeakFlow"/><div><strong>MusicLab<span>™</span></strong><small>BY SPEAKFLOW</small></div></div>
       <div className="musiclab-user">{name?name:"SpeakFlow"} <i/></div>
     </header>
