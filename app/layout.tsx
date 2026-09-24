@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeBootstrap from "./theme-bootstrap";
+import ContentProtection from "./content-protection";
 
 export const metadata: Metadata = {
   title: "SpeakFlow IA — Fluência guiada por IA",
@@ -16,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body><ThemeBootstrap />{children}</body>
+      <body><ThemeBootstrap /><ContentProtection />{children}</body>
     </html>
   );
 }
