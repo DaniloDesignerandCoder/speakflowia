@@ -1,5 +1,7 @@
 -- SpeakFlow billing and entitlement foundation.
 -- Billing providers and server-side webhooks are authoritative for Pro access.
+-- No entitlement row means Free. Client applications must never infer or grant Pro
+-- without a backend-validated entitlement row.
 
 create table if not exists public.subscriptions (
   id uuid primary key default gen_random_uuid(),
@@ -12,7 +14,8 @@ create table if not exists public.subscriptions (
   current_period_end timestamptz,
   cancel_at_period_end boolean not null default false,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint subscriptions_id_user_unique unique (id, user_id)
 );
 
 create unique index if not exists subscriptions_provider_subscription_uidx
@@ -26,13 +29,30 @@ create table if not exists public.entitlements (
   plan text not null default 'free' check (plan in ('free','pro')),
   subscription_status text not null default 'none' check (subscription_status in ('none','pending','active','past_due','canceled','expired')),
   current_period_end timestamptz,
-  source_subscription_id uuid references public.subscriptions(id) on delete set null,
-  updated_at timestamptz not null default now()
+  source_subscription_id uuid,
+  updated_at timestamptz not null default now(),
+  constraint entitlements_pro_billing_state_check check (
+    plan = 'free'
+    or (
+      subscription_status in ('active','canceled')
+      and source_subscription_id is not null
+      and (subscription_status <> 'canceled' or current_period_end is not null)
+    )
+  ),
+  constraint entitlements_source_subscription_owner_fk
+    foreign key (source_subscription_id, user_id)
+    references public.subscriptions (id, user_id)
+    on delete set null (source_subscription_id)
 );
+
+create index if not exists entitlements_source_subscription_idx
+  on public.entitlements(source_subscription_id)
+  where source_subscription_id is not null;
 
 create table if not exists public.usage_monthly (
   user_id uuid not null references auth.users(id) on delete cascade,
-  period_start date not null,
+  period_start date not null
+    check (period_start = date_trunc('month', period_start::timestamp)::date),
   coach_interactions integer not null default 0 check (coach_interactions >= 0),
   voice_characters integer not null default 0 check (voice_characters >= 0),
   updated_at timestamptz not null default now(),
@@ -42,15 +62,29 @@ create table if not exists public.usage_monthly (
 create table if not exists public.billing_events (
   id uuid primary key default gen_random_uuid(),
   provider text not null check (provider in ('mercado_pago')),
+  -- The provider event ID is the unique notification/event identifier received
+  -- from the provider, not merely a subscription or payment resource ID.
   provider_event_id text not null,
   event_type text,
   provider_subscription_id text,
   user_id uuid references auth.users(id) on delete set null,
   payload jsonb not null default '{}'::jsonb,
+  processing_status text not null default 'pending'
+    check (processing_status in ('pending','processing','processed','failed')),
+  processing_error text,
+  attempt_count integer not null default 0 check (attempt_count >= 0),
   processed_at timestamptz,
   created_at timestamptz not null default now(),
   unique (provider, provider_event_id)
 );
+
+create index if not exists billing_events_user_id_idx
+  on public.billing_events(user_id)
+  where user_id is not null;
+
+create index if not exists billing_events_provider_subscription_idx
+  on public.billing_events(provider, provider_subscription_id)
+  where provider_subscription_id is not null;
 
 alter table public.subscriptions enable row level security;
 alter table public.entitlements enable row level security;
