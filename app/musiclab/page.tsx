@@ -53,6 +53,8 @@ export default function MusicLab() {
   const [recommendedPhrase,setRecommendedPhrase]=useState(0);
   const [missionStarted,setMissionStarted]=useState(false);
   const [missionComplete,setMissionComplete]=useState(false);
+  const [missionScore,setMissionScore]=useState<number|null>(null);
+  const [missionTarget,setMissionTarget]=useState<number|null>(null);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -177,9 +179,9 @@ export default function MusicLab() {
 
   function resetShadow(){setShadowPhase("idle");setShadowListening(false);setShadowResult(null);setShadowSaved(false);}
 
-  function startMission(){setStep(recommendedPhrase);setRevealed(false);resetShadow();setMissionStarted(true);setMissionComplete(false);document.querySelector(".ml-focus")?.scrollIntoView({behavior:"smooth",block:"center"});}
+  function startMission(){setStep(recommendedPhrase);setRevealed(false);resetShadow();setMissionStarted(true);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);document.querySelector(".ml-focus")?.scrollIntoView({behavior:"smooth",block:"center"});}
 
-  function completeMission(){setMissionComplete(true);setMissionStarted(false);}
+  function completeMission(score:number){const target=score>=90?Math.min(98,score+2):score>=70?85:70;setMissionScore(score);setMissionTarget(target);setMissionComplete(true);setMissionStarted(false);}
 
   function chooseTrack(id:string){
     stopTrackAudio();
@@ -188,7 +190,7 @@ export default function MusicLab() {
     setStep(0);
     setRevealed(false);
     setAudioError("");
-    setMissionStarted(false);setMissionComplete(false);
+    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);
     resetShadow();
   }
 
@@ -311,7 +313,7 @@ export default function MusicLab() {
     if(!Recognition){setAudioError("O reconhecimento de voz não está disponível neste navegador.");return;}
     const recognition=new Recognition(); recognition.lang="en-US"; recognition.interimResults=false; recognition.continuous=false;
     recognition.onstart=()=>setShadowListening(true);
-    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;const score=speechScore(phrase.line,heard);setShadowResult({heard,score});setSessionAttempts(current=>[...current,{phrase:phrase.line,score}]);setShadowPhase("result");if(missionStarted&&step===recommendedPhrase)completeMission();void saveShadowInsight(heard,score);};
+    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;const score=speechScore(phrase.line,heard);setShadowResult({heard,score});setSessionAttempts(current=>[...current,{phrase:phrase.line,score}]);setShadowPhase("result");if(missionStarted&&step===recommendedPhrase)completeMission(score);void saveShadowInsight(heard,score);};
     recognition.onerror=()=>setShadowListening(false); recognition.onend=()=>setShadowListening(false); recognition.start();
   }
 
@@ -406,7 +408,7 @@ export default function MusicLab() {
     </section>
 
     {adaptiveMode==="guided"&&missionStarted&&<section className="ml-mission-live"><div><span>● PERSONAL MISSION ACTIVE</span><strong>Frase {recommendedPhrase+1} · complete o Shadow Mode</strong></div><p>Ouça o modelo, repita a frase e conclua o resultado para fechar esta missão.</p></section>}
-    {missionComplete&&<section className="ml-mission-complete"><div><span>✦ MISSÃO CONCLUÍDA</span><strong>Prática recomendada concluída.</strong></div><p>Este resultado já entrou no seu histórico adaptativo.</p><button onClick={()=>{setMissionComplete(false);movePhrase(1)}}>Continuar explorando <b>→</b></button></section>}
+    {missionComplete&&<section className="ml-mission-complete ml-mission-result"><div><span>✦ MISSÃO CONCLUÍDA</span><strong>Prática recomendada concluída.</strong></div><div className="ml-mission-score"><span>RESULTADO</span><strong>{missionScore??0}<b>%</b></strong><i><em style={{width:`${missionScore??0}%`}}/></i></div><div className="ml-mission-next"><span>PRÓXIMO ALVO</span><strong>{missionTarget??70}<b>%</b></strong><small>{(missionScore??0)>=90?"Mantenha a consistência e avance para outra frase.":(missionScore??0)>=70?"Tente superar este resultado mantendo o ritmo natural.":"Ouça o modelo novamente e avance em blocos curtos."}</small></div><button onClick={()=>{setMissionComplete(false);movePhrase(1)}}>Continuar <b>→</b></button></section>}
 
     <section className="ml-adaptive-cue" aria-label="Foco adaptativo do MusicLab">
       <div><span>✦ SPEAKFLOW ADAPTIVE SIGNAL</span><strong>{adaptiveCue?.title??"Preparando seu foco…"}</strong></div>
