@@ -45,6 +45,9 @@ export default function MusicLab() {
   const [shadowListening,setShadowListening]=useState(false);
   const [shadowResult,setShadowResult]=useState<{heard:string;score:number}|null>(null);
   const [shadowSaved,setShadowSaved]=useState(false);
+  const [sessionAttempts,setSessionAttempts]=useState<{phrase:string;score:number}[]>([]);
+  const [sessionComplete,setSessionComplete]=useState(false);
+  const [sessionSaving,setSessionSaving]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -298,8 +301,21 @@ export default function MusicLab() {
     if(!Recognition){setAudioError("O reconhecimento de voz não está disponível neste navegador.");return;}
     const recognition=new Recognition(); recognition.lang="en-US"; recognition.interimResults=false; recognition.continuous=false;
     recognition.onstart=()=>setShadowListening(true);
-    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;const score=speechScore(phrase.line,heard);setShadowResult({heard,score});setShadowPhase("result");void saveShadowInsight(heard,score);};
+    recognition.onresult=(event:any)=>{const heard=event.results[0][0].transcript;const score=speechScore(phrase.line,heard);setShadowResult({heard,score});setSessionAttempts(current=>[...current,{phrase:phrase.line,score}]);setShadowPhase("result");void saveShadowInsight(heard,score);};
     recognition.onerror=()=>setShadowListening(false); recognition.onend=()=>setShadowListening(false); recognition.start();
+  }
+
+  async function finishMusicSession(){
+    if(sessionSaving||sessionAttempts.length===0)return; setSessionSaving(true);
+    try{
+      const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
+      const average=Math.round(sessionAttempts.reduce((sum,item)=>sum+item.score,0)/sessionAttempts.length);
+      const duration=Math.max(1,Math.round(audioCurrentTime));
+      const summary=`MusicLab · ${track.title}: ${sessionAttempts.length} prática(s) de shadowing, média de correspondência ${average}%.`;
+      const {error}=await supabase.from("learning_sessions").insert({user_id:session.user.id,mode:"musiclab",duration_seconds:duration,score:average,summary,skills_practiced:["Listening","Shadowing","Pronúncia"],positive_point:average>=80?"Boa correspondência nas frases praticadas.":"Você concluiu práticas de fala dentro do contexto musical.",improvement_point:average>=80?"Continue buscando ritmo e naturalidade.":"Repita as frases com mais calma após ouvir o modelo.",next_recommendation:"Continue no MusicLab e pratique novas frases da faixa."});
+      if(error)throw error; setSessionComplete(true);
+    }catch(error){console.error("Erro ao finalizar sessão MusicLab:",error);}
+    finally{setSessionSaving(false);}
   }
 
   async function returnToMusic(){
@@ -378,6 +394,9 @@ export default function MusicLab() {
           {shadowPhase==="result"&&shadowResult&&<div className="ml-shadow-result"><span>03 · RESULT</span><strong>{shadowResult.score}%</strong><p>Reconhecido: “{shadowResult.heard}”</p><small>Correspondência das palavras reconhecidas com a frase-alvo.</small>{shadowSaved&&<em className="ml-shadow-saved">✦ Aprendizado salvo no seu perfil</em>}<button onClick={returnToMusic}>{track.audioUrl?"Voltar para a música":"Concluir prática"} <b>→</b></button></div>}
         </div>
         <button className="ml-next" onClick={()=>movePhrase(1)}><span>Continuar a sessão</span><b>→</b></button>
+        {sessionAttempts.length>0&&<div className="ml-session-finish">
+          {!sessionComplete?<><div><span>SESSÃO MUSICLAB</span><strong>{sessionAttempts.length} prática{sessionAttempts.length>1?"s":""} registrada{sessionAttempts.length>1?"s":""}</strong></div><button onClick={finishMusicSession} disabled={sessionSaving}>{sessionSaving?"Salvando…":"Finalizar sessão"} <b>→</b></button></>:<div className="ml-session-complete"><span>✦ SESSÃO CONCLUÍDA</span><strong>Seu progresso MusicLab foi registrado.</strong><button onClick={()=>router.push("/progress")}>Ver meu progresso <b>↗</b></button></div>}
+        </div>}
       </div>
     </section>
 
