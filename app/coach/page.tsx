@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -380,7 +381,7 @@ export default function CoachPage() {
 
       <div className="coach-container">
         <header className="coach-header">
-          <button className="coach-back" onClick={requestExitSession}>← Voltar</button>
+          <button className="coach-back" onClick={requestExitSession}><ArrowLeft /> Voltar</button>
           <div className="coach-brand">
             <div className="coach-mark"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div>
             <div>
@@ -428,7 +429,7 @@ export default function CoachPage() {
             </div>
 
             <div className="session-summary-actions">
-              <button className="coach-primary" onClick={startSession}>Praticar novamente <span>→</span></button>
+              <button className="coach-primary" onClick={startSession}>Praticar novamente <span><ArrowRight /></span></button>
               <button className="session-summary-progress" onClick={() => router.push("/progress")}>Ver meu progresso</button>
             </div>
           </section>
@@ -525,7 +526,7 @@ export default function CoachPage() {
                     )}
                     {message.role === "coach" && message.feedback && (
                       <div className="speakflow-insight">
-                        <div className="insight-title"><span>✦</span> SPEAKFLOW INSIGHT</div>
+                        <div className="insight-title"><span><Sparkles /></span> SPEAKFLOW INSIGHT</div>
                         <div className="insight-section">
                           <span className="insight-label">VOCÊ DISSE</span>
                           <strong>{message.feedback.original}</strong>
