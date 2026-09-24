@@ -55,6 +55,8 @@ export default function MusicLab() {
   const [missionComplete,setMissionComplete]=useState(false);
   const [missionScore,setMissionScore]=useState<number|null>(null);
   const [missionTarget,setMissionTarget]=useState<number|null>(null);
+  const [studyTab,setStudyTab]=useState<"message"|"vocabulary"|"patterns"|"listening"|"reflection">("message");
+  const [learnedWords,setLearnedWords]=useState<string[]>([]);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -190,7 +192,7 @@ export default function MusicLab() {
     setStep(0);
     setRevealed(false);
     setAudioError("");
-    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);
+    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);setStudyTab("message");setLearnedWords([]);
     resetShadow();
   }
 
@@ -435,14 +437,21 @@ export default function MusicLab() {
           {revealed&&<div className="ml-discovery-content"><div><span>SENTIDO</span><strong>{phrase.meaning}</strong></div><div><span>POR DENTRO DO INGLÊS</span><p>{phrase.note}</p></div></div>}
         </div>
         {track.lesson&&<section className="ml-song-study">
-          <div className="ml-study-head"><span>SONG INTELLIGENCE</span><strong>Entenda o inglês por dentro da música</strong><small>Vocabulário · mensagem · padrões · listening</small></div>
-          <div className="ml-study-grid">
-            <article className="ml-study-message"><span>MENSAGEM CENTRAL</span><p>{track.lesson.centralMessage}</p></article>
-            <article><span>VOCABULÁRIO-CHAVE</span><div className="ml-vocab-list">{track.lesson.vocabulary.map(item=><div key={item.term}><strong>{item.term}</strong><p>{item.meaning}</p><small>{item.usage}</small></div>)}</div></article>
-            <article><span>INGLÊS EM USO</span>{track.lesson.languagePatterns.map(item=><div className="ml-pattern" key={item.pattern}><strong>{item.pattern}</strong><p>{item.explanation}</p><small>{item.example}</small></div>)}</article>
-            <article><span>MISSÃO DE LISTENING</span>{track.lesson.listeningGoals.map((goal,index)=><p className="ml-study-task" key={goal}><b>0{index+1}</b>{goal}</p>)}</article>
+          <div className="ml-study-head"><span>SONG INTELLIGENCE</span><strong>Entenda o inglês por dentro da música</strong><small>{learnedWords.length}/{track.lesson.vocabulary.length} palavras exploradas</small></div>
+          <nav className="ml-study-tabs" aria-label="Camadas didáticas">
+            <button className={studyTab==="message"?"active":""} onClick={()=>setStudyTab("message")}>Mensagem</button>
+            <button className={studyTab==="vocabulary"?"active":""} onClick={()=>setStudyTab("vocabulary")}>Vocabulário</button>
+            <button className={studyTab==="patterns"?"active":""} onClick={()=>setStudyTab("patterns")}>Inglês em uso</button>
+            <button className={studyTab==="listening"?"active":""} onClick={()=>setStudyTab("listening")}>Listening</button>
+            <button className={studyTab==="reflection"?"active":""} onClick={()=>setStudyTab("reflection")}>Interpretação</button>
+          </nav>
+          <div className="ml-study-stage">
+            {studyTab==="message"&&<article><span>MENSAGEM CENTRAL</span><h3>Construa o sentido antes de procurar cada palavra.</h3><p>{track.lesson.centralMessage}</p><button onClick={()=>setStudyTab("vocabulary")}>Explorar vocabulário <b>→</b></button></article>}
+            {studyTab==="vocabulary"&&<article><span>VOCABULÁRIO-CHAVE</span><div className="ml-vocab-cards">{track.lesson.vocabulary.map(item=><button key={item.term} className={learnedWords.includes(item.term)?"learned":""} onClick={()=>setLearnedWords(words=>words.includes(item.term)?words.filter(word=>word!==item.term):[...words,item.term])}><strong>{item.term}</strong><p>{item.meaning}</p><small>{item.usage}</small><em>{learnedWords.includes(item.term)?"✓ EXPLORADA":"TOQUE PARA MARCAR"}</em></button>)}</div></article>}
+            {studyTab==="patterns"&&<article><span>INGLÊS EM USO</span>{track.lesson.languagePatterns.map(item=><div className="ml-pattern" key={item.pattern}><strong>{item.pattern}</strong><p>{item.explanation}</p><small>{item.example}</small><button onClick={()=>speak(item.example)}>▶ Ouvir exemplo</button></div>)}</article>}
+            {studyTab==="listening"&&<article><span>MISSÃO DE LISTENING</span><h3>Volte à faixa com uma intenção específica.</h3>{track.lesson.listeningGoals.map((goal,index)=><p className="ml-study-task" key={goal}><b>0{index+1}</b>{goal}</p>)}</article>}
+            {studyTab==="reflection"&&<article><span>THINK IN ENGLISH</span><h3>Transforme compreensão em produção.</h3>{track.lesson.reflectionPrompts.map((prompt,index)=><div className="ml-reflection-prompt" key={prompt}><b>0{index+1}</b><p>{prompt}</p></div>)}</article>}
           </div>
-          <div className="ml-reflection"><span>THINK IN ENGLISH</span>{track.lesson.reflectionPrompts.map(prompt=><p key={prompt}>{prompt}</p>)}</div>
         </section>}
         <div className={"ml-shadow " + (shadowPhase!=="idle"?"active":"")}>
           <div className="ml-shadow-head"><span>SHADOW MODE</span><small>OUÇA · REPITA · VOLTE À MÚSICA</small></div>
