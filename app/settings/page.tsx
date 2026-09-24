@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, BrainCircuit, Check, CircleCheck, CircleUserRound, Palette, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BrainCircuit, Check, CircleCheck, CircleUserRound, Monitor, Moon, Palette, ShieldCheck, Sun } from "lucide-react";
 
 export default function SettingsPage(){
   const router=useRouter();
@@ -97,9 +97,9 @@ export default function SettingsPage(){
       <section id="appearance" className="settings-section">
         <div className="settings-section-title"><span>01</span><div><small>ACCESSIBILITY & APPEARANCE</small><h2>Aparência</h2><p>Escolha o contraste visual mais confortável para usar a SpeakFlow.</p></div></div>
         <div className="settings-theme-picker" role="group" aria-label="Tema da aplicação">
-          <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"/><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?<Check />:null}</b></button>
-          <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"/><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?<Check />:null}</b></button>
-          <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?<Check />:null}</b></button>
+          <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"><Moon /></i><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?<Check />:null}</b></button>
+          <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"><Sun /></i><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?<Check />:null}</b></button>
+          <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"><Monitor /></i><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?<Check />:null}</b></button>
         </div>
         <div className="settings-accessibility">
           <div><span>TEXT SIZE</span><strong>Tamanho do texto <b className="settings-scale-value">{textScale}%</b></strong><p>Ajuste a leitura em tempo real. A interface protege o layout entre 90% e 130%.</p><div className="settings-text-slider"><span>A</span><input type="range" min="90" max="130" step="5" value={textScale} onChange={e=>applyTextScale(Number(e.target.value))} aria-label={`Tamanho do texto: ${textScale}%`} aria-valuetext={`${textScale}%`}/><strong>A</strong></div><div className="settings-text-preview" aria-live="polite"><small>PRÉVIA AO VIVO</small><p>Aprender inglês deve ser natural, claro e confortável.</p></div></div>
