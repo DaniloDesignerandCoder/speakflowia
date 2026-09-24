@@ -88,6 +88,7 @@ export default function MusicLab() {
   const spectrumRef=useRef<HTMLDivElement|null>(null);
   const spectrumMotionRef=useRef<number[]>(Array(16).fill(.18));
   const spectrumPhaseRef=useRef(0);
+  const waveformDataRef=useRef<Uint8Array<ArrayBuffer>|null>(null);
 
   useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");void loadAdaptiveCue();});},[router]);
 
@@ -180,34 +181,39 @@ export default function MusicLab() {
     let sum=0;
     for(let i=0;i<data.length;i++)sum+=data[i];
     audioEnergyRef.current=sum/(data.length*255);
-    spectrumPhaseRef.current+=.17+audioEnergyRef.current*.34;
+    const waveform=waveformDataRef.current?.length===analyser.fftSize
+      ? waveformDataRef.current
+      : new Uint8Array(analyser.fftSize);
+    waveformDataRef.current=waveform;
+    analyser.getByteTimeDomainData(waveform);
+    spectrumPhaseRef.current+=.12+audioEnergyRef.current*.24;
     const bars=spectrumRef.current?.children;
     if(bars?.length){
-      const nyquist=(audioContextRef.current?.sampleRate??44100)/2;
-      const minHz=72,maxHz=9800;
-      const logRange=Math.log(maxHz/minHz);
+      const sampleWindow=Math.max(2,Math.floor(waveform.length/(bars.length*2)));
       for(let i=0;i<bars.length;i++){
-        const lowHz=minHz*Math.exp(logRange*(i/bars.length));
-        const highHz=minHz*Math.exp(logRange*((i+1)/bars.length));
-        const start=Math.max(1,Math.floor(lowHz/nyquist*data.length));
-        const end=Math.min(data.length-1,Math.max(start+1,Math.ceil(highHz/nyquist*data.length)));
-        let peak=0,bandSum=0;
-        for(let j=start;j<=end;j++){peak=Math.max(peak,data[j]);bandSum+=data[j];}
-        const average=bandSum/(end-start+1);
-        const centerHz=Math.sqrt(lowHz*highHz);
-        const bassWeight=centerHz<180?2.12:centerHz<420?1.62:centerHz<1200?1.24:1.04;
-        const raw=((peak*.62+average*.38)/255)*bassWeight;
-        const signal=Math.min(1,Math.pow(raw,0.58));
-        const previous=spectrumMotionRef.current[i]??.18;
-        const reactiveFloor=(.055+audioEnergyRef.current*.26)*(1+.18*Math.sin(spectrumPhaseRef.current+i*.83));
-        const target=Math.max(reactiveFloor,signal);
-        const level=previous+(target-previous)*(target>previous?.64:.34);
+        const center=Math.floor(((i+.5)/bars.length)*waveform.length);
+        const from=Math.max(0,center-sampleWindow);
+        const to=Math.min(waveform.length-1,center+sampleWindow);
+        let localPeak=0,localSum=0,count=0;
+        for(let j=from;j<=to;j++){
+          const displacement=Math.abs((waveform[j]-128)/128);
+          localPeak=Math.max(localPeak,displacement);
+          localSum+=displacement;
+          count++;
+        }
+        const localAverage=count?localSum/count:0;
+        const waveformLevel=Math.min(1,localPeak*.72+localAverage*.9);
+        const energyLift=Math.min(.38,audioEnergyRef.current*.72);
+        const pulse=(.035+audioEnergyRef.current*.12)*(1+.22*Math.sin(spectrumPhaseRef.current+i*.78));
+        const target=Math.min(1,Math.max(pulse,waveformLevel*.9+energyLift));
+        const previous=spectrumMotionRef.current[i]??.12;
+        const level=previous+(target-previous)*(target>previous?.72:.4);
         spectrumMotionRef.current[i]=level;
         const height=3+level*33;
         const bar=bars[i] as HTMLElement;
         bar.style.height=`${height}px`;
-        bar.style.opacity=String(.34+level*.66);
-        bar.style.transform=`scaleY(${.92+level*.14})`;
+        bar.style.opacity=String(.38+level*.62);
+        bar.style.transform=`scaleY(${.94+level*.12})`;
       }
     }
     if(audio.duration&&Number.isFinite(audio.duration)){
