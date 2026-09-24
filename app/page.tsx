@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "./lib/supabase";
-import { AudioLines, BookOpenText, ChartNoAxesColumnIncreasing, House, Layers3, MessageCircleMore, Mic2, Settings2, type LucideIcon } from "lucide-react";
+import { AudioLines, BookOpenText, ChartNoAxesColumnIncreasing, House, Layers3, MessageCircleMore, Mic2, Settings2, GraduationCap, type LucideIcon } from "lucide-react";
 
 const modules: Array<{ title: string; subtitle: string; description: string; icon: LucideIcon; route: string }> = [
   {
@@ -436,7 +436,7 @@ export default function Home() {
             <div className="dashboard-level-main">
               <span className="dashboard-label">SEU NÍVEL ATUAL</span>
               <div className="dashboard-level-title">
-                <div className="dashboard-level-orb">✦</div>
+                <div className="dashboard-level-orb"><GraduationCap /></div>
                 <div>
                   <h2>{currentLevel.label}</h2>
                   <p>{currentLevel.description}</p>
@@ -447,7 +447,7 @@ export default function Home() {
               <span>APRENDIZADO ADAPTATIVO</span>
               <strong>Seu Coach acompanha seu ritmo.</strong>
               <p>Vocabulário, perguntas e feedback são ajustados ao seu nível durante os treinos.</p>
-              <button onClick={() => router.push("/coach")}>Treinar neste nível <span>→</span></button>
+              <button onClick={() => router.push("/coach")}>Treinar neste nível</button>
             </div>
           </section>
 
@@ -457,14 +457,14 @@ export default function Home() {
               <h2>{learningFocus.skill}</h2>
               <p>{learningFocus.tip}</p>
               <button className="dashboard-focus-action" onClick={() => router.push(learningFocus.route)}>
-                Continuar praticando <span>→</span>
+                Continuar praticando
               </button>
             </div>
 
             <div className="dashboard-focus-stats">
               <div><strong>{learningFocus.sessions}</strong><span>SESSÕES</span></div>
               <div><strong>{learningFocus.minutes}</strong><span>MINUTOS</span></div>
-              <button onClick={() => router.push("/progress")}>Ver progresso <span>↗</span></button>
+              <button onClick={() => router.push("/progress")}>Ver progresso</button>
             </div>
           </section>
 
