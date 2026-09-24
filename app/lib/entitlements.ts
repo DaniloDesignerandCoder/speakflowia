@@ -22,6 +22,13 @@ export type SpeakFlowAccessState = {
 export type UsageLevel = "available" | "near_limit" | "limit_reached";
 export type UsageResource = "coach" | "voice";
 export type UsageAction = "allow" | "warn" | "block";
+export type AccessReason = "available" | "near_limit" | "limit_reached" | "pro_required";
+
+export type AccessDecision = {
+  allowed: boolean;
+  action: UsageAction;
+  reason: AccessReason;
+};
 
 export type UsageStatus = {
   used: number;
@@ -75,6 +82,22 @@ export function getUsageAction(status: UsageStatus): UsageAction {
   if (status.level === "limit_reached") return "block";
   if (status.level === "near_limit") return "warn";
   return "allow";
+}
+
+export function getUsageDecision(status: UsageStatus): AccessDecision {
+  const action = getUsageAction(status);
+  return {
+    allowed: action !== "block",
+    action,
+    reason: status.level,
+  };
+}
+
+export function getFeatureDecision(plan: SpeakFlowPlan, requiresPro: boolean): AccessDecision {
+  if (requiresPro && plan !== "pro") {
+    return { allowed: false, action: "block", reason: "pro_required" };
+  }
+  return { allowed: true, action: "allow", reason: "available" };
 }
 
 export function getUsageMessage(resource: UsageResource, status: UsageStatus) {
