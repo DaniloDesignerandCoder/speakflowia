@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "./lib/supabase";
 
-const PUBLIC_ROUTES = new Set(["/login", "/onboarding"]);
+const PUBLIC_ROUTES = new Set(["/login"]);
 const SESSION_KEY = "speakflow:active-user";
 
 export default function SessionGuard() {
   const router = useRouter();
   const pathname = usePathname();
-  const activeUserRef = useRef<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -28,7 +27,6 @@ export default function SessionGuard() {
 
     const bindUser = (userId: string | null) => {
       if (!userId) {
-        activeUserRef.current = null;
         try {
           localStorage.removeItem(SESSION_KEY);
         } catch {}
@@ -42,24 +40,23 @@ export default function SessionGuard() {
 
       if (previous && previous !== userId) clearPrivateClientState();
 
-      activeUserRef.current = userId;
       try {
         localStorage.setItem(SESSION_KEY, userId);
       } catch {}
     };
 
     const enforceSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user }, error } = await supabase.auth.getUser();
       if (!mounted) return;
 
-      if (!session) {
+      if (error || !user) {
         bindUser(null);
         clearPrivateClientState();
         if (!PUBLIC_ROUTES.has(pathname)) router.replace("/login");
         return;
       }
 
-      bindUser(session.user.id);
+      bindUser(user.id);
     };
 
     void enforceSession();
