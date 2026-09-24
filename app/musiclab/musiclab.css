@@ -155,3 +155,7 @@
 
 /* Recall → adaptive vocabulary mission */
 .ml-word-mission{margin-top:12px;padding:12px;border-top:1px solid rgba(255,255,255,.06);background:linear-gradient(90deg,rgba(123,143,255,.045),transparent)}.ml-word-mission>span{display:block;color:#91a5ff;font-size:5px;font-weight:900;letter-spacing:1.15px}.ml-word-mission>strong{display:block;margin-top:5px;color:#e6eaff;font-size:10px}.ml-word-mission>p{margin:6px 0;color:rgba(255,255,255,.47);font-size:8px;line-height:1.5}.ml-word-mission>p b{color:#bfcaff}.ml-word-mission>small{display:block;color:rgba(255,255,255,.3);font-size:7px;line-height:1.45}.ml-word-mission>div{display:flex;gap:6px;margin-top:9px}.ml-word-mission button{border:1px solid rgba(126,146,255,.13);border-radius:8px;background:rgba(112,132,244,.06);color:#cad3ff;padding:7px 9px;font-size:7px;cursor:pointer}.ml-word-mission.mastered{background:linear-gradient(90deg,rgba(79,208,148,.055),transparent)}.ml-word-mission.mastered>span{color:#79dfa9}
+
+
+/* Vocabulary mission → speaking */
+.ml-word-speak-result{margin-top:10px!important;padding:10px!important;border:1px solid rgba(111,225,170,.12);border-radius:9px;background:rgba(76,202,145,.04)}.ml-word-speak-result span{display:block;color:#79dfa9;font-size:5px;font-weight:900;letter-spacing:1.1px}.ml-word-speak-result strong{display:block;margin-top:3px;color:#dcffed;font-size:16px}.ml-word-speak-result p{margin:3px 0;color:rgba(255,255,255,.45);font-size:7px}.ml-word-speak-result small{display:block;color:rgba(255,255,255,.32);font-size:7px;line-height:1.45}
