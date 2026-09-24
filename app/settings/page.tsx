@@ -92,7 +92,7 @@ export default function SettingsPage(){
     </aside>
 
     <section className="settings-main">
-      <header><div><span>CONFIGURAÇÕES</span><h1>Seu SpeakFlow.<br/><em>Do seu jeito.</em></h1><p>Ajuste como a inteligência conversa, corrige e evolui com você.</p></div><button type="button" onClick={()=>router.push("/profile")}>Ver perfil →</button></header>
+      <header><div><span>CONFIGURAÇÕES</span><h1>Seu SpeakFlow.<br/><em>Do seu jeito.</em></h1><p>Ajuste como a inteligência conversa, corrige e evolui com você.</p></div><button type="button" onClick={()=>router.push("/profile")}>Ver perfil</button></header>
 
       <section id="appearance" className="settings-section">
         <div className="settings-section-title"><span>01</span><div><small>ACCESSIBILITY & APPEARANCE</small><h2>Aparência</h2><p>Escolha o contraste visual mais confortável para usar a SpeakFlow.</p></div></div>
