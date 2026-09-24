@@ -59,6 +59,7 @@ export default function MusicLab() {
   const [learnedWords,setLearnedWords]=useState<string[]>([]);
   const [studyXp,setStudyXp]=useState(0);
   const [completedStudyTabs,setCompletedStudyTabs]=useState<string[]>([]);
+  const [studySaved,setStudySaved]=useState(false);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -183,7 +184,17 @@ export default function MusicLab() {
 
   function resetShadow(){setShadowPhase("idle");setShadowListening(false);setShadowResult(null);setShadowSaved(false);}
 
-  function completeStudyLayer(layer:"message"|"vocabulary"|"patterns"|"listening"|"reflection",xp:number){setCompletedStudyTabs(current=>current.includes(layer)?current:[...current,layer]);setStudyXp(current=>completedStudyTabs.includes(layer)?current:current+xp);}
+  function completeStudyLayer(layer:"message"|"vocabulary"|"patterns"|"listening"|"reflection",xp:number){const already=completedStudyTabs.includes(layer);setCompletedStudyTabs(current=>already?current:[...current,layer]);setStudyXp(current=>already?current:current+xp);if(layer==="reflection"&&!already)void saveSongStudyInsight();}
+
+  async function saveSongStudyInsight(){
+    if(!track.lesson||studySaved)return;
+    try{
+      const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
+      const vocabulary=track.lesson.vocabulary.filter(item=>learnedWords.includes(item.term)).map(item=>item.term).join(", ");
+      const {error}=await supabase.from("learning_insights").insert({user_id:session.user.id,level:track.level.toLowerCase().replace(/\\s+/g,"_"),original_text:`Song Intelligence concluído em ${track.title}`,corrected_text:vocabulary?`Vocabulário explorado: ${vocabulary}`:"Compreensão musical e interpretação praticadas.",tip:"Reutilize o vocabulário e os padrões desta música em frases próprias e em novas sessões de listening.",skill_category:"Vocabulário & Listening · MusicLab"});
+      if(error)throw error; setStudySaved(true);
+    }catch(error){console.error("Erro ao salvar aprendizado Song Intelligence:",error);}
+  }
 
   function learnWord(term:string){setLearnedWords(words=>{if(words.includes(term))return words.filter(word=>word!==term);setStudyXp(xp=>xp+5);return [...words,term];});}
 
@@ -198,7 +209,7 @@ export default function MusicLab() {
     setStep(0);
     setRevealed(false);
     setAudioError("");
-    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);setStudyTab("message");setLearnedWords([]);setStudyXp(0);setCompletedStudyTabs([]);
+    setMissionStarted(false);setMissionComplete(false);setMissionScore(null);setMissionTarget(null);setStudyTab("message");setLearnedWords([]);setStudyXp(0);setCompletedStudyTabs([]);setStudySaved(false);
     resetShadow();
   }
 
@@ -456,7 +467,7 @@ export default function MusicLab() {
             {studyTab==="vocabulary"&&<article><span>VOCABULÁRIO-CHAVE</span><div className="ml-vocab-cards">{track.lesson.vocabulary.map(item=><button key={item.term} className={learnedWords.includes(item.term)?"learned":""} onClick={()=>learnWord(item.term)}><strong>{item.term}</strong><p>{item.meaning}</p><small>{item.usage}</small><em>{learnedWords.includes(item.term)?"✓ EXPLORADA":"TOQUE PARA MARCAR"}</em></button>)}</div>{learnedWords.length===track.lesson.vocabulary.length&&<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("vocabulary",20);setStudyTab("patterns")}}>Concluir vocabulário +20 XP <b>→</b></button>}</article>}
             {studyTab==="patterns"&&<article><span>INGLÊS EM USO</span>{track.lesson.languagePatterns.map(item=><div className="ml-pattern" key={item.pattern}><strong>{item.pattern}</strong><p>{item.explanation}</p><small>{item.example}</small><button onClick={()=>speak(item.example)}>▶ Ouvir exemplo</button></div>)}<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("patterns",15);setStudyTab("listening")}}>Entendi os padrões +15 XP <b>→</b></button></article>}
             {studyTab==="listening"&&<article><span>MISSÃO DE LISTENING</span><h3>Volte à faixa com uma intenção específica.</h3>{track.lesson.listeningGoals.map((goal,index)=><p className="ml-study-task" key={goal}><b>0{index+1}</b>{goal}</p>)}<button className="ml-layer-complete" onClick={()=>{completeStudyLayer("listening",20);setStudyTab("reflection")}}>Concluir listening +20 XP <b>→</b></button></article>}
-            {studyTab==="reflection"&&<article><span>THINK IN ENGLISH</span><h3>Transforme compreensão em produção.</h3>{track.lesson.reflectionPrompts.map((prompt,index)=><div className="ml-reflection-prompt" key={prompt}><b>0{index+1}</b><p>{prompt}</p></div>)}{!completedStudyTabs.includes("reflection")?<button className="ml-layer-complete" onClick={()=>completeStudyLayer("reflection",25)}>Finalizar Song Intelligence +25 XP</button>:<div className="ml-study-finished"><span>✦ SONG INTELLIGENCE COMPLETE</span><strong>{studyXp} XP conquistados nesta experiência</strong><p>Agora leve esse conhecimento para o Shadow Mode e transforme compreensão em fala.</p></div>}</article>}
+            {studyTab==="reflection"&&<article><span>THINK IN ENGLISH</span><h3>Transforme compreensão em produção.</h3>{track.lesson.reflectionPrompts.map((prompt,index)=><div className="ml-reflection-prompt" key={prompt}><b>0{index+1}</b><p>{prompt}</p></div>)}{!completedStudyTabs.includes("reflection")?<button className="ml-layer-complete" onClick={()=>completeStudyLayer("reflection",25)}>Finalizar Song Intelligence +25 XP</button>:<div className="ml-study-finished"><span>✦ SONG INTELLIGENCE COMPLETE</span><strong>{studyXp} XP conquistados nesta experiência</strong><p>Agora leve esse conhecimento para o Shadow Mode e transforme compreensão em fala.</p>{studySaved&&<em>✓ Vocabulário e listening adicionados ao seu aprendizado adaptativo</em>}</div>}</article>}
           </div>
         </section>}
         <div className={"ml-shadow " + (shadowPhase!=="idle"?"active":"")}>
