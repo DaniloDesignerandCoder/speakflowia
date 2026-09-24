@@ -6,5 +6,14 @@
   "background_color": "#07090d",
   "theme_color": "#07090d",
   "description": "O poder da IA guiando sua fluência em inglês.",
-  "lang": "pt-BR"
+  "lang": "pt-BR",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/speakflow-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
