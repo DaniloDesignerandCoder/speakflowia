@@ -593,7 +593,6 @@ export default function CoachPage() {
               <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
                 {isFinishing ? (finishStage <= 1 ? "Analisando sua prática..." : finishStage === 2 ? "Atualizando seu aprendizado..." : "Preparando seu progresso...") : "Finalizar sessão"}
               </button>
-              <div className="conversation-note"><span className="conversation-status-dot" /> Sessão de prática em andamento.</div>
             </div>
           </section>
         )}
