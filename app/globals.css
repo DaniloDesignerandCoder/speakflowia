@@ -3966,4 +3966,3 @@ button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
 
 .coach-icon-spin{animation:coach-icon-spin .85s linear infinite}
 @keyframes coach-icon-spin{to{transform:rotate(360deg)}}
-.conversation-status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#70dca7;box-shadow:0 0 8px rgba(112,220,167,.35)}
