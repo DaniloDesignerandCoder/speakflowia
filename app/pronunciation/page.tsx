@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mic2, Volume2 } from "lucide-react";
 import "./pronunciation.css";
 
 type Insight={id?:string;original_text:string|null;corrected_text:string|null;tip:string|null;skill_category:string|null;created_at:string};
@@ -32,8 +32,8 @@ export default function PronunciationPage(){
  return <main className="pron-shell"><header className="pron-top"><button onClick={()=>router.push("/")}><ArrowLeft /> Início</button><div className="pron-brand"><img src="/speakflow-logo.png" alt=""/><strong>Speak<span>Flow</span></strong><small>PRONUNCIATION LAB</small></div><button onClick={()=>router.push("/progress")}>Progresso <ArrowRight /></button></header>
  <section className="pron-hero"><span>SPEECH TRAINING ENGINE</span><h1>Treine o som.<br/><em>Leve para a conversa.</em></h1><p>Prática focada de frases, contrastes e padrões de fala com a voz neural SpeakFlow como modelo.</p><div className="pron-stats"><div><strong>{personal.length}</strong><span>focos pessoais</span></div><div><strong>{drills.length}</strong><span>treinos essenciais</span></div></div></section>
  <section className="pron-workspace"><aside><span>TRILHA DE TREINO</span>{lessons.map((x,i)=><button key={i} className={i===index?"active":""} onClick={()=>{setIndex(i);setResult(null)}}><strong>{x.title}</strong><small>{masteryLabel(mastery[x.target.toLowerCase()]?.status||"new")} · {x.focus}</small></button>)}</aside>
- <article className="pron-study"><div className="pron-mastery"><span>{masteryLabel(mastery[current.target.toLowerCase()]?.status||"new")}</span><strong>{mastery[current.target.toLowerCase()]?.attempts||0} tentativas · melhor {mastery[current.target.toLowerCase()]?.bestScore||0}%</strong></div><div className="pron-focus"><span>FOCO</span><strong>{current.focus}</strong></div><span className="pron-label">OUÇA · REPITA · COMPARE</span><h2>{current.target}</h2><p>{current.tip}</p><div className="pron-actions"><button onClick={speak} disabled={speaking}>{speaking?"◉ Reproduzindo…":"🔊 Ouvir modelo neural"}</button><button className={listening?"recording":""} onClick={record} disabled={listening}>{listening?"● Ouvindo…":"🎙️ Repetir frase"}</button></div>
+ <article className="pron-study"><div className="pron-mastery"><span>{masteryLabel(mastery[current.target.toLowerCase()]?.status||"new")}</span><strong>{mastery[current.target.toLowerCase()]?.attempts||0} tentativas · melhor {mastery[current.target.toLowerCase()]?.bestScore||0}%</strong></div><div className="pron-focus"><span>FOCO</span><strong>{current.focus}</strong></div><span className="pron-label">OUÇA · REPITA · COMPARE</span><h2>{current.target}</h2><p>{current.tip}</p><div className="pron-actions"><button onClick={speak} disabled={speaking}>{speaking ? "Reproduzindo…" : <><Volume2 /> Ouvir modelo neural</>}</button><button className={listening?"recording":""} onClick={record} disabled={listening}>{listening ? "Ouvindo…" : <><Mic2 /> Repetir frase</>}</button></div>
  {result&&<div className="pron-result"><div><span>RECONHECIDO</span><strong>{result.heard}</strong></div><div><span>CORRESPONDÊNCIA</span><strong>{result.score}%</strong></div><p>Esta pontuação compara as palavras reconhecidas com a frase-alvo; não substitui uma análise fonética completa.</p></div>}
- <button className="pron-next" onClick={()=>{setIndex((index+1)%lessons.length);setResult(null)}}>Próximo treino <ArrowRight /></button></article></section>
+ <button className="pron-next" onClick={()=>{setIndex((index+1)%lessons.length);setResult(null)}}>Próximo treino</button></article></section>
  </main>
 }
