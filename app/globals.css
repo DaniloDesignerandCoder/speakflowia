@@ -243,10 +243,6 @@ img {
     );
 }
 
-.dashboard-account-item {
-  display: none;
-}
-
 .dashboard-menu-item.active > span {
   color: #91a9ff;
 }
@@ -1315,13 +1311,6 @@ img {
     display: none;
   }
 
-  .dashboard-settings-item {
-    display: none;
-  }
-
-  .dashboard-account-item {
-    display: flex;
-  }
 
   .dashboard-menu {
     width: 100%;
@@ -1329,7 +1318,7 @@ img {
     display: grid;
 
     grid-template-columns:
-      repeat(5, minmax(0, 1fr));
+      repeat(6, minmax(0, 1fr));
 
     gap: 2px;
   }
@@ -1353,7 +1342,7 @@ img {
 
     text-align: center;
 
-    font-size: 7px;
+    font-size: 6.5px;
   }
 
   .dashboard-menu-item > span {
