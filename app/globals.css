@@ -3877,19 +3877,3 @@ html{font-size:calc(16px * var(--sf-text-scale))}\nbody{font-size:var(--sf-text-
 @media(max-width:760px){.settings-accessibility{grid-template-columns:1fr}}
 
 .settings-scale-value{float:right;color:#8da2ff;font-size:9px}.settings-text-slider{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin:12px 0}.settings-text-slider>span{font-size:8px}.settings-text-slider>strong{font-size:13px}.settings-text-slider input{width:100%;accent-color:#7f96ff;cursor:pointer}.settings-text-preview{padding:12px;border:1px solid rgba(126,148,255,.1);border-radius:10px;background:rgba(126,148,255,.035)}.settings-text-preview small{display:block;color:#7f96ff;font-size:6px;font-weight:850;letter-spacing:1px}.settings-text-preview p{margin:5px 0 0;font-size:calc(8px * var(--sf-text-scale));line-height:1.55}:root[data-theme="light"] .settings-text-preview{background:#f7f8fc;border-color:rgba(31,45,76,.1)}:root[data-theme="light"] .settings-scale-value{color:#4059c7}
-
-
-/* Accessible brand mark: preserve the official geometry and swap only its contrast treatment. */
-:root[data-theme="light"] .dashboard-brand img,
-:root[data-theme="light"] .dashboard-mobile-brand img,
-:root[data-theme="light"] .profile-brand img,
-:root[data-theme="light"] .settings-brand img{
-  content:url("/speakflow-logo-light.svg");
-  filter:none;
-}
-:root[data-theme="dark"] .dashboard-brand img,
-:root[data-theme="dark"] .dashboard-mobile-brand img,
-:root[data-theme="dark"] .profile-brand img,
-:root[data-theme="dark"] .settings-brand img{
-  content:url("/speakflow-logo.svg");
-}
