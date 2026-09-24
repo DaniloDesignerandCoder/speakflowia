@@ -33,7 +33,7 @@ export default function PlansPage() {
           <img src="/speakflow-logo.png" alt="SpeakFlow" />
           <div><strong>Speak<span>Flow</span></strong><small>PLANOS</small></div>
         </div>
-        <button type="button" className="plans-account" onClick={() => router.push("/settings")}>Minha conta</button>
+        <div className="plans-topbar-spacer" aria-hidden="true" />
       </header>
 
       <section className="plans-hero">
