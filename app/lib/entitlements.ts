@@ -32,6 +32,18 @@ export type AccountAccessSnapshot = {
   usage: SpeakFlowMonthlyUsage;
 };
 
+export type AccountAccessView = AccountAccessSnapshot & {
+  effectivePlan: SpeakFlowPlan;
+  usageStatus: {
+    coach: UsageStatus;
+    voice: UsageStatus;
+  };
+  decisions: {
+    coach: AccessDecision;
+    voice: AccessDecision;
+  };
+};
+
 export type UsageLevel = "available" | "near_limit" | "limit_reached";
 export type UsageResource = "coach" | "voice";
 export type UsageAction = "allow" | "warn" | "block";
@@ -155,6 +167,20 @@ export function getAccessUsageStatus(state: SpeakFlowAccessState) {
   return {
     coach: getUsageStatus(state.usage.coachInteractions, state.entitlements.coachMonthlyLimit),
     voice: getUsageStatus(state.usage.voiceCharacters, state.entitlements.voiceCharacterMonthlyLimit),
+  };
+}
+
+export function createAccountAccessView(snapshot: AccountAccessSnapshot): AccountAccessView {
+  const effectivePlan = resolveEffectivePlan(snapshot.billing);
+  const usageStatus = getAccessUsageStatus(snapshot);
+  return {
+    ...snapshot,
+    effectivePlan,
+    usageStatus,
+    decisions: {
+      coach: getUsageDecision(usageStatus.coach),
+      voice: getUsageDecision(usageStatus.voice),
+    },
   };
 }
 
