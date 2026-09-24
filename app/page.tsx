@@ -340,7 +340,6 @@ export default function Home() {
                 onClick={() => router.push("/coach")}
               >
                 Começar um treino
-                <span>→</span>
               </button>
 
             </div>
@@ -419,7 +418,6 @@ export default function Home() {
 
                   <div className="dashboard-module-action">
                     Praticar
-                    <span>↗</span>
                   </div>
 
                 </button>
