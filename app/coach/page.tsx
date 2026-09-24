@@ -464,7 +464,7 @@ export default function CoachPage() {
 
             <button className="coach-primary" onClick={startSession}>
               Começar conversa
-              <span>→</span>
+             
             </button>
 
             <div className="coach-tip">
