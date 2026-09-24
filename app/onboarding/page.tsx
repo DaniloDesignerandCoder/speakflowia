@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const score = useMemo(() => answers.reduce((n, a, i) => n + (a === questions[i][4] ? 1 : 0), 0), [answers]);
   const result = results[score <= 1 ? 0 : score === 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4];
@@ -40,13 +41,18 @@ export default function OnboardingPage() {
 
   async function finish() {
     setSaving(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { router.replace("/login"); return; }
+    setSaveError("");
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) { setSaving(false); router.replace("/login"); return; }
     const { error } = await supabase.from("profiles").update({
       preferred_level: result[0],
       onboarding_completed: true,
-    }).eq("id", session.user.id);
-    if (error) { setSaving(false); return; }
+    }).eq("id", user.id);
+    if (error) {
+      setSaveError("Não foi possível salvar sua personalização agora. Tente novamente.");
+      setSaving(false);
+      return;
+    }
     router.replace("/");
     router.refresh();
   }
@@ -67,6 +73,7 @@ export default function OnboardingPage() {
       </> : <div className="onboarding-result">
         <span>SEU PONTO DE PARTIDA</span><div className="onboarding-orb">✦</div><h1>{result[1]}</h1><strong>{result[2]}</strong>
         <p>O SpeakFlow usará este nível para ajustar vocabulário, complexidade, perguntas e feedback. Você poderá alterá-lo depois.</p>
+        {saveError && <p role="alert">{saveError}</p>}
         <button className="onboarding-primary" disabled={saving} onClick={finish}>{saving ? "Personalizando..." : "Começar minha jornada →"}</button>
       </div>}
     </section>
