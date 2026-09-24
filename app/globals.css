@@ -243,6 +243,10 @@ img {
     );
 }
 
+.dashboard-account-item {
+  display: none;
+}
+
 .dashboard-menu-item.active > span {
   color: #91a9ff;
 }
@@ -1309,6 +1313,14 @@ img {
   .dashboard-brand,
   .dashboard-sidebar-footer {
     display: none;
+  }
+
+  .dashboard-settings-item {
+    display: none;
+  }
+
+  .dashboard-account-item {
+    display: flex;
   }
 
   .dashboard-menu {
