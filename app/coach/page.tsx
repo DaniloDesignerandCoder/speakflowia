@@ -619,7 +619,7 @@ export default function CoachPage() {
               <p>Para transformar esta prática em progresso, finalize a sessão antes de sair. Assim o SpeakFlow gera seu resumo e atualiza seu aprendizado.</p>
               <div className="session-exit-actions">
                 <button type="button" className="coach-primary" onClick={finishSession} disabled={isFinishing || isReplying}>
-                  {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : isReplying ? "Aguarde o Coach responder..." : "Encerrar e salvar sessão"}
+                  {isFinishing ? (finishStage <= 1 ? "Analisando sua prática..." : finishStage === 2 ? "Atualizando seu aprendizado..." : "Preparando seu progresso...") : isReplying ? "Aguarde o Coach responder..." : "Encerrar e salvar sessão"}
                 </button>
                 <button type="button" className="session-exit-continue" onClick={() => setShowExitGuard(false)} disabled={isFinishing}>
                   Continuar praticando
