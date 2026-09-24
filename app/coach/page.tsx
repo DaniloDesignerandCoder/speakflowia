@@ -54,6 +54,7 @@ export default function CoachPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
   const [sessionCompleted, setSessionCompleted] = useState(false);
+  const [hasSessionInteraction, setHasSessionInteraction] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
   const [finishStage, setFinishStage] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -107,17 +108,18 @@ export default function CoachPage() {
   }, [isFinishing]);
 
   useEffect(() => {
-    if (!started || isFinishing) return;
+    if (!started || !hasSessionInteraction || isFinishing) return;
     const warnBeforeUnload = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
     };
     window.addEventListener("beforeunload", warnBeforeUnload);
     return () => window.removeEventListener("beforeunload", warnBeforeUnload);
-  }, [started, isFinishing]);
+  }, [started, hasSessionInteraction, isFinishing]);
 
   function requestExitSession() {
-    if (!started) {
+    if (!started || !hasSessionInteraction) {
+      setStarted(false);
       router.push("/");
       return;
     }
@@ -147,6 +149,7 @@ export default function CoachPage() {
     setSessionSeconds(0);
     setSessionSummary(null);
     setSessionCompleted(false);
+    setHasSessionInteraction(false);
     setShowExitGuard(false);
     setStarted(true);
 
@@ -222,6 +225,7 @@ export default function CoachPage() {
     const text = input.trim();
     if (!text || isReplying) return;
 
+    setHasSessionInteraction(true);
     setMessages((current) => [...current, { role: "student", text }]);
     setInput("");
     setIsReplying(true);
@@ -270,6 +274,12 @@ export default function CoachPage() {
   async function finishSession() {
     if (isFinishing || isReplying) return;
     setShowExitGuard(false);
+    if (!hasSessionInteraction) {
+      setStarted(false);
+      setMessages([]);
+      setSessionSeconds(0);
+      return;
+    }
     setIsFinishing(true);
 
     const { data: { session } } = await supabase.auth.getSession();
