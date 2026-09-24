@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ChartNoAxesColumnIncreasing, House, MessageCircleMore } from "lucide-react";
 import "./progress.css";
 
 type Progress = { conversations_count:number; total_minutes:number; streak_days:number; last_practice_date:string|null };
@@ -54,7 +55,7 @@ export default function ProgressPage(){
  return <main className="progress-shell">
   <aside className="progress-sidebar">
    <button className="progress-brand" onClick={()=>router.push("/")}><img src="/speakflow-logo.png" alt="SpeakFlow"/><div><strong>Speak<span>Flow</span></strong><small>AI ENGLISH COACH</small></div></button>
-   <nav className="progress-menu"><button onClick={()=>router.push("/")}><span>⌂</span>Início</button><button onClick={()=>router.push("/coach")}><span>✦</span>Coach</button><button className="active"><span>▥</span>Progresso</button></nav>
+   <nav className="progress-menu"><button onClick={()=>router.push("/")}><span><House /></span>Início</button><button onClick={()=>router.push("/coach")}><span><MessageCircleMore /></span>Coach</button><button className="active"><span><ChartNoAxesColumnIncreasing /></span>Progresso</button></nav>
    <div className="progress-sidebar-footer"><img src="/speakflow-logo.png" alt=""/><div><strong>SpeakFlow</strong><small>Sua evolução, em movimento.</small></div></div>
   </aside>
   <section className="progress-main">
