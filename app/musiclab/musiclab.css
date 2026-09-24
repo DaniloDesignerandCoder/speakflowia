@@ -167,3 +167,7 @@
 
 /* AI Language Coach — learner-created sentences */
 .ml-sentence-coach{margin-top:9px;padding:10px;border-top:1px solid rgba(255,255,255,.06);background:linear-gradient(90deg,rgba(112,132,244,.055),transparent)}.ml-sentence-coach.loading{color:rgba(203,212,255,.58);font-size:7px;letter-spacing:.2px}.ml-sentence-coach>span{display:block;color:#9caeff;font-size:5px;font-weight:900;letter-spacing:1.05px}.ml-sentence-coach>p{margin:5px 0;color:rgba(255,255,255,.45);font-size:7px;line-height:1.5}.ml-sentence-coach>strong{display:block;color:#e8ebff;font-size:9px;font-weight:650;line-height:1.45}.ml-sentence-coach>button{margin-top:8px;border:1px solid rgba(125,145,255,.14);border-radius:8px;background:rgba(111,131,244,.065);color:#cbd4ff;padding:7px 9px;font-size:7px;cursor:pointer}
+
+
+/* AI sentence → contextual shadowing */
+.ml-sentence-coach>button+button{margin-left:6px}.ml-natural-shadow{margin-top:10px;padding:9px;border-radius:8px;border:1px solid rgba(104,224,169,.13);background:rgba(74,200,143,.04)}.ml-natural-shadow span{display:block;color:#79dfa9;font-size:5px;font-weight:900;letter-spacing:1.05px}.ml-natural-shadow strong{display:block;margin-top:3px;color:#dcffed;font-size:17px}.ml-natural-shadow p{margin:3px 0;color:rgba(255,255,255,.45);font-size:7px}.ml-natural-shadow small{display:block;color:rgba(255,255,255,.32);font-size:7px;line-height:1.45}@media(max-width:600px){.ml-sentence-coach>button{width:100%}.ml-sentence-coach>button+button{margin-left:0;margin-top:6px}}
