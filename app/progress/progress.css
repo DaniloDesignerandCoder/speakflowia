@@ -56,3 +56,19 @@
 .musiclab-progress-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.musiclab-progress-grid article{padding:17px;border:1px solid rgba(135,154,255,.1);border-radius:15px;background:rgba(7,9,17,.36)}.musiclab-progress-grid article>span{color:#8fa3ff;font-size:6px;font-weight:900;letter-spacing:1.35px}.musiclab-progress-grid article>strong{display:block;margin:10px 0 4px;font-size:25px;letter-spacing:-1px}.musiclab-progress-grid article>strong b{font-size:10px;color:#9eacff}.musiclab-progress-grid article>small{color:#ffffff48;font-size:7px}
 .musiclab-progress-foot{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid #ffffff0c}.musiclab-progress-foot>div{display:flex;align-items:center;gap:7px;color:#ffffff42;font-size:6px;font-weight:800;letter-spacing:1px}.musiclab-progress-foot i{width:18px;height:1px;background:linear-gradient(90deg,#7187ff55,transparent)}.musiclab-progress-foot button{position:relative;z-index:1;border:1px solid rgba(135,154,255,.15);border-radius:11px;background:rgba(113,135,255,.08);color:#dfe5ff;padding:9px 12px;font-size:8px;cursor:pointer}.musiclab-mode{background:radial-gradient(circle at 100% 0,rgba(116,94,255,.1),transparent 45%),linear-gradient(145deg,#ffffff08,#ffffff03)!important}
 @media(max-width:760px){.musiclab-progress-grid{grid-template-columns:repeat(2,1fr)}.musiclab-progress-foot{align-items:stretch;flex-direction:column}.musiclab-progress-foot>div{justify-content:center;flex-wrap:wrap}.musiclab-progress-foot button{width:100%;min-height:42px}}
+
+
+/* SpeakFlow global button interaction */
+button:not(:disabled){
+  position:relative;
+  overflow:hidden;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+button:not(:disabled):hover{
+  background-color:rgba(126,148,255,.12);
+  border-color:rgba(139,158,255,.34);
+  color:inherit;
+  box-shadow:inset 0 0 0 1px rgba(145,168,255,.04);
+}
+button:not(:disabled):active{transform:translateY(0) scale(.99)}
+button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
