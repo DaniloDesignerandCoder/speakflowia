@@ -311,8 +311,13 @@ export default function MusicLab() {
       const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
       const average=Math.round(sessionAttempts.reduce((sum,item)=>sum+item.score,0)/sessionAttempts.length);
       const duration=Math.max(1,Math.round(audioCurrentTime));
-      const summary=`MusicLab · ${track.title}: ${sessionAttempts.length} prática(s) de shadowing, média de correspondência ${average}%.`;
-      const {error}=await supabase.from("learning_sessions").insert({user_id:session.user.id,mode:"musiclab",duration_seconds:duration,score:average,summary,skills_practiced:["Listening","Shadowing","Pronúncia"],positive_point:average>=80?"Boa correspondência nas frases praticadas.":"Você concluiu práticas de fala dentro do contexto musical.",improvement_point:average>=80?"Continue buscando ritmo e naturalidade.":"Repita as frases com mais calma após ouvir o modelo.",next_recommendation:"Continue no MusicLab e pratique novas frases da faixa."});
+      const fallback={summary:`MusicLab · ${track.title}: ${sessionAttempts.length} prática(s) de shadowing, média de correspondência ${average}%.`,skills_practiced:"Listening, Shadowing, Pronúncia",positive_point:average>=80?"Boa correspondência nas frases praticadas.":"Você concluiu práticas de fala dentro do contexto musical.",improvement_point:average>=80?"Continue buscando ritmo e naturalidade.":"Repita as frases com mais calma após ouvir o modelo.",next_recommendation:"Continue no MusicLab e pratique novas frases da faixa."};
+      let pedagogical=fallback;
+      try{
+        const {data,error:coachError}=await supabase.functions.invoke("speakflow-coach",{body:{operation:"session_summary",level:track.level.toLowerCase(),mode:"musiclab",learningGoal:"pronunciation",pronunciationResults:sessionAttempts.map(item=>({target:item.phrase,score:item.score})),feedbacks:sessionAttempts.map(item=>({skill_category:"Pronúncia · MusicLab",original:item.phrase,corrected:item.phrase,tip:`Correspondência reconhecida: ${item.score}%`}))}});
+        if(!coachError&&data?.summary&&data?.skills_practiced&&data?.positive_point&&data?.improvement_point&&data?.next_recommendation)pedagogical=data;
+      }catch(error){console.error("Resumo adaptativo MusicLab indisponível; usando resumo local.",error);}
+      const {error}=await supabase.from("learning_sessions").insert({user_id:session.user.id,mode:"musiclab",duration_seconds:duration,score:average,summary:pedagogical.summary,skills_practiced:pedagogical.skills_practiced,positive_point:pedagogical.positive_point,improvement_point:pedagogical.improvement_point,next_recommendation:pedagogical.next_recommendation});
       if(error)throw error; setSessionComplete(true);
     }catch(error){console.error("Erro ao finalizar sessão MusicLab:",error);}
     finally{setSessionSaving(false);}
