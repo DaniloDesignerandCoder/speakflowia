@@ -35,28 +35,28 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadProfile() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.replace("/login"); return; }
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) { router.replace("/login"); return; }
 
-      setUserId(session.user.id);
+      setUserId(user.id);
       const [{ data }, { data: progress }, { data: insights }] = await Promise.all([
         supabase.from("profiles")
           .select("full_name, preferred_level, avatar_url, learning_goal, correction_style, conversation_pace")
-          .eq("id", session.user.id)
+          .eq("id", user.id)
           .maybeSingle(),
         supabase.from("progress")
           .select("conversations_count, total_minutes, streak_days")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .maybeSingle(),
         supabase.from("learning_insights")
           .select("skill_category")
-          .eq("user_id", session.user.id)
+          .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(20),
       ]);
 
-      setName(data?.full_name || session.user.user_metadata?.full_name || "Usuário SpeakFlow");
-      setEmail(session.user.email || "");
+      setName(data?.full_name || user.user_metadata?.full_name || "Usuário SpeakFlow");
+      setEmail(user.email || "");
       setAvatarUrl(data?.avatar_url || "");
       setStats({
         sessions: progress?.conversations_count || 0,
