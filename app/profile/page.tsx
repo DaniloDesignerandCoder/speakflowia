@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
 
@@ -150,7 +151,7 @@ export default function ProfilePage() {
 
   return <main className="profile-shell">
     <section className="profile-card">
-      <button className="profile-back" onClick={() => router.push("/")}>← Voltar para o início</button>
+      <button className="profile-back" onClick={() => router.push("/")}><ArrowLeft /> Voltar para o início</button>
       <div className="profile-brand">
         <img src="/speakflow-logo.png" alt="SpeakFlow" />
         <div><strong>Speak<span>Flow</span></strong><small>MINHA CONTA</small></div>
@@ -178,7 +179,7 @@ export default function ProfilePage() {
         <div className="profile-level-track">{levelOrder.map((item, index) => { const currentIndex = levelOrder.indexOf(level); const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "future"; return <div key={item} className={`profile-level-step ${state}`}><i>{index < currentIndex ? "✓" : index + 1}</i><span>{levelLabels[item].split(" · ")[0]}</span></div>; })}</div>
         <div className="profile-journey-insight">
           <div><span>FOCOS IDENTIFICADOS</span><strong>{focusSkills.length ? focusSkills.join(" · ") : "Sua jornada está começando"}</strong><p>{focusSkills.length ? "Baseado nos padrões recentes dos seus feedbacks. Continue praticando para refinar seu perfil de aprendizagem." : "À medida que você pratica, o SpeakFlow identifica padrões reais nos seus feedbacks e destaca habilidades para desenvolver."}</p></div>
-          <button type="button" onClick={() => router.push("/progress")}>Ver progresso →</button>
+          <button type="button" onClick={() => router.push("/progress")}>Ver progresso <ArrowRight /></button>
         </div>
       </section>
       <section className="profile-achievements">
@@ -205,7 +206,7 @@ export default function ProfilePage() {
         <div className="profile-preferences-actions"><button type="button" className="profile-preferences-save" disabled={savingPreferences} onClick={savePreferences}>{savingPreferences ? "Salvando..." : "Salvar preferências"}</button>{preferencesMessage && <span className={preferencesMessage.startsWith("✓") ? "profile-preferences-feedback success" : "profile-preferences-feedback error"}>{preferencesMessage}</span>}</div>
       </section>
       <div className="profile-actions">
-        <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach →</button>
+        <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach <ArrowRight /></button>
         <button className="profile-logout" onClick={signOut}>Sair da conta</button>
       </div>
     </section>
