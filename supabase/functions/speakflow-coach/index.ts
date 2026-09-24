@@ -4,7 +4,17 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
+
+const jsonHeaders = {
+  ...corsHeaders,
+  "Content-Type": "application/json",
+  "Cache-Control": "no-store",
+  "X-Content-Type-Options": "nosniff",
+};
+
+const MAX_BODY_BYTES = 64 * 1024;
 
 type ChatMessage = {
   role: "coach" | "student";
@@ -93,7 +103,29 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "Method not allowed." }), {
+      status: 405,
+      headers: { ...jsonHeaders, "Allow": "POST, OPTIONS" },
+    });
+  }
+
   try {
+    const contentType = req.headers.get("content-type")?.toLowerCase() ?? "";
+    if (!contentType.startsWith("application/json")) {
+      return new Response(JSON.stringify({ error: "Content-Type must be application/json." }), {
+        status: 415,
+        headers: jsonHeaders,
+      });
+    }
+
+    const declaredLength = Number(req.headers.get("content-length") ?? "0");
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: "Request body is too large." }), {
+        status: 413,
+        headers: jsonHeaders,
+      });
+    }
     const geminiKey = Deno.env.get("GEMINI_API_KEY");
     const groqKey = Deno.env.get("GROQ_API_KEY");
 
@@ -105,6 +137,13 @@ Deno.serve(async (req: Request) => {
     }
 
     const authHeader = req.headers.get("Authorization") ?? "";
+    if (!/^Bearer\s+\S+$/i.test(authHeader)) {
+      return new Response(JSON.stringify({ error: "Unauthorized." }), {
+        status: 401,
+        headers: jsonHeaders,
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 
@@ -180,7 +219,26 @@ Deno.serve(async (req: Request) => {
                           ? `Recurring learning patterns: ${recurringSkills}.`
                             : "No recurring learning pattern has been identified yet.";
 
-    const body = await req.json();
+    const rawBody = await req.text();
+    if (!rawBody || new TextEncoder().encode(rawBody).byteLength > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: "Invalid request body." }), {
+        status: rawBody ? 413 : 400,
+        headers: jsonHeaders,
+      });
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      const parsed = JSON.parse(rawBody);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid");
+      body = parsed as Record<string, unknown>;
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body." }), {
+        status: 400,
+        headers: jsonHeaders,
+      });
+    }
+
     const level = typeof body.level === "string" ? body.level : "intermediate";
     const mode =
       body.mode === "vocabulary"
