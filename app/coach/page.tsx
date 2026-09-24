@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, LogOut, Sparkles } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -391,7 +391,7 @@ export default function CoachPage() {
           </div>
           <div className="coach-status">
             <span>{userName ? userName.split(" ")[0] : "Minha conta"}</span>
-            <button type="button" onClick={handleLogout} className="coach-logout">Sair</button>
+            <button type="button" onClick={handleLogout} className="coach-logout"><LogOut /> Sair</button>
           </div>
         </header>
 
@@ -468,7 +468,7 @@ export default function CoachPage() {
             </button>
 
             <div className="coach-tip">
-              <span>✦</span>
+              <span><Sparkles /></span>
               Escolha seu nível e converse no seu ritmo. Seus insights podem alimentar os Labs especializados.
             </div>
           </section>
