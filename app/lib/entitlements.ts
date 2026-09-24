@@ -19,6 +19,16 @@ export type SpeakFlowAccessState = {
   usage: SpeakFlowMonthlyUsage;
 };
 
+export type UsageLevel = "available" | "near_limit" | "limit_reached";
+
+export type UsageStatus = {
+  used: number;
+  limit: number;
+  remaining: number;
+  percentUsed: number;
+  level: UsageLevel;
+};
+
 export const SPEAKFLOW_PLAN_LIMITS: Record<SpeakFlowPlan, SpeakFlowEntitlements> = {
   free: {
     plan: "free",
@@ -44,6 +54,26 @@ export function getUsageRemaining(used: number, limit: number) {
 
 export function hasUsageAvailable(used: number, limit: number) {
   return getUsageRemaining(used, limit) > 0;
+}
+
+export function getUsageStatus(used: number, limit: number): UsageStatus {
+  const safeLimit = Math.max(0, limit);
+  const safeUsed = Math.max(0, used);
+  const remaining = getUsageRemaining(safeUsed, safeLimit);
+  const percentUsed = safeLimit === 0 ? 100 : Math.min(100, Math.round((safeUsed / safeLimit) * 100));
+
+  let level: UsageLevel = "available";
+  if (remaining === 0) level = "limit_reached";
+  else if (percentUsed >= 80) level = "near_limit";
+
+  return { used: safeUsed, limit: safeLimit, remaining, percentUsed, level };
+}
+
+export function getAccessUsageStatus(state: SpeakFlowAccessState) {
+  return {
+    coach: getUsageStatus(state.usage.coachInteractions, state.entitlements.coachMonthlyLimit),
+    voice: getUsageStatus(state.usage.voiceCharacters, state.entitlements.voiceCharacterMonthlyLimit),
+  };
 }
 
 // This module describes product capabilities only.
