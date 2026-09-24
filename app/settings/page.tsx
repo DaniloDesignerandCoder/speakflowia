@@ -21,6 +21,7 @@ export default function SettingsPage(){
   const [securityMessage,setSecurityMessage]=useState("");
   const [securityLoading,setSecurityLoading]=useState(false);
   const [privacyMessage,setPrivacyMessage]=useState("");
+  const [activeSection,setActiveSection]=useState("appearance");
 
   useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);const savedScale=Math.min(130,Math.max(90,Number(localStorage.getItem("speakflow-text-scale")||100)));setTextScale(savedScale);document.documentElement.style.setProperty("--sf-text-scale",String(savedScale/100));setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
@@ -29,7 +30,11 @@ export default function SettingsPage(){
     const {data}=await supabase.from("profiles").select("preferred_level, learning_goal, correction_style, conversation_pace").eq("id",session.user.id).maybeSingle();
     if(data){setLevel(data.preferred_level||"intermediate");setLearningGoal(data.learning_goal||"conversation");setCorrectionStyle(data.correction_style||"balanced");setConversationPace(data.conversation_pace||"natural");}
     setLoading(false);
-  })();},[router]);
+  })();
+    const ids=["appearance","learning","account","privacy"];
+    const onScroll=()=>{const current=ids.map(id=>document.getElementById(id)).filter(Boolean).sort((a,b)=>Math.abs((a as HTMLElement).getBoundingClientRect().top-120)-Math.abs((b as HTMLElement).getBoundingClientRect().top-120))[0] as HTMLElement|undefined;if(current)setActiveSection(current.id);};
+    onScroll();window.addEventListener("scroll",onScroll,{passive:true});return()=>window.removeEventListener("scroll",onScroll);
+  },[router]);
 
   async function saveLearning(){
     if(!userId)return;setSaving(true);setMessage("");
@@ -79,14 +84,14 @@ export default function SettingsPage(){
 
   return <main className="settings-shell">
     <aside className="settings-nav">
-      <button className="settings-back" onClick={()=>router.push("/")}>← Início</button>
-      <div className="settings-brand"><img src="/speakflow-logo.png" alt="SpeakFlow"/><div><strong>Speak<span>Flow</span></strong><small>SETTINGS</small></div></div>
-      <nav><a href="#appearance" className="active"><i>◐</i><span>Aparência</span></a><a href="#learning"><i>✦</i><span>Aprendizado</span></a><a href="#account"><i>◎</i><span>Conta</span></a><a href="#privacy"><i>◇</i><span>Privacidade</span></a></nav>
+      <button type="button" className="settings-back" onClick={()=>router.push("/")} aria-label="Voltar ao início">← Início</button>
+      <div className="settings-brand"><img src="/speakflow-logo.png" alt=""/><div><strong>Speak<span>Flow</span></strong><small>SETTINGS</small></div></div>
+      <nav aria-label="Seções das configurações"><a href="#appearance" className={activeSection==="appearance"?"active":""} aria-current={activeSection==="appearance"?"location":undefined}><i aria-hidden="true">◐</i><span>Aparência</span></a><a href="#learning" className={activeSection==="learning"?"active":""} aria-current={activeSection==="learning"?"location":undefined}><i aria-hidden="true">✦</i><span>Aprendizado</span></a><a href="#account" className={activeSection==="account"?"active":""} aria-current={activeSection==="account"?"location":undefined}><i aria-hidden="true">◎</i><span>Conta</span></a><a href="#privacy" className={activeSection==="privacy"?"active":""} aria-current={activeSection==="privacy"?"location":undefined}><i aria-hidden="true">◇</i><span>Privacidade</span></a></nav>
       <div className="settings-nav-foot"><span>PERSONALIZAÇÃO</span><p>Suas escolhas moldam a experiência do Coach.</p></div>
     </aside>
 
     <section className="settings-main">
-      <header><div><span>CONFIGURAÇÕES</span><h1>Seu SpeakFlow.<br/><em>Do seu jeito.</em></h1><p>Ajuste como a inteligência conversa, corrige e evolui com você.</p></div><button onClick={()=>router.push("/profile")}>Ver perfil →</button></header>
+      <header><div><span>CONFIGURAÇÕES</span><h1>Seu SpeakFlow.<br/><em>Do seu jeito.</em></h1><p>Ajuste como a inteligência conversa, corrige e evolui com você.</p></div><button type="button" onClick={()=>router.push("/profile")}>Ver perfil →</button></header>
 
       <section id="appearance" className="settings-section">
         <div className="settings-section-title"><span>01</span><div><small>ACCESSIBILITY & APPEARANCE</small><h2>Aparência</h2><p>Escolha o contraste visual mais confortável para usar a SpeakFlow.</p></div></div>
