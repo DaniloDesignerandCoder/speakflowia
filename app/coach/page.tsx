@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Gauge, LogOut, Sparkles } from "lucide-react";
+import { ArrowLeft, Gauge, Sparkles } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -391,7 +391,6 @@ export default function CoachPage() {
           </div>
           <div className="coach-status">
             <span>{userName ? userName.split(" ")[0] : "Minha conta"}</span>
-            <button type="button" onClick={handleLogout} className="coach-logout"><LogOut /> Sair</button>
           </div>
         </header>
 
