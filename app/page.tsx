@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "./lib/supabase";
-import { SpeakFlowIcon, type SpeakFlowIconName } from "./speakflow-icon";
+import { AudioLines, BookOpenText, ChartNoAxesColumnIncreasing, House, Layers3, MessageCircleMore, Mic2, Settings2, type LucideIcon } from "lucide-react";
 
-const modules: Array<{ title: string; subtitle: string; description: string; icon: SpeakFlowIconName; route: string }> = [
+const modules: Array<{ title: string; subtitle: string; description: string; icon: LucideIcon; route: string }> = [
   {
     title: "Conversação",
     subtitle: "Speaking",
     description:
       "Pratique situações reais em inglês com seu Coach.",
-    icon: "conversation",
+    icon: MessageCircleMore,
     route: "/coach?mode=conversation",
   },
   {
@@ -19,7 +19,7 @@ const modules: Array<{ title: string; subtitle: string; description: string; ico
     subtitle: "Pronunciation",
     description:
       "Treine sua fala e desenvolva uma pronúncia mais natural.",
-    icon: "pronunciation",
+    icon: Mic2,
     route: "/pronunciation",
   },
   {
@@ -27,7 +27,7 @@ const modules: Array<{ title: string; subtitle: string; description: string; ico
     subtitle: "Vocabulary",
     description:
       "Amplie seu repertório através de situações práticas.",
-    icon: "vocabulary",
+    icon: BookOpenText,
     route: "/vocabulary",
   },
   {
@@ -35,7 +35,7 @@ const modules: Array<{ title: string; subtitle: string; description: string; ico
     subtitle: "Music × Language",
     description:
       "Aprenda inglês ouvindo música em uma experiência audiovisual interativa.",
-    icon: "music",
+    icon: AudioLines,
     route: "/musiclab",
   },
 ];
@@ -206,7 +206,7 @@ export default function Home() {
           aria-label="Menu principal"
         >
           <button className="dashboard-menu-item active">
-            <span><SpeakFlowIcon name="home" /></span>
+            <span><House /></span>
             Início
           </button>
 
@@ -214,7 +214,7 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/coach")}
           >
-            <span><SpeakFlowIcon name="coach" /></span>
+            <span><MessageCircleMore /></span>
             Coach
           </button>
 
@@ -222,7 +222,7 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/progress")}
           >
-            <span><SpeakFlowIcon name="progress" /></span>
+            <span><ChartNoAxesColumnIncreasing /></span>
             Progresso
           </button>
 
@@ -230,17 +230,17 @@ export default function Home() {
             className="dashboard-menu-item"
             onClick={() => router.push("/musiclab")}
           >
-            <span><SpeakFlowIcon name="music" /></span>
+            <span><AudioLines /></span>
             MusicLab™
           </button>
 
           <button className="dashboard-menu-item" onClick={() => router.push("/plans")}>
-            <span><SpeakFlowIcon name="plans" /></span>
+            <span><Layers3 /></span>
             Planos
           </button>
 
           <button className="dashboard-menu-item" onClick={() => router.push("/settings")}>
-            <span><SpeakFlowIcon name="settings" /></span>
+            <span><Settings2 /></span>
             Configurações
           </button>
         </nav>
@@ -385,7 +385,9 @@ export default function Home() {
 
             <div className="dashboard-module-grid">
 
-              {modules.map((module) => (
+              {modules.map((module) => {
+                const ModuleIcon = module.icon;
+                return (
 
                 <button
                   className="dashboard-module"
@@ -398,7 +400,7 @@ export default function Home() {
                   <div className="dashboard-module-top">
 
                     <span className="dashboard-module-icon">
-                      <SpeakFlowIcon name={module.icon} />
+                      <ModuleIcon />
                     </span>
 
                     <span>
@@ -422,7 +424,8 @@ export default function Home() {
 
                 </button>
 
-              ))}
+              );
+              })}
 
             </div>
 
