@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -119,7 +120,7 @@ export default function LoginPage() {
           className="login-back"
           onClick={() => router.push("/")}
         >
-          ← Voltar
+          <ArrowLeft /> Voltar
         </button>
 
         <section className="login-card">
