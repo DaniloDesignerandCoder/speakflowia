@@ -2106,19 +2106,30 @@ img {
 
 .coach-back {
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid rgba(126, 148, 255, 0.14);
+  border-radius: 9px;
+  background: rgba(110, 128, 255, 0.035);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
 
-  padding:
-    10px 15px;
+.coach-back svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8;
+}
 
-  border:
-    1px solid rgba(255, 255, 255, 0.08);
-
-  border-radius: 12px;
-
-  background:
-    rgba(255, 255, 255, 0.035);
-
-  color: #cbd0da;
+.coach-back:hover {
+  background: rgba(126, 148, 255, 0.1);
+  border-color: rgba(130, 148, 255, 0.34);
+  transform: translateY(-1px);
 }
 
 .coach-brand {
@@ -2360,9 +2371,7 @@ img {
   font-weight: 800;
 }
 
-.coach-primary span {
-  margin-left: 18px;
-}
+
 
 .coach-tip {
   margin-top: 17px;
