@@ -3904,3 +3904,10 @@ html{font-size:calc(16px * var(--sf-text-scale))}\nbody{font-size:var(--sf-text-
 
 /* Settings final interaction polish */
 .settings-section{scroll-margin-top:24px}.settings-nav nav a{transition:background .18s ease,color .18s ease,border-color .18s ease}.settings-nav nav a:focus-visible,.settings-back:focus-visible,.settings-main>header button:focus-visible,.settings-account button:focus-visible,.settings-save-row button:focus-visible{outline:2px solid #7f96ff;outline-offset:3px}:root[data-theme="light"] .settings-nav nav a:focus-visible,:root[data-theme="light"] .settings-back:focus-visible,:root[data-theme="light"] .settings-main>header button:focus-visible,:root[data-theme="light"] .settings-account button:focus-visible,:root[data-theme="light"] .settings-save-row button:focus-visible{outline-color:#4059c7}
+
+
+/* Global protected-content marker */
+.sf-content-protection{position:fixed;right:12px;bottom:10px;z-index:2147483000;pointer-events:none;user-select:none;-webkit-user-select:none;opacity:.34}
+.sf-content-protection span{display:block;padding:4px 7px;border:1px solid rgba(126,148,255,.16);border-radius:6px;background:rgba(8,11,22,.48);color:rgba(214,221,255,.72);font-size:6px;font-weight:750;letter-spacing:.55px;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+:root[data-theme="light"] .sf-content-protection span{background:rgba(255,255,255,.58);border-color:rgba(55,75,150,.13);color:rgba(42,57,112,.64)}
+@media(max-width:760px){.sf-content-protection{right:8px;bottom:7px;opacity:.28}.sf-content-protection span{font-size:5px;padding:3px 6px}}
