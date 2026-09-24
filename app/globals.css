@@ -2133,6 +2133,7 @@ img {
 }
 
 .coach-brand {
+  justify-self: center;
   display: flex;
   align-items: center;
 
