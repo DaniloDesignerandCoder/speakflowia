@@ -16,10 +16,10 @@ export default function SettingsPage(){
   const [message,setMessage]=useState("");
   const [loading,setLoading]=useState(true);
   const [theme,setTheme]=useState<"dark"|"light"|"system">("dark");
-  const [textSize,setTextSize]=useState<"normal"|"large">("normal");
+  const [textScale,setTextScale]=useState(100);
   const [reduceMotion,setReduceMotion]=useState<"system"|"on"|"off">("system");
 
-  useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);setTextSize((localStorage.getItem("speakflow-text-size")||"normal") as "normal"|"large");setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
+  useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);const savedScale=Math.min(130,Math.max(90,Number(localStorage.getItem("speakflow-text-scale")||100)));setTextScale(savedScale);document.documentElement.style.setProperty("--sf-text-scale",String(savedScale/100));setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
     if(!session){router.replace("/login");return;}
     setUserId(session.user.id);setEmail(session.user.email??"");
@@ -41,7 +41,7 @@ export default function SettingsPage(){
     document.documentElement.dataset.theme=resolved;document.documentElement.style.colorScheme=resolved;
   }
 
-  function applyTextSize(value:"normal"|"large"){setTextSize(value);localStorage.setItem("speakflow-text-size",value);document.documentElement.dataset.textSize=value;}
+  function applyTextScale(value:number){const next=Math.min(130,Math.max(90,value));setTextScale(next);localStorage.setItem("speakflow-text-scale",String(next));document.documentElement.style.setProperty("--sf-text-scale",String(next/100));}
   function applyMotion(value:"system"|"on"|"off"){setReduceMotion(value);localStorage.setItem("speakflow-reduce-motion",value);document.documentElement.dataset.reduceMotion=value;}
 
   async function signOut(){await supabase.auth.signOut();router.replace("/login");router.refresh();}
@@ -67,7 +67,7 @@ export default function SettingsPage(){
           <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?"✓":""}</b></button>
         </div>
         <div className="settings-accessibility">
-          <div><span>TEXT SIZE</span><strong>Tamanho do texto</strong><p>Aumente a leitura sem alterar o conteúdo.</p><div className="settings-segmented" role="group" aria-label="Tamanho do texto"><button aria-pressed={textSize==="normal"} className={textSize==="normal"?"selected":""} onClick={()=>applyTextSize("normal")}>Normal</button><button aria-pressed={textSize==="large"} className={textSize==="large"?"selected":""} onClick={()=>applyTextSize("large")}>Maior</button></div></div>
+          <div><span>TEXT SIZE</span><strong>Tamanho do texto <b className="settings-scale-value">{textScale}%</b></strong><p>Ajuste a leitura em tempo real. A interface protege o layout entre 90% e 130%.</p><div className="settings-text-slider"><span>A</span><input type="range" min="90" max="130" step="5" value={textScale} onChange={e=>applyTextScale(Number(e.target.value))} aria-label={`Tamanho do texto: ${textScale}%`} aria-valuetext={`${textScale}%`}/><strong>A</strong></div><div className="settings-text-preview" aria-live="polite"><small>PRÉVIA AO VIVO</small><p>Aprender inglês deve ser natural, claro e confortável.</p></div></div>
           <div><span>MOTION</span><strong>Movimento e animações</strong><p>Reduza efeitos visuais quando precisar de uma experiência mais estável.</p><div className="settings-segmented" role="group" aria-label="Movimento e animações"><button aria-pressed={reduceMotion==="system"} className={reduceMotion==="system"?"selected":""} onClick={()=>applyMotion("system")}>Sistema</button><button aria-pressed={reduceMotion==="on"} className={reduceMotion==="on"?"selected":""} onClick={()=>applyMotion("on")}>Reduzir</button><button aria-pressed={reduceMotion==="off"} className={reduceMotion==="off"?"selected":""} onClick={()=>applyMotion("off")}>Completo</button></div></div>
         </div>
       </section>
