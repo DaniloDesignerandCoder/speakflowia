@@ -3940,3 +3940,19 @@ html{font-size:calc(16px * var(--sf-text-scale))}\nbody{font-size:var(--sf-text-
 .sf-content-protection span{display:block;padding:4px 7px;border:1px solid rgba(126,148,255,.16);border-radius:6px;background:rgba(8,11,22,.48);color:rgba(214,221,255,.72);font-size:6px;font-weight:750;letter-spacing:.55px;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
 :root[data-theme="light"] .sf-content-protection span{background:rgba(255,255,255,.58);border-color:rgba(55,75,150,.13);color:rgba(42,57,112,.64)}
 @media(max-width:760px){.sf-content-protection{right:8px;bottom:7px;opacity:.28}.sf-content-protection span{font-size:5px;padding:3px 6px}}
+
+
+/* SpeakFlow global button interaction */
+button:not(:disabled){
+  position:relative;
+  overflow:hidden;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+button:not(:disabled):hover{
+  background-color:rgba(126,148,255,.12);
+  border-color:rgba(139,158,255,.34);
+  color:inherit;
+  box-shadow:inset 0 0 0 1px rgba(145,168,255,.04);
+}
+button:not(:disabled):active{transform:translateY(0) scale(.99)}
+button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
