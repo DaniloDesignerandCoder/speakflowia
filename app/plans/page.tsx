@@ -2,18 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import "./plans.css";
+import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
+
+const freePlan = SPEAKFLOW_PLAN_LIMITS.free;
+const proPlan = SPEAKFLOW_PLAN_LIMITS.pro;
 
 const proFeatures = [
-  "Até 1.000 interações mensais com o Coach",
+  `Até ${proPlan.coachMonthlyLimit.toLocaleString("pt-BR")} interações mensais com o Coach`,
   "Vocabulary Lab e Pronunciation Lab completos",
-  "Até 50.000 caracteres mensais de voz neural SpeakFlow",
+  `Até ${proPlan.voiceCharacterMonthlyLimit.toLocaleString("pt-BR")} caracteres mensais de voz neural SpeakFlow`,
   "Aprendizado adaptativo e histórico completo",
 ];
 
 const freeFeatures = [
-  "Até 50 interações mensais com o Coach",
+  `Até ${freePlan.coachMonthlyLimit.toLocaleString("pt-BR")} interações mensais com o Coach`,
   "Acesso essencial aos Labs",
-  "Até 5.000 caracteres mensais de voz neural SpeakFlow",
+  `Até ${freePlan.voiceCharacterMonthlyLimit.toLocaleString("pt-BR")} caracteres mensais de voz neural SpeakFlow`,
   "Progresso essencial vinculado à sua conta",
 ];
 
