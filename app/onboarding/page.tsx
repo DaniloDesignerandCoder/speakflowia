@@ -69,7 +69,7 @@ export default function OnboardingPage() {
         <div className="onboarding-options">{questions[step].slice(1,4).map((option, i) =>
           <button key={option} type="button" className={selected === i ? "selected" : ""} onClick={() => setSelected(i)}><b>{String.fromCharCode(65+i)}</b>{option}</button>
         )}</div>
-        <button className="onboarding-primary" disabled={selected === null} onClick={next}>Continuar →</button>
+        <button className="onboarding-primary" disabled={selected === null} onClick={next}>Continuar</button>
       </> : <div className="onboarding-result">
         <span>SEU PONTO DE PARTIDA</span><div className="onboarding-orb">✦</div><h1>{result[1]}</h1><strong>{result[2]}</strong>
         <p>O SpeakFlow usará este nível para ajustar vocabulário, complexidade, perguntas e feedback. Você poderá alterá-lo depois.</p>
