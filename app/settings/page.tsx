@@ -18,6 +18,8 @@ export default function SettingsPage(){
   const [theme,setTheme]=useState<"dark"|"light"|"system">("dark");
   const [textScale,setTextScale]=useState(100);
   const [reduceMotion,setReduceMotion]=useState<"system"|"on"|"off">("system");
+  const [securityMessage,setSecurityMessage]=useState("");
+  const [securityLoading,setSecurityLoading]=useState(false);
 
   useEffect(()=>{const saved=(localStorage.getItem("speakflow-theme")||"dark") as "dark"|"light"|"system";setTheme(saved);const savedScale=Math.min(130,Math.max(90,Number(localStorage.getItem("speakflow-text-scale")||100)));setTextScale(savedScale);document.documentElement.style.setProperty("--sf-text-scale",String(savedScale/100));setReduceMotion((localStorage.getItem("speakflow-reduce-motion")||"system") as "system"|"on"|"off");(async()=>{
     const {data:{session}}=await supabase.auth.getSession();
@@ -43,6 +45,22 @@ export default function SettingsPage(){
 
   function applyTextScale(value:number){const next=Math.min(130,Math.max(90,value));setTextScale(next);localStorage.setItem("speakflow-text-scale",String(next));document.documentElement.style.setProperty("--sf-text-scale",String(next/100));}
   function applyMotion(value:"system"|"on"|"off"){setReduceMotion(value);localStorage.setItem("speakflow-reduce-motion",value);document.documentElement.dataset.reduceMotion=value;}
+
+  async function sendPasswordReset(){
+    if(!email||securityLoading)return;
+    setSecurityLoading(true);setSecurityMessage("");
+    const {error}=await supabase.auth.resetPasswordForEmail(email,{redirectTo:`${window.location.origin}/settings`});
+    setSecurityMessage(error?"Não foi possível enviar o link agora. Tente novamente.":"Link seguro enviado para seu e-mail.");
+    setSecurityLoading(false);
+  }
+
+  async function signOutAll(){
+    if(securityLoading)return;
+    setSecurityLoading(true);setSecurityMessage("");
+    const {error}=await supabase.auth.signOut({scope:"global"});
+    if(error){setSecurityMessage("Não foi possível encerrar as sessões agora.");setSecurityLoading(false);return;}
+    router.replace("/login");router.refresh();
+  }
 
   async function signOut(){await supabase.auth.signOut();router.replace("/login");router.refresh();}
 
@@ -86,6 +104,11 @@ export default function SettingsPage(){
       <section id="account" className="settings-section">
         <div className="settings-section-title"><span>03</span><div><small>ACCOUNT</small><h2>Conta</h2><p>Identidade usada para manter seu histórico e aprendizado sincronizados.</p></div></div>
         <div className="settings-account"><div><span>E-MAIL</span><strong>{email}</strong><small>Conta autenticada no SpeakFlow</small></div><button onClick={()=>router.push("/profile")}>Gerenciar perfil</button></div>
+        <div className="settings-security-grid">
+          <article><span>ACESSO</span><strong>Senha da conta</strong><p>Receba no e-mail um link seguro para redefinir sua senha.</p><button onClick={sendPasswordReset} disabled={securityLoading}>{securityLoading?"Processando…":"Redefinir senha"}</button></article>
+          <article><span>SESSÕES</span><strong>Encerrar em todos os dispositivos</strong><p>Revoga as sessões autenticadas da sua conta e solicita um novo login.</p><button className="danger" onClick={signOutAll} disabled={securityLoading}>Encerrar todas</button></article>
+        </div>
+        {securityMessage&&<div className="settings-security-message" role="status" aria-live="polite">{securityMessage}</div>}
       </section>
 
       <section id="privacy" className="settings-section">
