@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import "./session-summary.css";
 
-type TrainingMode = "conversation" | "vocabulary" | "pronunciation";
-
 type Feedback = {
   original: string;
   corrected: string;
@@ -28,12 +26,6 @@ type SessionSummary = {
   next_recommendation: string;
 };
 
-type PronunciationAttempt = {
-  target: string;
-  heard: string;
-  score: number;
-};
-
 const levels = [
   { id: "beginner", label: "Beginner", description: "Iniciante" },
   { id: "elementary", label: "Elementary", description: "Básico" },
@@ -42,74 +34,8 @@ const levels = [
   { id: "advanced", label: "Advanced", description: "Avançado" },
 ];
 
-const pronunciationPhrases: Record<string, string[]> = {
-  beginner: [
-    "Good morning, how are you?",
-    "I would like a glass of water.",
-    "My name is Alex and I am learning English.",
-  ],
-  elementary: [
-    "I usually have breakfast before I go to work.",
-    "Could you tell me where the train station is?",
-    "I really enjoy listening to music in my free time.",
-  ],
-  intermediate: [
-    "I would really appreciate your help with this project.",
-    "Learning English gives me more confidence when I travel.",
-    "The weather has been surprisingly pleasant this week.",
-  ],
-  upper_intermediate: [
-    "I am looking forward to improving my communication skills.",
-    "The presentation went smoothly despite a few unexpected changes.",
-    "Being understood clearly is more important than speaking quickly.",
-  ],
-  advanced: [
-    "Effective communication requires clarity, confidence, and careful listening.",
-    "Although the circumstances were challenging, we handled them remarkably well.",
-    "Developing natural pronunciation involves rhythm, stress, and consistent practice.",
-  ],
-};
-
-function normalizeSpeech(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9\s']/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function wordSimilarity(target: string, heard: string) {
-  const expected = normalizeSpeech(target).split(" ").filter(Boolean);
-  const actual = normalizeSpeech(heard).split(" ").filter(Boolean);
-  if (!expected.length) return 0;
-
-  const rows = expected.length + 1;
-  const cols = actual.length + 1;
-  const matrix = Array.from({ length: rows }, () => Array(cols).fill(0));
-
-  for (let i = 0; i < rows; i += 1) matrix[i][0] = i;
-  for (let j = 0; j < cols; j += 1) matrix[0][j] = j;
-
-  for (let i = 1; i < rows; i += 1) {
-    for (let j = 1; j < cols; j += 1) {
-      const cost = expected[i - 1] === actual[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1,
-        matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
-      );
-    }
-  }
-
-  return Math.max(0, Math.round((1 - matrix[expected.length][actual.length] / expected.length) * 100));
-}
-
 export default function CoachPage() {
   const router = useRouter();
-  const [trainingMode, setTrainingMode] = useState<TrainingMode>("conversation");
-  const isVocabulary = trainingMode === "vocabulary";
-  const isPronunciation = trainingMode === "pronunciation";
-
   const [level, setLevel] = useState("intermediate");
   const [learningGoal, setLearningGoal] = useState("conversation");
   const [correctionStyle, setCorrectionStyle] = useState("balanced");
@@ -125,26 +51,11 @@ export default function CoachPage() {
   const [authChecking, setAuthChecking] = useState(true);
   const [userName, setUserName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [pronunciationIndex, setPronunciationIndex] = useState(0);
-  const [pronunciationResult, setPronunciationResult] = useState<{ heard: string; score: number } | null>(null);
-  const [pronunciationAttempts, setPronunciationAttempts] = useState<PronunciationAttempt[]>([]);
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [showExitGuard, setShowExitGuard] = useState(false);
   const [finishStage, setFinishStage] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const currentPhrases = pronunciationPhrases[level] ?? pronunciationPhrases.intermediate;
-  const pronunciationTarget = currentPhrases[pronunciationIndex % currentPhrases.length];
-
-  useEffect(() => {
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
-    if (requestedMode === "vocabulary" || requestedMode === "pronunciation") {
-      setTrainingMode(requestedMode);
-    } else {
-      setTrainingMode("conversation");
-    }
-  }, []);
 
   useEffect(() => {
     async function checkAuth() {
@@ -233,26 +144,15 @@ export default function CoachPage() {
 
   function startSession() {
     setSessionSeconds(0);
-    setPronunciationIndex(0);
-    setPronunciationResult(null);
-    setPronunciationAttempts([]);
     setSessionSummary(null);
     setSessionCompleted(false);
     setShowExitGuard(false);
     setStarted(true);
 
-    if (isPronunciation) {
-      setMessages([]);
-      window.setTimeout(() => speakText(pronunciationPhrases[level][0]), 250);
-      return;
-    }
-
     setMessages([
       {
         role: "coach",
-        text: isVocabulary
-          ? "Hi! Today we'll build your vocabulary through conversation. Tell me about something you enjoy doing, and I'll help you discover useful new words along the way."
-          : "Hi! I'm your SpeakFlow coach. Let's practice English together. Tell me about your day.",
+        text: "Hi! I'm your SpeakFlow coach. Let's practice English together. Tell me about your day.",
       },
     ]);
   }
@@ -286,7 +186,7 @@ export default function CoachPage() {
       window.speechSynthesis.cancel();
       const speech = new SpeechSynthesisUtterance(text);
       speech.lang = "en-US";
-      speech.rate = isPronunciation ? 0.82 : conversationPace === "slow" ? 0.85 : conversationPace === "fast" ? 1.05 : 0.95;
+      speech.rate = conversationPace === "slow" ? 0.85 : conversationPace === "fast" ? 1.05 : 0.95;
       speech.pitch = 1;
       speech.onend = () => setIsSpeaking(false);
       speech.onerror = () => setIsSpeaking(false);
@@ -311,32 +211,15 @@ export default function CoachPage() {
     recognition.continuous = false;
 
     recognition.onstart = () => setIsListening(true);
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      if (isPronunciation) {
-        const score = wordSimilarity(pronunciationTarget, transcript);
-        const attempt = { target: pronunciationTarget, heard: transcript, score };
-        setPronunciationResult({ heard: transcript, score });
-        setPronunciationAttempts((current) => [...current, attempt]);
-      } else {
-        setInput(transcript);
-      }
-    };
+    recognition.onresult = (event: any) => setInput(event.results[0][0].transcript);
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
     recognition.start();
   }
 
-  function nextPronunciationPhrase() {
-    const nextIndex = (pronunciationIndex + 1) % currentPhrases.length;
-    setPronunciationIndex(nextIndex);
-    setPronunciationResult(null);
-    window.setTimeout(() => speakText(currentPhrases[nextIndex]), 150);
-  }
-
   async function sendMessage() {
     const text = input.trim();
-    if (!text || isReplying || isPronunciation) return;
+    if (!text || isReplying) return;
 
     setMessages((current) => [...current, { role: "student", text }]);
     setInput("");
@@ -344,7 +227,7 @@ export default function CoachPage() {
 
     try {
       const { data, error } = await supabase.functions.invoke("speakflow-coach", {
-        body: { level, mode: trainingMode, messages, message: text, learningGoal, correctionStyle, conversationPace },
+        body: { level, mode: "conversation", messages, message: text, learningGoal, correctionStyle, conversationPace },
       });
 
       if (error) throw error;
@@ -401,13 +284,12 @@ export default function CoachPage() {
         body: {
           operation: "session_summary",
           level,
-          mode: trainingMode,
+          mode: "conversation",
           learningGoal,
           correctionStyle,
           conversationPace,
           duration_seconds: sessionSeconds,
-          messages: isPronunciation ? [] : messages,
-          pronunciation_results: isPronunciation ? pronunciationAttempts : [],
+          messages,
         },
       });
 
@@ -430,7 +312,7 @@ export default function CoachPage() {
       .from("learning_sessions")
       .insert({
         user_id: session.user.id,
-        mode: trainingMode,
+        mode: "conversation",
         duration_seconds: sessionSeconds,
         summary: generatedSummary?.summary ?? null,
         skills_practiced: generatedSummary?.skills_practiced ?? null,
@@ -484,26 +366,12 @@ export default function CoachPage() {
     setSessionCompleted(true);
     setStarted(false);
     setInput("");
-    setPronunciationResult(null);
-    setPronunciationAttempts([]);
     setIsFinishing(false);
   }
 
   const currentLevel = levels.find((item) => item.id === level);
   const minutes = Math.floor(sessionSeconds / 60);
   const seconds = sessionSeconds % 60;
-
-  const modeTitle = isPronunciation
-    ? "Treino de pronúncia"
-    : isVocabulary
-      ? "Treino de vocabulário"
-      : "Sua próxima conversa";
-
-  const modeIntro = isPronunciation
-    ? "Ouça frases em inglês, repita em voz alta e confira o quanto o reconhecimento conseguiu entender da sua fala."
-    : isVocabulary
-      ? "Amplie seu repertório com palavras úteis apresentadas naturalmente durante a conversa."
-      : "Pratique inglês em uma experiência criada para acompanhar seu nível e ajudar você a evoluir.";
 
   return (
     <main className="coach-shell">
@@ -535,7 +403,7 @@ export default function CoachPage() {
               <p>{sessionSummary?.summary ?? "Sua sessão foi salva com sucesso. O SpeakFlow registrou esta prática no seu histórico de aprendizado."}</p>
               <div className="session-summary-meta">
                 <span>{currentLevel?.label}</span>
-                <span>{isPronunciation ? "Pronúncia" : isVocabulary ? "Vocabulário" : "Conversação"}</span>
+                <span>Conversação</span>
                 <span>{Math.max(1, Math.round(sessionSeconds / 60))} min</span>
               </div>
             </div>
@@ -566,11 +434,9 @@ export default function CoachPage() {
           </section>
         ) : !started ? (
           <section className="coach-start">
-            <div className="coach-eyebrow">
-              {isPronunciation ? "SPEAKFLOW PRONUNCIATION" : isVocabulary ? "SPEAKFLOW VOCABULARY" : "SPEAKFLOW COACH"}
-            </div>
-            <h1>{modeTitle}<br />começa <em>agora.</em></h1>
-            <p className="coach-intro">{modeIntro}</p>
+            <div className="coach-eyebrow">SPEAKFLOW COACH</div>
+            <h1>Sua próxima conversa<br />começa <em>agora.</em></h1>
+            <p className="coach-intro">Pratique inglês em conversas reais. Enquanto você fala, o Coach identifica oportunidades de vocabulário, pronúncia e estrutura para alimentar seu aprendizado.</p>
 
             <div className="level-panel">
               <div className="level-heading">
@@ -596,98 +462,21 @@ export default function CoachPage() {
             </div>
 
             <button className="coach-primary" onClick={startSession}>
-              {isPronunciation
-                ? "Começar treino de pronúncia"
-                : isVocabulary
-                  ? "Começar treino de vocabulário"
-                  : "Começar conversa"}
+              Começar conversa
               <span>→</span>
             </button>
 
             <div className="coach-tip">
               <span>✦</span>
-              {isPronunciation
-                ? "Use o microfone para repetir as frases. A pontuação inicial compara o texto reconhecido com a frase-alvo."
-                : isVocabulary
-                  ? "Escolha seu nível e amplie seu vocabulário em contexto."
-                  : "Escolha seu nível e pratique no seu ritmo."}
-            </div>
-          </section>
-        ) : isPronunciation ? (
-          <section className="conversation pronunciation-session">
-            <div className="conversation-top">
-              <div>
-                <span className="coach-label">PRONÚNCIA</span>
-                <h1>Pronunciation Practice</h1>
-              </div>
-              <div className="session-time">
-                <span>SESSION</span>
-                <strong>{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}</strong>
-              </div>
-            </div>
-
-            <div className="conversation-card pronunciation-card">
-              <div className="conversation-level">
-                <span>LEVEL</span>
-                <strong>{currentLevel?.label}</strong>
-              </div>
-
-              <div className="pronunciation-workspace">
-                <span className="coach-label">OUÇA E REPITA</span>
-                <h2>{pronunciationTarget}</h2>
-                <p>Ouça o modelo e repita a frase em voz alta. Fale com naturalidade, sem correr.</p>
-
-                <div className="pronunciation-actions">
-                  <button type="button" className="voice-toggle" onClick={() => speakText(pronunciationTarget)}>
-                    🔊 Ouvir modelo
-                  </button>
-                  <button
-                    type="button"
-                    className={isListening ? "mic-button listening" : "mic-button"}
-                    onClick={startListening}
-                    disabled={isListening}
-                  >
-                    {isListening ? "● Ouvindo..." : "🎙️ Repetir frase"}
-                  </button>
-                </div>
-
-                {pronunciationResult && (
-                  <div className="speakflow-insight pronunciation-result">
-                    <div className="insight-title"><span>✦</span> SPEAKFLOW PRONUNCIATION CHECK</div>
-                    <div className="insight-section">
-                      <span className="insight-label">O RECONHECIMENTO ENTENDEU</span>
-                      <strong>{pronunciationResult.heard}</strong>
-                    </div>
-                    <div className="insight-section">
-                      <span className="insight-label">CORRESPONDÊNCIA DA FRASE</span>
-                      <strong>{pronunciationResult.score}%</strong>
-                    </div>
-                    <div className="insight-tip">
-                      <span>LEMBRETE</span>
-                      Esta pontuação compara as palavras reconhecidas com a frase-alvo; ela não é uma medição fonética completa.
-                    </div>
-                  </div>
-                )}
-
-                <button type="button" className="coach-primary" onClick={nextPronunciationPhrase}>
-                  Próxima frase <span>→</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="conversation-actions">
-              <button className="finish-button" onClick={finishSession} disabled={isFinishing}>
-                {isFinishing ? (finishStage <= 1 ? "✦ Analisando sua prática..." : finishStage === 2 ? "✦ Atualizando seu aprendizado..." : "✦ Preparando seu progresso...") : "Finalizar sessão"}
-              </button>
-              <div className="conversation-note"><span>●</span> Treino de pronúncia em andamento.</div>
+              Escolha seu nível e converse no seu ritmo. Seus insights podem alimentar os Labs especializados.
             </div>
           </section>
         ) : (
           <section className="conversation">
             <div className="conversation-top">
               <div>
-                <span className="coach-label">{isVocabulary ? "VOCABULÁRIO" : "CONVERSAÇÃO"}</span>
-                <h1>{isVocabulary ? "Vocabulary Practice" : "English Practice"}</h1>
+                <span className="coach-label">CONVERSAÇÃO</span>
+                <h1>English Practice</h1>
               </div>
               <div className="session-time">
                 <span>SESSION</span>
