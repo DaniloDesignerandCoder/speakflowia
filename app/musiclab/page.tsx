@@ -48,6 +48,7 @@ export default function MusicLab() {
   const [sessionAttempts,setSessionAttempts]=useState<{phrase:string;score:number}[]>([]);
   const [sessionComplete,setSessionComplete]=useState(false);
   const [sessionSaving,setSessionSaving]=useState(false);
+  const [adaptiveCue,setAdaptiveCue]=useState<{title:string;detail:string}|null>(null);
   const shellRef=useRef<HTMLElement>(null);
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const webglRef=useRef<HTMLDivElement>(null);
@@ -60,7 +61,7 @@ export default function MusicLab() {
   const audioRafRef=useRef<number|null>(null);
   const audioTrackIdRef=useRef<string|null>(null);
 
-  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");});},[router]);
+  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");void loadAdaptiveCue();});},[router]);
 
   useEffect(()=>()=>{ 
     if(audioRafRef.current!==null)cancelAnimationFrame(audioRafRef.current);
@@ -305,6 +306,20 @@ export default function MusicLab() {
     recognition.onerror=()=>setShadowListening(false); recognition.onend=()=>setShadowListening(false); recognition.start();
   }
 
+  async function loadAdaptiveCue(){
+    try{
+      const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
+      const [{data:plan},{data:recent}]=await Promise.all([
+        supabase.from("learning_plans").select("current_focus, next_milestone, priority_skills").eq("user_id",session.user.id).maybeSingle(),
+        supabase.from("learning_insights").select("skill_category, tip").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(5)
+      ]);
+      const musicInsight=(recent??[]).find(item=>(item.skill_category??"").toLowerCase().includes("musiclab"));
+      const detail=musicInsight?.tip||plan?.current_focus||plan?.next_milestone||"Ouça a frase uma vez, depois repita tentando preservar o ritmo natural.";
+      const title=musicInsight?"Seu último insight MusicLab":plan?.current_focus?"Seu foco adaptativo":"Foco desta sessão";
+      setAdaptiveCue({title,detail});
+    }catch(error){console.error("Não foi possível carregar o foco adaptativo do MusicLab:",error);}
+  }
+
   async function finishMusicSession(){
     if(sessionSaving||sessionAttempts.length===0)return; setSessionSaving(true);
     try{
@@ -370,6 +385,11 @@ export default function MusicLab() {
           <a href={track.rights.sourceUrl} target="_blank" rel="noreferrer">{track.rights.sourceName}</a>
         </div>}
       </div></div>
+    </section>
+
+    <section className="ml-adaptive-cue" aria-label="Foco adaptativo do MusicLab">
+      <div><span>✦ SPEAKFLOW ADAPTIVE SIGNAL</span><strong>{adaptiveCue?.title??"Preparando seu foco…"}</strong></div>
+      <p>{adaptiveCue?.detail??"O MusicLab está conectando esta sessão ao seu histórico de aprendizado."}</p>
     </section>
 
     <section className="ml-workspace">
