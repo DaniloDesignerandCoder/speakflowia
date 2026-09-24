@@ -4,10 +4,17 @@ import { useRouter } from "next/navigation";
 import "./plans.css";
 
 const proFeatures = [
-  "Coach com experiência completa",
-  "Vocabulary Lab e Pronunciation Lab",
-  "Voz neural SpeakFlow",
+  "Até 1.000 interações mensais com o Coach",
+  "Vocabulary Lab e Pronunciation Lab completos",
+  "Até 50.000 caracteres mensais de voz neural SpeakFlow",
   "Aprendizado adaptativo e histórico completo",
+];
+
+const freeFeatures = [
+  "Até 50 interações mensais com o Coach",
+  "Acesso essencial aos Labs",
+  "Até 5.000 caracteres mensais de voz neural SpeakFlow",
+  "Progresso essencial vinculado à sua conta",
 ];
 
 export default function PlansPage() {
@@ -34,11 +41,7 @@ export default function PlansPage() {
         <article className="plans-card">
           <div className="plans-card-head"><span>FREE</span><h2>SpeakFlow Free</h2><p>Para começar sua jornada e conhecer a experiência SpeakFlow.</p></div>
           <div className="plans-price"><strong>R$ 0</strong><span>/ para começar</span></div>
-          <ul>
-            <li>✓ Acesso inicial ao Coach</li>
-            <li>✓ Experiência de aprendizado SpeakFlow</li>
-            <li>✓ Progresso vinculado à sua conta</li>
-          </ul>
+          <ul>{freeFeatures.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
           <button type="button" className="plans-secondary" onClick={() => router.push("/coach")}>Continuar no Free</button>
         </article>
 
