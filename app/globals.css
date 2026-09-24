@@ -3866,3 +3866,13 @@ img {
 :root[data-theme="light"] .settings-save-row button,
 :root[data-theme="light"] .profile-save,
 :root[data-theme="light"] .profile-primary{color:#fff}
+
+
+/* Accessibility controls */
+.settings-accessibility{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.settings-accessibility>div{padding:17px;border:1px solid rgba(255,255,255,.055);border-radius:14px;background:rgba(255,255,255,.018)}.settings-accessibility span{display:block;color:#7f96ff;font-size:6px;font-weight:900;letter-spacing:1px}.settings-accessibility strong{display:block;margin-top:6px;font-size:10px}.settings-accessibility p{margin:5px 0 12px;color:rgba(255,255,255,.3);font-size:7px;line-height:1.5}.settings-segmented{display:flex;gap:5px}.settings-segmented button{flex:1;min-height:34px;border:1px solid rgba(126,148,255,.11);border-radius:8px;background:rgba(255,255,255,.018);color:rgba(255,255,255,.52);font-size:7px;font-weight:750;cursor:pointer}.settings-segmented button.selected{border-color:rgba(126,148,255,.38);background:rgba(99,124,255,.13);color:#dfe4ff}.settings-segmented button:focus-visible{outline:2px solid #7f96ff;outline-offset:2px}
+:root[data-theme="light"] .settings-accessibility>div{background:rgba(255,255,255,.72);border-color:rgba(31,45,76,.1)}:root[data-theme="light"] .settings-accessibility p{color:#5c6880}:root[data-theme="light"] .settings-segmented button{background:#f7f8fc;border-color:rgba(31,45,76,.12);color:#526078}:root[data-theme="light"] .settings-segmented button.selected{background:#edf1ff;border-color:#7188ef;color:#263f9e}
+:root[data-text-size="large"]{font-size:112.5%}
+:root[data-text-size="large"] button,:root[data-text-size="large"] input,:root[data-text-size="large"] select,:root[data-text-size="large"] textarea{font-size:max(1em,inherit)}
+:root[data-reduce-motion="on"] *,:root[data-reduce-motion="on"] *::before,:root[data-reduce-motion="on"] *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){:root:not([data-reduce-motion="off"]) *,:root:not([data-reduce-motion="off"]) *::before,:root:not([data-reduce-motion="off"]) *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}}
+@media(max-width:760px){.settings-accessibility{grid-template-columns:1fr}}
