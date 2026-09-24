@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import "./plans.css";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
+import { ArrowLeft, Check } from "lucide-react";
 
 const freePlan = SPEAKFLOW_PLAN_LIMITS.free;
 const proPlan = SPEAKFLOW_PLAN_LIMITS.pro;
@@ -27,7 +28,7 @@ export default function PlansPage() {
   return (
     <main className="plans-shell">
       <header className="plans-topbar">
-        <button type="button" className="plans-back" onClick={() => router.push("/")}>← Início</button>
+        <button type="button" className="plans-back" onClick={() => router.push("/")}><ArrowLeft /> Início</button>
         <div className="plans-brand">
           <img src="/speakflow-logo.png" alt="SpeakFlow" />
           <div><strong>Speak<span>Flow</span></strong><small>PLANOS</small></div>
@@ -45,7 +46,7 @@ export default function PlansPage() {
         <article className="plans-card">
           <div className="plans-card-head"><span>FREE</span><h2>SpeakFlow Free</h2><p>Para começar sua jornada e conhecer a experiência SpeakFlow.</p></div>
           <div className="plans-price"><strong>R$ 0</strong><span>/ para começar</span></div>
-          <ul>{freeFeatures.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
+          <ul>{freeFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
           <button type="button" className="plans-secondary" onClick={() => router.push("/coach")}>Continuar no Free</button>
         </article>
 
@@ -53,7 +54,7 @@ export default function PlansPage() {
           <div className="plans-pro-label">EXPERIÊNCIA COMPLETA</div>
           <div className="plans-card-head"><span>PRO</span><h2>SpeakFlow Pro</h2><p>Para transformar prática constante em evolução contínua.</p></div>
           <div className="plans-price"><strong>R$ 35,99</strong><span>/ mês</span></div>
-          <ul>{proFeatures.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
+          <ul>{proFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
           <button type="button" className="plans-primary" disabled aria-disabled="true">Assinatura em preparação</button>
           <small className="plans-safe-note">A ativação será confirmada com segurança pelo sistema de cobrança. Esta página não concede acesso Pro.</small>
         </article>
