@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -429,7 +429,7 @@ export default function CoachPage() {
             </div>
 
             <div className="session-summary-actions">
-              <button className="coach-primary" onClick={startSession}>Praticar novamente <span><ArrowRight /></span></button>
+              <button className="coach-primary" onClick={startSession}>Praticar novamente</button>
               <button className="session-summary-progress" onClick={() => router.push("/progress")}>Ver meu progresso</button>
             </div>
           </section>
