@@ -26,7 +26,7 @@ export default function ProgressPage(){
 
  useEffect(()=>{async function load(){
   const {data:{user},error:userError}=await supabase.auth.getUser();
-  if(!session){router.replace("/login");return}
+  if(userError || !user){router.replace("/login");return}
   const [p,s,i,lp]=await Promise.all([
    supabase.from("progress").select("conversations_count, total_minutes, streak_days, last_practice_date").eq("user_id",user.id).single(),
    supabase.from("learning_sessions").select("id, mode, duration_seconds, score, summary, skills_practiced, positive_point, improvement_point, next_recommendation, created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(30),
