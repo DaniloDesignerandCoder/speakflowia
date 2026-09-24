@@ -45,7 +45,7 @@ export default function PlansPage() {
         <article className="plans-card plans-pro">
           <div className="plans-pro-label">EXPERIÊNCIA COMPLETA</div>
           <div className="plans-card-head"><span>PRO</span><h2>SpeakFlow Pro</h2><p>Para transformar prática constante em evolução contínua.</p></div>
-          <div className="plans-price plans-price-pending"><strong>Em breve</strong><span>preço de lançamento</span></div>
+          <div className="plans-price"><strong>R$ 35,99</strong><span>/ mês</span></div>
           <ul>{proFeatures.map((feature) => <li key={feature}>✓ {feature}</li>)}</ul>
           <button type="button" className="plans-primary" disabled aria-disabled="true">Assinatura em preparação</button>
           <small className="plans-safe-note">A ativação será confirmada com segurança pelo sistema de cobrança. Esta página não concede acesso Pro.</small>
