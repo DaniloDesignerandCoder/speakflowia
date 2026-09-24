@@ -188,9 +188,10 @@ export default function MusicLab() {
         const start=Math.max(0,bin-1),end=Math.min(data.length-1,bin+2);
         let peak=0;
         for(let j=start;j<=end;j++)peak=Math.max(peak,data[j]);
-        const bassWeight=hz<220?1.3:hz<900?1.08:.9;
-        const level=Math.min(1,(peak/255)*bassWeight);
-        const height=3+level*31;
+        const bassWeight=hz<180?1.85:hz<420?1.48:hz<1200?1.2:1.02;
+        const raw=(peak/255)*bassWeight;
+        const level=Math.min(1,Math.pow(raw,0.62));
+        const height=2+level*34;
         const bar=bars[i] as HTMLElement;
         bar.style.height=`${height}px`;
         bar.style.opacity=String(.25+level*.75);
@@ -369,8 +370,10 @@ export default function MusicLab() {
       const context=new AudioContextClass();
       const source=context.createMediaElementSource(audio);
       const analyser=context.createAnalyser();
-      analyser.fftSize=256;
-      analyser.smoothingTimeConstant=.78;
+      analyser.fftSize=1024;
+      analyser.smoothingTimeConstant=.42;
+      analyser.minDecibels=-90;
+      analyser.maxDecibels=-18;
       source.connect(analyser);
       analyser.connect(context.destination);
       trackAudioRef.current=audio;
