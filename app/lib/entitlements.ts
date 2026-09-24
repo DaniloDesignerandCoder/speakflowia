@@ -26,6 +26,12 @@ export type BillingState = {
   currentPeriodEnd: string | null;
 };
 
+export type AccountAccessSnapshot = {
+  billing: BillingState;
+  entitlements: SpeakFlowEntitlements;
+  usage: SpeakFlowMonthlyUsage;
+};
+
 export type UsageLevel = "available" | "near_limit" | "limit_reached";
 export type UsageResource = "coach" | "voice";
 export type UsageAction = "allow" | "warn" | "block";
@@ -74,6 +80,21 @@ export const SPEAKFLOW_PLAN_LIMITS: Record<SpeakFlowPlan, SpeakFlowEntitlements>
     fullHistory: true,
   },
 };
+
+export function createAccountAccessSnapshot(
+  billing: BillingState,
+  usage: SpeakFlowMonthlyUsage
+): AccountAccessSnapshot {
+  const effectivePlan = resolveEffectivePlan(billing);
+  return {
+    billing,
+    entitlements: SPEAKFLOW_PLAN_LIMITS[effectivePlan],
+    usage: {
+      coachInteractions: Math.max(0, usage.coachInteractions),
+      voiceCharacters: Math.max(0, usage.voiceCharacters),
+    },
+  };
+}
 
 export function getUsageRemaining(used: number, limit: number) {
   return Math.max(0, limit - Math.max(0, used));
