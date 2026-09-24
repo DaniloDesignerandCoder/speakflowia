@@ -89,3 +89,11 @@
 @media(max-width:700px){.ml-shadow{padding:14px}.ml-shadow-head{align-items:flex-start;flex-direction:column;gap:4px}.ml-shadow-start,.ml-shadow-state button,.ml-shadow-result button{min-height:46px;font-size:10px}}
 
 .ml-shadow-saved{display:block;margin:0 0 13px;padding:8px 10px;border:1px solid rgba(117,255,181,.12);border-radius:10px;background:rgba(87,255,169,.045);color:rgba(164,255,205,.72)!important;font-size:7px!important;font-style:normal;letter-spacing:.5px}
+
+
+/* MusicLab session completion */
+.ml-session-finish{margin-top:12px;padding:14px 15px;display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.018)}
+.ml-session-finish>div>span,.ml-session-complete>span{display:block;color:#8fa3ff;font-size:6px;font-weight:900;letter-spacing:1.4px}.ml-session-finish>div>strong,.ml-session-complete>strong{display:block;margin-top:5px;color:rgba(255,255,255,.68);font-size:9px}
+.ml-session-finish button{border:1px solid rgba(132,157,255,.15);border-radius:11px;background:rgba(119,140,255,.08);color:#dfe5ff;padding:9px 11px;font-size:8px;white-space:nowrap;cursor:pointer}.ml-session-finish button:disabled{opacity:.55}
+.ml-session-complete{width:100%;display:flex;align-items:center;gap:14px}.ml-session-complete strong{flex:1;margin:0}
+@media(max-width:700px){.ml-session-finish,.ml-session-complete{align-items:stretch;flex-direction:column}.ml-session-finish button{width:100%;min-height:42px}}
