@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { ArrowLeft, Check, CircleCheck } from "lucide-react";
 
 export default function SettingsPage(){
   const router=useRouter();
@@ -84,7 +85,7 @@ export default function SettingsPage(){
 
   return <main className="settings-shell">
     <aside className="settings-nav">
-      <button type="button" className="settings-back" onClick={()=>router.push("/")} aria-label="Voltar ao início">← Início</button>
+      <button type="button" className="settings-back" onClick={()=>router.push("/")} aria-label="Voltar ao início"><ArrowLeft /> Início</button>
       <div className="settings-brand"><img src="/speakflow-logo.png" alt=""/><div><strong>Speak<span>Flow</span></strong><small>SETTINGS</small></div></div>
       <nav aria-label="Seções das configurações"><a href="#appearance" className={activeSection==="appearance"?"active":""} aria-current={activeSection==="appearance"?"location":undefined}><i aria-hidden="true">◐</i><span>Aparência</span></a><a href="#learning" className={activeSection==="learning"?"active":""} aria-current={activeSection==="learning"?"location":undefined}><i aria-hidden="true">✦</i><span>Aprendizado</span></a><a href="#account" className={activeSection==="account"?"active":""} aria-current={activeSection==="account"?"location":undefined}><i aria-hidden="true">◎</i><span>Conta</span></a><a href="#privacy" className={activeSection==="privacy"?"active":""} aria-current={activeSection==="privacy"?"location":undefined}><i aria-hidden="true">◇</i><span>Privacidade</span></a></nav>
       <div className="settings-nav-foot"><span>PERSONALIZAÇÃO</span><p>Suas escolhas moldam a experiência do Coach.</p></div>
@@ -96,9 +97,9 @@ export default function SettingsPage(){
       <section id="appearance" className="settings-section">
         <div className="settings-section-title"><span>01</span><div><small>ACCESSIBILITY & APPEARANCE</small><h2>Aparência</h2><p>Escolha o contraste visual mais confortável para usar a SpeakFlow.</p></div></div>
         <div className="settings-theme-picker" role="group" aria-label="Tema da aplicação">
-          <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"/><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?"✓":""}</b></button>
-          <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"/><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?"✓":""}</b></button>
-          <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?"✓":""}</b></button>
+          <button className={theme==="dark"?"selected":""} aria-pressed={theme==="dark"} onClick={()=>applyTheme("dark")}><i className="theme-preview dark"/><span><strong>Escuro</strong><small>Experiência original SpeakFlow</small></span><b>{theme==="dark"?<Check />:null}</b></button>
+          <button className={theme==="light"?"selected":""} aria-pressed={theme==="light"} onClick={()=>applyTheme("light")}><i className="theme-preview light"/><span><strong>Claro</strong><small>Maior luminosidade e leitura</small></span><b>{theme==="light"?<Check />:null}</b></button>
+          <button className={theme==="system"?"selected":""} aria-pressed={theme==="system"} onClick={()=>applyTheme("system")}><i className="theme-preview system"/><span><strong>Sistema</strong><small>Acompanha seu dispositivo</small></span><b>{theme==="system"?<Check />:null}</b></button>
         </div>
         <div className="settings-accessibility">
           <div><span>TEXT SIZE</span><strong>Tamanho do texto <b className="settings-scale-value">{textScale}%</b></strong><p>Ajuste a leitura em tempo real. A interface protege o layout entre 90% e 130%.</p><div className="settings-text-slider"><span>A</span><input type="range" min="90" max="130" step="5" value={textScale} onChange={e=>applyTextScale(Number(e.target.value))} aria-label={`Tamanho do texto: ${textScale}%`} aria-valuetext={`${textScale}%`}/><strong>A</strong></div><div className="settings-text-preview" aria-live="polite"><small>PRÉVIA AO VIVO</small><p>Aprender inglês deve ser natural, claro e confortável.</p></div></div>
@@ -132,7 +133,7 @@ export default function SettingsPage(){
         <div className="settings-privacy-center">
           <article><div><span>SESSÃO ATUAL</span><strong>Sair deste dispositivo</strong><p>Encerra somente esta sessão. Seu perfil, progresso e histórico permanecem associados à sua conta.</p></div><button onClick={signOut}>Sair da conta</button></article>
           <article><div><span>DADOS LOCAIS</span><strong>Restaurar preferências deste dispositivo</strong><p>Remove tema, tamanho de texto e preferência de movimento salvos localmente. Não apaga seu aprendizado.</p></div><button onClick={clearLocalPreferences}>Restaurar</button></article>
-          <article className="settings-privacy-info"><div><span>APRENDIZADO</span><strong>Seus dados continuam vinculados à sua conta</strong><p>Sessões e progresso usados para personalizar o SpeakFlow não são removidos ao limpar preferências locais ou sair.</p></div><b aria-hidden="true">✓</b></article>
+          <article className="settings-privacy-info"><div><span>APRENDIZADO</span><strong>Seus dados continuam vinculados à sua conta</strong><p>Sessões e progresso usados para personalizar o SpeakFlow não são removidos ao limpar preferências locais ou sair.</p></div><b aria-hidden="true"><CircleCheck /></b></article>
         </div>
         {privacyMessage&&<div className="settings-security-message" role="status" aria-live="polite">{privacyMessage}</div>}
       </section>
