@@ -399,9 +399,7 @@ export default function CoachPage() {
               <div className="coach-kicker">AI ENGLISH COACH</div>
             </div>
           </div>
-          <div className="coach-status">
-            <span>{userName ? userName.split(" ")[0] : "Minha conta"}</span>
-          </div>
+          <div className="coach-status" aria-hidden="true" />
         </header>
 
         {!started && sessionCompleted ? (
