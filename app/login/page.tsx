@@ -63,7 +63,7 @@ export default function LoginPage() {
         );
       }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -71,7 +71,7 @@ export default function LoginPage() {
       if (error) {
         setMessage(getFriendlyAuthMessage(error.message));
       } else {
-        const { data: { session } } = await supabase.auth.getSession();
+        const session = authData.session;
 
         if (!session) {
           setMessage("Não foi possível iniciar sua sessão agora. Tente novamente.");
