@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import "./plans.css";
+import { supabase } from "../lib/supabase";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
 import { ArrowLeft, Check } from "lucide-react";
 
@@ -24,6 +26,58 @@ const freeFeatures = [
 
 export default function PlansPage() {
   const router = useRouter();
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [billingMessage, setBillingMessage] = useState("");
+
+  async function subscribeToPro() {
+    if (isSubscribing) return;
+
+    setIsSubscribing(true);
+    setBillingMessage("");
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        router.push("/login");
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-billing-subscribe`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.status === 409) {
+        setBillingMessage(
+          data?.status === "active"
+            ? "Sua assinatura SpeakFlow Pro já está ativa."
+            : "Já existe uma assinatura SpeakFlow Pro em andamento para esta conta."
+        );
+        return;
+      }
+
+      if (!response.ok || typeof data?.checkoutUrl !== "string") {
+        throw new Error("Billing request failed");
+      }
+
+      window.location.assign(data.checkoutUrl);
+    } catch (error) {
+      console.error("Erro ao iniciar assinatura SpeakFlow Pro:", error);
+      setBillingMessage("Não foi possível abrir a assinatura agora. Tente novamente em alguns instantes.");
+    } finally {
+      setIsSubscribing(false);
+    }
+  }
 
   return (
     <main className="plans-shell">
@@ -55,7 +109,10 @@ export default function PlansPage() {
           <div className="plans-card-head"><span>PRO</span><h2>SpeakFlow Pro</h2><p>Para transformar prática constante em evolução contínua.</p></div>
           <div className="plans-price"><strong>R$ 35,99</strong><span>/ mês</span></div>
           <ul>{proFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
-          <button type="button" className="plans-primary" disabled aria-disabled="true">Assinatura em preparação</button>
+          <button type="button" className="plans-primary" onClick={subscribeToPro} disabled={isSubscribing} aria-busy={isSubscribing}>
+            {isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
+          </button>
+          {billingMessage && <p className="plans-billing-message" role="status">{billingMessage}</p>}
           <small className="plans-safe-note">A ativação será confirmada com segurança pelo sistema de cobrança. Esta página não concede acesso Pro.</small>
         </article>
       </section>
