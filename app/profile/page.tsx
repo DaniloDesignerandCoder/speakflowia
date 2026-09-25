@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ArrowRight, Check, LockKeyhole } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, LockKeyhole, Crown, Sparkles, ShieldCheck } from "lucide-react";
 
 const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
 
@@ -166,7 +166,7 @@ export default function ProfilePage() {
       </div>
       <div className="profile-hero">
         <div className="profile-avatar"><img src={avatarUrl || "/speakflow-logo.png"} alt="Foto do perfil" /></div>
-        <div><span>PERFIL DO ALUNO</span><div className="profile-name-row"><h1>{name}</h1>{hasActivePro && <span className="profile-pro-badge">PRO</span>}</div><p>{email}</p>
+        <div><span>{hasActivePro ? "MEMBRO SPEAKFLOW PRO" : "PERFIL DO ALUNO"}</span><div className="profile-name-row"><h1>{name}</h1>{hasActivePro && <span className="profile-pro-badge"><Crown aria-hidden="true" /> PRO</span>}</div><p>{email}</p>{hasActivePro && <div className="profile-premium-status"><div className="profile-premium-glow" aria-hidden="true" /><span className="profile-premium-mark"><Sparkles aria-hidden="true" /></span><div><small>EXPERIÊNCIA PREMIUM ATIVA</small><strong>Seu SpeakFlow está completo.</strong><p>Coach avançado, Labs completos e aprendizado adaptativo liberados para a sua jornada.</p></div><span className="profile-premium-verified"><ShieldCheck aria-hidden="true" /> PRO ATIVO</span></div>}
           <div className="profile-photo-actions">
             <label>{uploading ? "Enviando..." : avatarUrl ? "Alterar foto" : "Adicionar foto"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { const file=e.target.files?.[0]; if(file) uploadAvatar(file); e.currentTarget.value=""; }} /></label>
             {avatarUrl && <button type="button" disabled={uploading} onClick={removeAvatar}>Remover foto</button>}
