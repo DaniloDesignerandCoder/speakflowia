@@ -50,6 +50,7 @@ export default function Home() {
   });
 
   const [heroExperience, setHeroExperience] = useState<"coach" | "musiclab">("coach");
+  const [hasActivePro, setHasActivePro] = useState(false);
 
   const [progress, setProgress] = useState({
     conversations_count: 0,
@@ -92,10 +93,13 @@ export default function Home() {
       avatarUrl: "",
     });
 
-    const [{ data: accessData }, profileResult] = await Promise.all([
+    const [{ data: accessData }, profileResult, { data: accountAccess }] = await Promise.all([
       supabase.rpc("get_progress_access_data"),
       supabase.from("profiles").select("preferred_level, avatar_url").eq("id", session.user.id).maybeSingle(),
+      supabase.rpc("get_account_access"),
     ]);
+    const planAccess = Array.isArray(accountAccess) ? accountAccess[0] : accountAccess;
+    setHasActivePro(planAccess?.effective_plan === "pro");
 
     const access = accessData ?? {};
     const progressData = access.progress ?? {};
@@ -160,6 +164,12 @@ export default function Home() {
   }
 
   loadProgress();
+  const refreshPlan=async()=>{if(document.visibilityState!=="visible")return;const {data}=await supabase.rpc("get_account_access");const access=Array.isArray(data)?data[0]:data;setHasActivePro(access?.effective_plan==="pro");};
+  const handleFocus=()=>{void refreshPlan();};
+  const handleVisibility=()=>{void refreshPlan();};
+  window.addEventListener("focus",handleFocus);
+  document.addEventListener("visibilitychange",handleVisibility);
+  return()=>{window.removeEventListener("focus",handleFocus);document.removeEventListener("visibilitychange",handleVisibility);};
 }, []);
   
   return (
@@ -219,7 +229,7 @@ export default function Home() {
 
           <button className="dashboard-menu-item" onClick={() => router.push("/plans")}>
             <span><Layers3 /></span>
-            Planos
+            {hasActivePro ? "Meu Pro" : "Planos"}
           </button>
 
           <button className="dashboard-menu-item dashboard-settings-item" onClick={() => router.push("/settings")}>
@@ -282,6 +292,7 @@ export default function Home() {
             <span className="dashboard-profile-name">
               {userProfile.name}
             </span>
+            <span className={`dashboard-plan-badge ${hasActivePro ? "pro" : "free"}`}>{hasActivePro ? "PRO" : "FREE"}</span>
 
             <span>⌄</span>
           </button>
