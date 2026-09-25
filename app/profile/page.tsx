@@ -75,6 +75,22 @@ export default function ProfilePage() {
       setLoading(false);
     }
     loadProfile();
+
+    async function refreshAccountAccess() {
+      if (document.visibilityState !== "visible") return;
+      const { data: accountAccess } = await supabase.rpc("get_account_access");
+      const access = Array.isArray(accountAccess) ? accountAccess[0] : accountAccess;
+      setHasActivePro(access?.effective_plan === "pro");
+    }
+
+    const handleFocus = () => { void refreshAccountAccess(); };
+    const handleVisibility = () => { void refreshAccountAccess(); };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [router]);
 
   async function uploadAvatar(file: File) {
