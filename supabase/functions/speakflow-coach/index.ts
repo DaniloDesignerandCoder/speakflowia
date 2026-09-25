@@ -978,6 +978,44 @@ Rules:
       );
     }
 
+    const { data: coachUsageRows, error: coachUsageError } = await supabase.rpc("reserve_coach_usage");
+
+    if (coachUsageError) {
+      console.error("SpeakFlow Coach usage reservation failed:", coachUsageError.message);
+      return new Response(
+        JSON.stringify({ error: "Coach usage check failed." }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    const coachUsage = Array.isArray(coachUsageRows) ? coachUsageRows[0] : coachUsageRows;
+    if (!coachUsage?.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Coach monthly limit reached.",
+          code: "coach_limit_reached",
+          usage: {
+            used: Number(coachUsage?.used ?? 0),
+            limit: Number(coachUsage?.usage_limit ?? 0),
+            remaining: Number(coachUsage?.remaining ?? 0),
+            plan: coachUsage?.effective_plan === "pro" ? "pro" : "free",
+          },
+        }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    let coachUsageReserved = true;
+    const releaseReservedCoachUsage = async () => {
+      if (!coachUsageReserved) return;
+      const { error: releaseError } = await supabase.rpc("release_coach_usage");
+      if (releaseError) {
+        console.error("SpeakFlow Coach usage release failed:", releaseError.message);
+        return;
+      }
+      coachUsageReserved = false;
+    };
+
     const { data: lastSessionSummary, error: lastSessionSummaryError } = await supabase
       .from("learning_sessions")
       .select("summary, skills_practiced, positive_point, improvement_point, next_recommendation, mode, created_at")
@@ -1131,6 +1169,7 @@ Keep feedback concise and useful. Never create feedback merely for capitalizatio
           const result = raw ? parseCoachResult(raw, userMessage) : null;
 
           if (result) {
+            coachUsageReserved = false;
             return new Response(
               JSON.stringify({ ...result, provider: "gemini" }),
               { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -1179,6 +1218,7 @@ Keep feedback concise and useful. Never create feedback merely for capitalizatio
         const result = raw ? parseCoachResult(raw, userMessage) : null;
 
         if (result) {
+          coachUsageReserved = false;
           return new Response(
             JSON.stringify({ ...result, provider: "groq" }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } },
@@ -1189,6 +1229,7 @@ Keep feedback concise and useful. Never create feedback merely for capitalizatio
       console.error("Groq fallback error:", groqData);
     }
 
+    await releaseReservedCoachUsage();
     return new Response(
       JSON.stringify({ error: "The AI services could not generate a response." }),
       { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
