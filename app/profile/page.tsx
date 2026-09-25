@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Check, LockKeyhole, Crown, Gem, BadgeCheck, Tag, LogOut } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, LockKeyhole, Crown, Gem, BadgeCheck, Tag, LogOut } from "lucide-react";
 
 const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
 
