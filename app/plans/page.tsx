@@ -44,7 +44,7 @@ export default function PlansPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-billing-subscribe`,
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-stripe-checkout`,
         {
           method: "POST",
           headers: {
