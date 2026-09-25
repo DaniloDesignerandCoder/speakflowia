@@ -3080,8 +3080,11 @@ img {
   letter-spacing: 1.5px;
 }
 
-.insight-title span {
-  font-size: 12px;
+.insight-title-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  stroke-width: 1.8;
 }
 
 .insight-section {
