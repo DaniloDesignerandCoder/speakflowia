@@ -92,35 +92,20 @@ export default function Home() {
       avatarUrl: "",
     });
 
-    const { data } = await supabase
-      .from("progress")
-      .select("conversations_count, total_minutes, streak_days")
-      .eq("user_id", session.user.id)
-      .single();
-
-    if (data) {
-      setProgress(data);
-    }
-
-    const [sessionsResult, insightsResult, profileResult] = await Promise.all([
-      supabase
-        .from("learning_sessions")
-        .select("duration_seconds")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(30),
-      supabase
-        .from("learning_insights")
-        .select("skill_category, tip")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(30),
-      supabase
-        .from("profiles")
-        .select("preferred_level, avatar_url")
-        .eq("id", session.user.id)
-        .maybeSingle(),
+    const [{ data: accessData }, profileResult] = await Promise.all([
+      supabase.rpc("get_progress_access_data"),
+      supabase.from("profiles").select("preferred_level, avatar_url").eq("id", session.user.id).maybeSingle(),
     ]);
+
+    const access = accessData ?? {};
+    const progressData = access.progress ?? {};
+    setProgress({
+      conversations_count: progressData.conversations_count ?? 0,
+      total_minutes: progressData.total_minutes ?? 0,
+      streak_days: progressData.streak_days ?? 0,
+    });
+    const sessions = access.sessions ?? [];
+    const insights = access.insights ?? [];
 
     const levelMap: Record<string, { label: string; description: string }> = {
       beginner: { label: "Beginner", description: "Iniciante" },
@@ -137,8 +122,6 @@ export default function Home() {
       avatarUrl: profileResult.data?.avatar_url ?? "",
     }));
 
-    const sessions = sessionsResult.data ?? [];
-    const insights = insightsResult.data ?? [];
     const minutes = Math.round(
       sessions.reduce((sum, item) => sum + Math.max(0, item.duration_seconds ?? 0), 0) / 60
     );
