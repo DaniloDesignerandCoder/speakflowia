@@ -4006,3 +4006,9 @@ button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
 .profile-premium-verified svg{width:11px;height:11px;stroke-width:2}
 :root[data-theme="light"] .profile-premium-status{background:linear-gradient(120deg,#f5f7ff,#f9f5ff);border-color:#cbd3f6}:root[data-theme="light"] .profile-premium-status div:not(.profile-premium-glow)>p{color:#63708a}:root[data-theme="light"] .profile-premium-mark{background:#edf1ff;color:#4059c7}:root[data-theme="light"] .profile-premium-verified{background:#edf9f3;color:#267750;border-color:#c8ead9}
 @media(max-width:760px){.profile-premium-status{grid-template-columns:auto 1fr;gap:11px;padding:14px}.profile-premium-verified{grid-column:2;justify-self:start}.profile-premium-status div:not(.profile-premium-glow)>strong{font-size:11px}}
+
+
+/* Free member plan badge */
+.profile-free-badge{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:6px 10px;border:1px solid rgba(148,163,184,.3);border-radius:999px;background:rgba(148,163,184,.09);color:#aeb8c7!important;font-size:7px!important;font-weight:900;letter-spacing:1.35px;line-height:1}
+.profile-free-badge svg{width:10px;height:10px;stroke-width:2.2}
+:root[data-theme="light"] .profile-free-badge{background:#f3f5f8;border-color:#cbd2dc;color:#667085!important}
