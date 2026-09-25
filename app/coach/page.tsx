@@ -338,40 +338,8 @@ export default function CoachPage() {
       return;
     }
 
-    const progressUpdate = (async () => {
-      const { data: currentProgress } = await supabase
-        .from("progress")
-        .select("total_minutes, conversations_count, streak_days, last_practice_date")
-        .eq("user_id", session.user.id)
-        .single();
-
-      const today = new Date().toISOString().split("T")[0];
-      const yesterdayDate = new Date();
-      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-      const yesterday = yesterdayDate.toISOString().split("T")[0];
-      let nextStreak = currentProgress?.streak_days ?? 0;
-
-      if (currentProgress?.last_practice_date !== today) {
-        nextStreak = currentProgress?.last_practice_date === yesterday ? nextStreak + 1 : 1;
-      }
-
-      if (currentProgress) {
-        const { error: progressError } = await supabase
-          .from("progress")
-          .update({
-            conversations_count: currentProgress.conversations_count + 1,
-            total_minutes:
-              currentProgress.total_minutes + Math.max(1, Math.round(sessionSeconds / 60)),
-            streak_days: nextStreak,
-            last_practice_date: today,
-          })
-          .eq("user_id", session.user.id);
-
-        if (progressError) console.error("Erro ao atualizar progresso:", progressError);
-      }
-    })();
-
-    void progressUpdate;
+    const { error: progressError } = await supabase.rpc("record_conversation_progress", { p_duration_seconds: sessionSeconds });
+    if (progressError) console.error("Erro ao atualizar progresso:", progressError);
 
     setSessionSummary(generatedSummary);
     setSessionCompleted(true);
