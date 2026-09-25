@@ -335,7 +335,12 @@ export default function MusicLab() {
 
   function completeMission(score:number){const target=score>=90?Math.min(98,score+2):score>=70?85:70;setMissionScore(score);setMissionTarget(target);setMissionComplete(true);setMissionStarted(false);}
 
-  function chooseTrack(id:string){
+  async function chooseTrack(id:string){
+    const trackIndex=tracks.findIndex(item=>item.id===id);
+    if(trackIndex<0)return;
+    const {data,error}=await supabase.rpc("authorize_musiclab_track",{p_track_index:trackIndex});
+    const access=Array.isArray(data)?data[0]:data;
+    if(error||!access?.allowed){router.push("/plans");return;}
     stopTrackAudio();
     window.speechSynthesis?.cancel();
     setSelectedId(id);
