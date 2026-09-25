@@ -108,9 +108,52 @@ serve(async (req) => {
       });
     }
 
+    const { data: usageRows, error: usageError } = await supabase.rpc("reserve_voice_usage", {
+      p_characters: text.length,
+    });
+
+    if (usageError) {
+      console.error("SpeakFlow Voice usage reservation failed:", usageError.message);
+      return new Response(JSON.stringify({ error: "Voice usage check failed." }), {
+        status: 503,
+        headers: jsonHeaders,
+      });
+    }
+
+    const usage = Array.isArray(usageRows) ? usageRows[0] : usageRows;
+    if (!usage?.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "Voice monthly limit reached.",
+          code: "voice_limit_reached",
+          usage: {
+            used: Number(usage?.used ?? 0),
+            limit: Number(usage?.usage_limit ?? 0),
+            remaining: Number(usage?.remaining ?? 0),
+            plan: usage?.effective_plan === "pro" ? "pro" : "free",
+          },
+        }),
+        { status: 429, headers: jsonHeaders },
+      );
+    }
+
+    let usageReserved = true;
+    const releaseReservedUsage = async () => {
+      if (!usageReserved) return;
+      const { error: releaseError } = await supabase.rpc("release_voice_usage", {
+        p_characters: text.length,
+      });
+      if (releaseError) {
+        console.error("SpeakFlow Voice usage release failed:", releaseError.message);
+        return;
+      }
+      usageReserved = false;
+    };
+
     const voiceId = Deno.env.get("ELEVENLABS_VOICE_ID");
     if (!voiceId) {
       console.error("SpeakFlow Voice ID is not configured.");
+      await releaseReservedUsage();
       return new Response(JSON.stringify({ error: "Voice service unavailable." }), {
         status: 503,
         headers: jsonHeaders,
@@ -138,6 +181,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       console.error("SpeakFlow Voice provider error:", response.status);
+      await releaseReservedUsage();
       return new Response(JSON.stringify({ error: "Neural voice unavailable." }), {
         status: 502,
         headers: jsonHeaders,
@@ -145,6 +189,7 @@ serve(async (req) => {
     }
 
     const audio = await response.arrayBuffer();
+    usageReserved = false;
     return new Response(audio, {
       status: 200,
       headers: {
