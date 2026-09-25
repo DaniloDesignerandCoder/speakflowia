@@ -14,3 +14,5 @@ button:not(:disabled):hover{
 }
 button:not(:disabled):active{transform:translateY(0) scale(.99)}
 button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
+
+.vocab-plan-note{width:fit-content;display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:7px 9px;border:1px solid rgba(126,148,255,.16);border-radius:9px;background:rgba(126,148,255,.045)}.vocab-plan-note>span{font-size:7px;font-weight:850;letter-spacing:1px;color:#8fa0ff}.vocab-plan-note button{display:inline-flex;align-items:center;gap:4px;padding:0;border:0;background:transparent;color:rgba(255,255,255,.55);font-size:7px;font-weight:750;cursor:pointer}.vocab-plan-note button svg{width:11px;height:11px}.vocab-plan-note.pro>span{color:#70dca7}:root[data-theme="light"] .vocab-plan-note{background:rgba(96,118,239,.055);border-color:rgba(96,118,239,.14)}:root[data-theme="light"] .vocab-plan-note button{color:#59657a}
