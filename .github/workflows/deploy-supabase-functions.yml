@@ -6,6 +6,8 @@ on:
     paths:
       - "supabase/functions/speakflow-voice/**"
       - "supabase/functions/speakflow-coach/**"
+      - "supabase/functions/speakflow-billing-subscribe/**"
+      - "supabase/functions/speakflow-billing-webhook/**"
 
 permissions:
   contents: read
@@ -16,6 +18,8 @@ jobs:
     outputs:
       voice: ${{ steps.filter.outputs.voice }}
       coach: ${{ steps.filter.outputs.coach }}
+      billing_subscribe: ${{ steps.filter.outputs.billing_subscribe }}
+      billing_webhook: ${{ steps.filter.outputs.billing_webhook }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,6 +34,8 @@ jobs:
           CHANGED="$(git diff --name-only "$BEFORE" "$AFTER")"
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-voice/'; then echo "voice=true" >> "$GITHUB_OUTPUT"; else echo "voice=false" >> "$GITHUB_OUTPUT"; fi
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-coach/'; then echo "coach=true" >> "$GITHUB_OUTPUT"; else echo "coach=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-billing-subscribe/'; then echo "billing_subscribe=true" >> "$GITHUB_OUTPUT"; else echo "billing_subscribe=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-billing-webhook/'; then echo "billing_webhook=true" >> "$GITHUB_OUTPUT"; else echo "billing_webhook=false" >> "$GITHUB_OUTPUT"; fi
 
   deploy-voice:
     needs: changes
@@ -58,3 +64,31 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy speakflow-coach --project-ref njoisdldoellzuqxkyuk
+
+  deploy-billing-subscribe:
+    needs: changes
+    if: needs.changes.outputs.billing_subscribe == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy speakflow-billing-subscribe
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy speakflow-billing-subscribe --project-ref njoisdldoellzuqxkyuk
+
+  deploy-billing-webhook:
+    needs: changes
+    if: needs.changes.outputs.billing_webhook == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy speakflow-billing-webhook
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy speakflow-billing-webhook --project-ref njoisdldoellzuqxkyuk --no-verify-jwt
