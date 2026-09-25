@@ -166,26 +166,11 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: memoryRows, error: memoryError } = await supabase
-      .from("learning_insights")
-      .select("level, original_text, corrected_text, tip, skill_category, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(8);
-
-    if (memoryError) {
-      console.error("Could not load pedagogical memory:", memoryError);
-    }
-
-    const { data: learningPlan, error: learningPlanError } = await supabase
-      .from("learning_plans")
-      .select("primary_goal, priority_skills, current_focus, next_milestone, coach_strategy, evidence_summary, sessions_analyzed")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (learningPlanError) {
-      console.error("Could not load adaptive learning context:", learningPlanError);
-    }
+    const { data: coachMemory, error: coachMemoryError } = await supabase.rpc("get_coach_memory_context");
+    if (coachMemoryError) console.error("Could not load Coach memory context:", coachMemoryError);
+    const memoryRows = coachMemory?.memory_rows ?? [];
+    const learningPlan = coachMemory?.learning_plan ?? null;
+    const lastSessionSummary = coachMemory?.last_session_summary ?? null;
 
     const pedagogicalMemory = (memoryRows ?? [])
       .map(
@@ -1015,19 +1000,6 @@ Rules:
       }
       coachUsageReserved = false;
     };
-
-    const { data: lastSessionSummary, error: lastSessionSummaryError } = await supabase
-      .from("learning_sessions")
-      .select("summary, skills_practiced, positive_point, improvement_point, next_recommendation, mode, created_at")
-      .eq("user_id", user.id)
-      .or("summary.not.is.null,skills_practiced.not.is.null,positive_point.not.is.null,improvement_point.not.is.null,next_recommendation.not.is.null")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (lastSessionSummaryError) {
-      console.error("Could not load latest session summary:", lastSessionSummaryError);
-    }
 
     const adaptivePlanMemory = learningPlan
       ? `Adaptive pedagogical guidance for natural use:
