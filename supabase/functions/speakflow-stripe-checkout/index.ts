@@ -121,7 +121,7 @@ serve(async (req) => {
 
     const stripeBody = await stripeResponse.json().catch(() => ({}));
     if (!stripeResponse.ok) {
-      console.error("Stripe checkout error:", stripeResponse.status, stripeBody?.error?.type ?? "unknown");
+      console.error("Stripe checkout error:", stripeResponse.status, stripeBody?.error?.type ?? "unknown", "code:", stripeBody?.error?.code ?? "none", "param:", stripeBody?.error?.param ?? "none", "message:", stripeBody?.error?.message ?? "none");
       return new Response(JSON.stringify({ error: "Could not open subscription checkout." }), {
         status: 502,
         headers: jsonHeaders,
