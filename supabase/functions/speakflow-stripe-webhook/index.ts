@@ -39,10 +39,19 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
+  const stripePriceId = Deno.env.get("STRIPE_PRO_PRICE_ID");
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
-  if (!supabaseUrl || !serviceRoleKey || !stripeSecretKey || !webhookSecret) {
+  if (!supabaseUrl || !serviceRoleKey || !stripeSecretKey || !stripePriceId || !webhookSecret) {
     console.error("Stripe webhook is not configured.");
+    return new Response(JSON.stringify({ error: "Webhook is not configured." }), {
+      status: 500,
+      headers: jsonHeaders,
+    });
+  }
+
+  if (!stripePriceId.startsWith("price_")) {
+    console.error("Stripe Pro price ID is invalid.");
     return new Response(JSON.stringify({ error: "Webhook is not configured." }), {
       status: 500,
       headers: jsonHeaders,
@@ -93,8 +102,13 @@ serve(async (req) => {
     const userId = getUserId(subscription);
     if (!userId) throw new Error("Stripe subscription is missing a valid SpeakFlow user ID.");
 
-    const status = mapStripeStatus(subscription.status);
     const firstItem = subscription.items?.data?.[0];
+    const subscriptionPriceId = typeof firstItem?.price?.id === "string" ? firstItem.price.id : "";
+    if (subscription.items?.data?.length !== 1 || subscriptionPriceId !== stripePriceId) {
+      throw new Error("Stripe subscription does not match the configured SpeakFlow Pro price.");
+    }
+
+    const status = mapStripeStatus(subscription.status);
     const periodStart = unixToIso(firstItem?.current_period_start);
     const periodEnd = unixToIso(firstItem?.current_period_end);
     const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
@@ -135,7 +149,7 @@ serve(async (req) => {
       .single();
     if (subscriptionError) throw subscriptionError;
 
-    const hasProAccess = status === "active" || (status === "canceled" && periodEnd && new Date(periodEnd) > new Date());
+    const hasProAccess = status === "active";
     const entitlement = {
       user_id: userId,
       plan: hasProAccess ? "pro" : "free",
