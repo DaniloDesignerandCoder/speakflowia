@@ -91,7 +91,20 @@ export default function MusicLab() {
   const spectrumPhaseRef=useRef(0);
   const waveformDataRef=useRef<Uint8Array<ArrayBuffer>|null>(null);
 
-  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");const {data:access}=await supabase.rpc("get_account_access");const account=Array.isArray(access)?access[0]:access;setFullLabs(Boolean(account?.full_labs));void loadAdaptiveCue();});},[router]);
+  useEffect(()=>{
+    async function refreshAccountAccess(){
+      if(document.visibilityState!=="visible")return;
+      const {data:access}=await supabase.rpc("get_account_access");
+      const account=Array.isArray(access)?access[0]:access;
+      setFullLabs(Boolean(account?.full_labs));
+    }
+    supabase.auth.getSession().then(async({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");await refreshAccountAccess();void loadAdaptiveCue();});
+    const handleFocus=()=>{void refreshAccountAccess();};
+    const handleVisibility=()=>{void refreshAccountAccess();};
+    window.addEventListener("focus",handleFocus);
+    document.addEventListener("visibilitychange",handleVisibility);
+    return()=>{window.removeEventListener("focus",handleFocus);document.removeEventListener("visibilitychange",handleVisibility);};
+  },[router]);
 
   useEffect(()=>()=>{ 
     if(audioRafRef.current!==null)cancelAnimationFrame(audioRafRef.current);
