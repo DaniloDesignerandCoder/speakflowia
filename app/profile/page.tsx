@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ArrowRight, Check, LockKeyhole, Crown, Gem, BadgeCheck, Tag } from "lucide-react";
+import { ArrowLeft, Check, LockKeyhole, Crown, Gem, BadgeCheck, Tag, LogOut } from "lucide-react";
 
 const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
 
@@ -220,8 +220,7 @@ export default function ProfilePage() {
         <div className="profile-preferences-actions"><button type="button" className="profile-preferences-save" disabled={savingPreferences} onClick={savePreferences}>{savingPreferences ? "Salvando..." : "Salvar preferências"}</button>{preferencesMessage && <span className={preferencesMessage.startsWith("✓") ? "profile-preferences-feedback success" : "profile-preferences-feedback error"}>{preferencesMessage}</span>}</div>
       </section>
       <div className="profile-actions">
-        <button className="profile-primary" onClick={() => router.push("/coach")}>Abrir meu Coach <ArrowRight /></button>
-        <button className="profile-logout" onClick={signOut}>Sair da conta</button>
+        <button className="profile-logout" onClick={signOut}><LogOut aria-hidden="true" /> Logout</button>
       </div>
     </section>
   </main>;
