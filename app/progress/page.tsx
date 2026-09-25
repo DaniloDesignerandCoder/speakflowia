@@ -30,14 +30,13 @@ export default function ProgressPage(){
  useEffect(()=>{async function load(){
   const {data:{user},error:userError}=await supabase.auth.getUser();
   if(userError || !user){router.replace("/login");return}
-  const [p,s,i,lp]=await Promise.all([
-   supabase.from("progress").select("conversations_count, total_minutes, streak_days, last_practice_date").eq("user_id",user.id).single(),
-   supabase.from("learning_sessions").select("id, mode, duration_seconds, score, summary, skills_practiced, positive_point, improvement_point, next_recommendation, created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(30),
-   supabase.from("learning_insights").select("id, level, original_text, corrected_text, tip, skill_category, created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(30),
-   supabase.from("learning_plans").select("primary_goal, priority_skills, current_focus, next_milestone, coach_strategy, updated_at").eq("user_id",user.id).maybeSingle()
-  ]);
-  if(p.data)setProgress(p.data); if(s.data)setSessions(s.data); if(i.data)setInsights(i.data); if(lp.data)setLearningPlan(lp.data);
-  if(p.error||s.error||i.error||lp.error){console.error("Erro ao carregar progresso:",{progress:p.error,sessions:s.error,insights:i.error,learningPlan:lp.error});setErrorMessage("Parte dos seus dados não pôde ser carregada agora.")}
+  const {data,error}=await supabase.rpc("get_progress_access_data");
+  if(error){console.error("Erro ao carregar progresso:",error);setErrorMessage("Parte dos seus dados não pôde ser carregada agora.");setLoading(false);return}
+  const payload=(data??{}) as {progress?:Progress;sessions?:LearningSession[];insights?:LearningInsight[];learning_plan?:LearningPlan|null};
+  if(payload.progress)setProgress(payload.progress);
+  setSessions(Array.isArray(payload.sessions)?payload.sessions:[]);
+  setInsights(Array.isArray(payload.insights)?payload.insights:[]);
+  setLearningPlan(payload.learning_plan??null);
   setLoading(false);
  }load()},[router]);
 
