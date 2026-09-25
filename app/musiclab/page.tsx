@@ -474,20 +474,17 @@ export default function MusicLab() {
   async function loadAdaptiveCue(){
     try{
       const {data:{session}}=await supabase.auth.getSession(); if(!session)return;
-      const [{data:plan},{data:recent}]=await Promise.all([
-        supabase.from("learning_plans").select("current_focus, next_milestone, priority_skills").eq("user_id",session.user.id).maybeSingle(),
-        supabase.from("learning_insights").select("skill_category, tip").eq("user_id",session.user.id).order("created_at",{ascending:false}).limit(5)
-      ]);
-      const musicInsight=(recent??[]).find(item=>(item.skill_category??"").toLowerCase().includes("musiclab"));
-      const detail=musicInsight?.tip||plan?.current_focus||plan?.next_milestone||"Ouça a frase uma vez, depois repita tentando preservar o ritmo natural.";
-      const title=musicInsight?"Seu último insight MusicLab":plan?.current_focus?"Seu foco adaptativo":"Foco desta sessão";
+      const {data,error}=await supabase.rpc("get_musiclab_adaptive_cue");
+      if(error)throw error;
+      const cue=(data??{}) as {title?:string;detail?:string;signal_text?:string};
+      const detail=cue.detail||"Ouça a frase uma vez, depois repita tentando preservar o ritmo natural.";
+      const title=cue.title||"Foco desta sessão";
       setAdaptiveCue({title,detail});
-      const text=`${musicInsight?.tip??""} ${plan?.current_focus??""} ${plan?.priority_skills??""}`.toLowerCase();
+      const text=(cue.signal_text||"").toLowerCase();
       const phraseIndex=text.includes("ritmo")||text.includes("flu")?Math.min(2,track.phrases.length-1):text.includes("vocab")||text.includes("word")?Math.min(1,track.phrases.length-1):0;
       setRecommendedPhrase(phraseIndex);
     }catch(error){console.error("Não foi possível carregar o foco adaptativo do MusicLab:",error);}
   }
-
   async function finishMusicSession(){
     if(sessionSaving||sessionAttempts.length===0)return; setSessionSaving(true);
     try{
