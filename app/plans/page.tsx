@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
@@ -26,6 +26,7 @@ const freeFeatures = [
 
 export default function PlansPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [billingMessage, setBillingMessage] = useState("");
   const [hasActivePro, setHasActivePro] = useState(false);
@@ -35,18 +36,43 @@ export default function PlansPage() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data } = await supabase
-        .from("entitlements")
-        .select("plan, subscription_status, current_period_end")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_account_access");
+      if (error) return;
 
-      const periodIsValid = !data?.current_period_end || new Date(data.current_period_end).getTime() > Date.now();
-      setHasActivePro(data?.plan === "pro" && data?.subscription_status === "active" && periodIsValid);
+      const access = Array.isArray(data) ? data[0] : data;
+      setHasActivePro(access?.effective_plan === "pro");
+    }
+
+    const billing = searchParams.get("billing");
+
+    if (billing === "canceled") {
+      setBillingMessage("Assinatura cancelada. Nenhuma alteração foi feita no seu plano.");
+      loadPlanStatus();
+      return;
+    }
+
+    if (billing === "success") {
+      setBillingMessage("Pagamento recebido. Estamos confirmando a ativação do SpeakFlow Pro...");
+      let attempts = 0;
+      const checkActivation = async () => {
+        attempts += 1;
+        await loadPlanStatus();
+        const { data } = await supabase.rpc("get_account_access");
+        const access = Array.isArray(data) ? data[0] : data;
+        if (access?.effective_plan === "pro") {
+          setHasActivePro(true);
+          setBillingMessage("SpeakFlow Pro ativado com sucesso.");
+          return;
+        }
+        if (attempts < 5) window.setTimeout(checkActivation, 1500);
+        else setBillingMessage("Pagamento recebido. A ativação do Pro pode levar alguns instantes.");
+      };
+      checkActivation();
+      return;
     }
 
     loadPlanStatus();
-  }, []);
+  }, [searchParams]);
 
   async function subscribeToPro() {
     if (isSubscribing || hasActivePro) return;
