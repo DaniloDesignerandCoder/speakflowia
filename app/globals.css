@@ -3982,3 +3982,11 @@ button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
 .profile-name-row h1{margin-right:0}
 .profile-pro-badge{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border:1px solid rgba(151,166,255,.34);border-radius:999px;background:linear-gradient(110deg,rgba(96,118,239,.2),rgba(120,140,255,.12));color:#b8c3ff!important;font-size:7px!important;font-weight:900;letter-spacing:1.35px;line-height:1;box-shadow:0 0 18px rgba(103,125,255,.12)}
 :root[data-theme="light"] .profile-pro-badge{background:#edf1ff;border-color:#aebbf4;color:#4059c7!important}
+
+
+/* Profile journey icon + action alignment refinement */
+.profile-level-step i svg{width:15px;height:15px;stroke-width:2.35}
+.profile-achievement-grid article>i svg{width:16px;height:16px;stroke-width:2}
+.profile-journey-insight button{display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap}
+.profile-journey-insight button svg{width:16px;height:16px;flex:0 0 16px;stroke-width:2;transition:transform .2s ease}
+.profile-journey-insight button:hover svg{transform:translateX(2px)}
