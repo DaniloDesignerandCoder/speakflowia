@@ -71,7 +71,7 @@ export default function ProfilePage() {
         if (skill) acc[skill] = (acc[skill] || 0) + 1;
         return acc;
       }, {});
-      setFocusSkills(Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([skill]) => skill));
+      setFocusSkills((Object.entries(counts) as [string, number][]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([skill]) => skill));
       setLoading(false);
     }
     loadProfile();
