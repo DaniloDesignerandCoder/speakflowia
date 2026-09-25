@@ -133,7 +133,6 @@ export default function PlansPage() {
             {hasActivePro ? "SpeakFlow Pro ativo" : isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
           </button>
           {billingMessage && <p className="plans-billing-message" role="status">{billingMessage}</p>}
-          <small className="plans-safe-note">A ativação será confirmada com segurança pelo sistema de cobrança. Esta página não concede acesso Pro.</small>
         </article>
       </section>
 
