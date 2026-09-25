@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
@@ -28,9 +28,28 @@ export default function PlansPage() {
   const router = useRouter();
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [billingMessage, setBillingMessage] = useState("");
+  const [hasActivePro, setHasActivePro] = useState(false);
+
+  useEffect(() => {
+    async function loadPlanStatus() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data } = await supabase
+        .from("entitlements")
+        .select("plan, subscription_status, current_period_end")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+
+      const periodIsValid = !data?.current_period_end || new Date(data.current_period_end).getTime() > Date.now();
+      setHasActivePro(data?.plan === "pro" && data?.subscription_status === "active" && periodIsValid);
+    }
+
+    loadPlanStatus();
+  }, []);
 
   async function subscribeToPro() {
-    if (isSubscribing) return;
+    if (isSubscribing || hasActivePro) return;
 
     setIsSubscribing(true);
     setBillingMessage("");
@@ -60,9 +79,10 @@ export default function PlansPage() {
       if (response.status === 409) {
         setBillingMessage(
           data?.status === "active"
-            ? "Sua assinatura SpeakFlow Pro já está ativa."
+            ? ""
             : "Já existe uma assinatura SpeakFlow Pro em andamento para esta conta."
         );
+        if (data?.status === "active") setHasActivePro(true);
         return;
       }
 
@@ -109,8 +129,8 @@ export default function PlansPage() {
           <div className="plans-card-head"><span>PRO</span><h2>SpeakFlow Pro</h2><p>Para transformar prática constante em evolução contínua.</p></div>
           <div className="plans-price"><strong>R$ 35,99</strong><span>/ mês</span></div>
           <ul>{proFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
-          <button type="button" className="plans-primary" onClick={subscribeToPro} disabled={isSubscribing} aria-busy={isSubscribing}>
-            {isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
+          <button type="button" className="plans-primary" onClick={subscribeToPro} disabled={isSubscribing || hasActivePro} aria-busy={isSubscribing}>
+            {hasActivePro ? "SpeakFlow Pro ativo" : isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
           </button>
           {billingMessage && <p className="plans-billing-message" role="status">{billingMessage}</p>}
           <small className="plans-safe-note">A ativação será confirmada com segurança pelo sistema de cobrança. Esta página não concede acesso Pro.</small>
