@@ -33,6 +33,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [hasActivePro, setHasActivePro] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -40,7 +41,7 @@ export default function ProfilePage() {
       if (userError || !user) { router.replace("/login"); return; }
 
       setUserId(user.id);
-      const [{ data }, { data: progress }, { data: insights }] = await Promise.all([
+      const [{ data }, { data: progress }, { data: insights }, { data: entitlement }] = await Promise.all([
         supabase.from("profiles")
           .select("full_name, preferred_level, avatar_url, learning_goal, correction_style, conversation_pace")
           .eq("id", user.id)
@@ -54,7 +55,14 @@ export default function ProfilePage() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(20),
+        supabase.from("entitlements")
+          .select("plan, subscription_status, current_period_end")
+          .eq("user_id", user.id)
+          .maybeSingle(),
       ]);
+
+      const proPeriodIsValid = !entitlement?.current_period_end || new Date(entitlement.current_period_end).getTime() > Date.now();
+      setHasActivePro(entitlement?.plan === "pro" && entitlement?.subscription_status === "active" && proPeriodIsValid);
 
       setName(data?.full_name || user.user_metadata?.full_name || "Usuário SpeakFlow");
       setEmail(user.email || "");
@@ -158,7 +166,7 @@ export default function ProfilePage() {
       </div>
       <div className="profile-hero">
         <div className="profile-avatar"><img src={avatarUrl || "/speakflow-logo.png"} alt="Foto do perfil" /></div>
-        <div><span>PERFIL DO ALUNO</span><h1>{name}</h1><p>{email}</p>
+        <div><span>PERFIL DO ALUNO</span><div className="profile-name-row"><h1>{name}</h1>{hasActivePro && <span className="profile-pro-badge">PRO</span>}</div><p>{email}</p>
           <div className="profile-photo-actions">
             <label>{uploading ? "Enviando..." : avatarUrl ? "Alterar foto" : "Adicionar foto"}<input type="file" accept="image/jpeg,image/png,image/webp" disabled={uploading} onChange={(e) => { const file=e.target.files?.[0]; if(file) uploadAvatar(file); e.currentTarget.value=""; }} /></label>
             {avatarUrl && <button type="button" disabled={uploading} onClick={removeAvatar}>Remover foto</button>}
