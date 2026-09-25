@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import {ArrowLeft, Check, LoaderCircle, Mic2, Pause, Play, Volume2 } from "lucide-react";
+import {ArrowLeft, Check, LoaderCircle, LockKeyhole, Mic2, Pause, Play, Volume2 } from "lucide-react";
 import * as THREE from "three";
 import "./musiclab.css";
 import { approvedMusicCatalog, attributionFor, type MusicTrack } from "./catalog";
@@ -35,6 +35,7 @@ const tracks: MusicTrack[] = [...originalTracks, ...playableLicensedTracks];
 export default function MusicLab() {
   const router = useRouter();
   const [name,setName]=useState("");
+  const [fullLabs,setFullLabs]=useState(false);
   const [selectedId,setSelectedId]=useState(tracks[0].id);
   const [step,setStep]=useState(0);
   const [revealed,setRevealed]=useState(false);
@@ -90,7 +91,7 @@ export default function MusicLab() {
   const spectrumPhaseRef=useRef(0);
   const waveformDataRef=useRef<Uint8Array<ArrayBuffer>|null>(null);
 
-  useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");void loadAdaptiveCue();});},[router]);
+  useEffect(()=>{supabase.auth.getSession().then(async({data})=>{if(!data.session){router.replace("/login");return;} setName(data.session.user.user_metadata?.full_name?.split(" ")[0]??"");const {data:access}=await supabase.rpc("get_account_access");const account=Array.isArray(access)?access[0]:access;setFullLabs(Boolean(account?.full_labs));void loadAdaptiveCue();});},[router]);
 
   useEffect(()=>()=>{ 
     if(audioRafRef.current!==null)cancelAnimationFrame(audioRafRef.current);
@@ -573,9 +574,9 @@ export default function MusicLab() {
     <section className="ml-workspace">
       <aside className="ml-library">
         <div className="ml-label"><span>SESSIONS</span><small>Escolha uma atmosfera</small></div>
-        {tracks.map((item,index)=><button key={item.id} className={selectedId===item.id?"ml-track active":"ml-track"} onClick={()=>chooseTrack(item.id)}>
-          <span>0{index+1}</span><div><strong>{item.title}</strong><small>{item.mood} · {item.focus}</small></div>
-        </button>)}
+        {tracks.map((item,index)=>{const locked=!fullLabs&&index>0;return <button key={item.id} className={`${selectedId===item.id?"ml-track active":"ml-track"}${locked?" locked":""}`} onClick={()=>chooseTrack(item.id)} aria-label={locked?`${item.title} · disponível no SpeakFlow Pro`:item.title}>
+          <span>0{index+1}</span><div><strong>{item.title}</strong><small>{item.mood} · {item.focus}</small></div>{locked?<b className="ml-track-pro"><LockKeyhole aria-hidden="true"/> PRO</b>:<b>›</b>}
+        </button>})}
       </aside>
 
       <div className="ml-focus"><div className="ml-hud-corner c1"/><div className="ml-hud-corner c2"/><div className="ml-hud-corner c3"/><div className="ml-hud-corner c4"/>
