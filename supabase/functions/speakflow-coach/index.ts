@@ -558,9 +558,15 @@ Rules:
                         updated_at: new Date().toISOString(),
                       };
 
-                      const { error: planUpsertError } = await supabase
-                        .from("learning_plans")
-                        .upsert(planRow, { onConflict: "user_id" });
+                      const { data: planSaved, error: planUpsertError } = await supabase.rpc("upsert_coach_learning_plan", {
+                        p_primary_goal: planRow.primary_goal,
+                        p_priority_skills: planRow.priority_skills,
+                        p_current_focus: planRow.current_focus,
+                        p_next_milestone: planRow.next_milestone,
+                        p_coach_strategy: planRow.coach_strategy,
+                        p_evidence_summary: planRow.evidence_summary,
+                        p_sessions_analyzed: planRow.sessions_analyzed,
+                      });
 
                       if (planUpsertError) {
                         console.error("Adaptive plan upsert failed:", {
@@ -851,9 +857,15 @@ Rules:
                         updated_at: new Date().toISOString(),
                       };
 
-                      const { error: planUpsertError } = await supabase
-                        .from("learning_plans")
-                        .upsert(planRow, { onConflict: "user_id" });
+                      const { data: planSaved, error: planUpsertError } = await supabase.rpc("upsert_coach_learning_plan", {
+                        p_primary_goal: planRow.primary_goal,
+                        p_priority_skills: planRow.priority_skills,
+                        p_current_focus: planRow.current_focus,
+                        p_next_milestone: planRow.next_milestone,
+                        p_coach_strategy: planRow.coach_strategy,
+                        p_evidence_summary: planRow.evidence_summary,
+                        p_sessions_analyzed: planRow.sessions_analyzed,
+                      });
 
                       if (planUpsertError) {
                         console.error("Adaptive plan upsert failed:", {
@@ -936,9 +948,15 @@ Rules:
             updated_at: new Date().toISOString(),
           };
 
-          const { error: planUpsertError } = await supabase
-            .from("learning_plans")
-            .upsert(planRow, { onConflict: "user_id" });
+          const { data: planSaved, error: planUpsertError } = await supabase.rpc("upsert_coach_learning_plan", {
+            p_primary_goal: planRow.primary_goal,
+            p_priority_skills: planRow.priority_skills,
+            p_current_focus: planRow.current_focus,
+            p_next_milestone: planRow.next_milestone,
+            p_coach_strategy: planRow.coach_strategy,
+            p_evidence_summary: planRow.evidence_summary,
+            p_sessions_analyzed: planRow.sessions_analyzed,
+          });
 
           if (planUpsertError) {
             console.error("Adaptive plan upsert failed after local session summary fallback:", {
