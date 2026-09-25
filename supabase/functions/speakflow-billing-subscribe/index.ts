@@ -71,72 +71,48 @@ serve(async (req) => {
       });
     }
 
-    const externalReference = `speakflow:${user.id}`;
-    const mpResponse = await fetch("https://api.mercadopago.com/preapproval", {
-      method: "POST",
+    const mpResponse = await fetch(`https://api.mercadopago.com/preapproval_plan/${encodeURIComponent(planId)}`, {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        preapproval_plan_id: planId,
-        reason: "SpeakFlow Pro",
-        external_reference: externalReference,
-        payer_email: user.email,
-        back_url: backUrl,
-        status: "pending",
-      }),
     });
 
     const mpBody = await mpResponse.json().catch(() => ({}));
     if (!mpResponse.ok) {
-      const mpError =
-        mpBody && typeof mpBody === "object"
-          ? {
-              status: mpResponse.status,
-              message: typeof mpBody.message === "string" ? mpBody.message : null,
-              error: typeof mpBody.error === "string" ? mpBody.error : null,
-              code: typeof mpBody.code === "string" || typeof mpBody.code === "number" ? mpBody.code : null,
-              cause: Array.isArray(mpBody.cause)
-                ? mpBody.cause.map((item: unknown) => {
-                    if (!item || typeof item !== "object") return null;
-                    const cause = item as Record<string, unknown>;
-                    return {
-                      code: typeof cause.code === "string" || typeof cause.code === "number" ? cause.code : null,
-                      description: typeof cause.description === "string" ? cause.description : null,
-                    };
-                  }).filter(Boolean)
-                : [],
-            }
-          : { status: mpResponse.status, message: null, error: null, code: null, cause: [] };
-
-      console.error("Mercado Pago subscription error:", JSON.stringify(mpError));
-      return new Response(JSON.stringify({ error: "Could not create subscription." }), {
+      console.error("Mercado Pago plan lookup error:", mpResponse.status);
+      return new Response(JSON.stringify({ error: "Could not open subscription checkout." }), {
         status: 502,
         headers: jsonHeaders,
       });
     }
 
-    const providerSubscriptionId = typeof mpBody.id === "string" ? mpBody.id : null;
+    const returnedPlanId = typeof mpBody.id === "string" ? mpBody.id : null;
+    const planStatus = typeof mpBody.status === "string" ? mpBody.status : null;
     const initPoint = typeof mpBody.init_point === "string" ? mpBody.init_point : null;
-    const providerStatus = typeof mpBody.status === "string" ? mpBody.status : "pending";
 
-    if (!providerSubscriptionId || !initPoint) {
-      throw new Error("Mercado Pago returned an incomplete subscription.");
+    if (returnedPlanId !== planId || planStatus !== "active" || !initPoint) {
+      throw new Error("Mercado Pago returned an invalid subscription plan.");
     }
 
-    const status = providerStatus === "authorized" ? "active" : "pending";
+    let checkoutUrl: URL;
+    try {
+      checkoutUrl = new URL(initPoint);
+    } catch {
+      throw new Error("Mercado Pago returned an invalid checkout URL.");
+    }
 
-    const { error: insertError } = await admin.from("subscriptions").insert({
-      user_id: user.id,
-      provider: "mercado_pago",
-      provider_subscription_id: providerSubscriptionId,
-      plan: "pro",
-      status,
-    });
-    if (insertError) throw insertError;
+    if (
+      checkoutUrl.protocol !== "https:" ||
+      checkoutUrl.hostname !== "www.mercadopago.com.br" ||
+      checkoutUrl.pathname !== "/subscriptions/checkout" ||
+      checkoutUrl.searchParams.get("preapproval_plan_id") !== planId
+    ) {
+      throw new Error("Mercado Pago returned an unexpected checkout URL.");
+    }
 
-    return new Response(JSON.stringify({ checkoutUrl: initPoint, status }), {
+    return new Response(JSON.stringify({ checkoutUrl: checkoutUrl.toString(), status: "checkout" }), {
       status: 200,
       headers: jsonHeaders,
     });
