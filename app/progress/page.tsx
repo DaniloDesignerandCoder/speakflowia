@@ -38,7 +38,13 @@ export default function ProgressPage(){
   setInsights(Array.isArray(payload.insights)?payload.insights:[]);
   setLearningPlan(payload.learning_plan??null);
   setLoading(false);
- }load()},[router]);
+ }
+ void load();
+ const refresh=()=>{if(document.visibilityState==="visible")void load();};
+ window.addEventListener("focus",refresh);
+ document.addEventListener("visibilitychange",refresh);
+ return()=>{window.removeEventListener("focus",refresh);document.removeEventListener("visibilitychange",refresh);};
+ },[router]);
 
  const skills=useMemo(()=>{const normalizeSkill=(value:string|null)=>{const raw=value?.trim().toLowerCase()||"";if(!raw)return "Outros";if(raw.includes("pronun")||raw.includes("pronunciation"))return "Pronúncia";if(raw.includes("gram")||raw.includes("grammar")||raw.includes("past_tense")||raw.includes("past tense")||raw.includes("present_tense")||raw.includes("present tense")||raw.includes("future_tense")||raw.includes("future tense")||raw.includes("verb")||raw.includes("tense"))return "Gramática";if(raw.includes("vocab")||raw.includes("word choice"))return "Vocabulário";if(raw.includes("flu")||raw.includes("fluency"))return "Fluência";if(raw.includes("listen")||raw.includes("compreens"))return "Compreensão";if(raw.includes("speak")||raw.includes("conversation")||raw.includes("conversa"))return "Conversação";return "Outros"};const m=new Map<string,number>();insights.forEach(x=>{const c=normalizeSkill(x.skill_category);m.set(c,(m.get(c)??0)+1)});return Array.from(m.entries()).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count)},[insights]);
  const maxSkill=Math.max(1,...skills.map(x=>x.count));
