@@ -41,28 +41,18 @@ export default function ProfilePage() {
       if (userError || !user) { router.replace("/login"); return; }
 
       setUserId(user.id);
-      const [{ data }, { data: progress }, { data: insights }, { data: entitlement }] = await Promise.all([
+      const [{ data }, { data: accessData }, { data: accountAccess }] = await Promise.all([
         supabase.from("profiles")
           .select("full_name, preferred_level, avatar_url, learning_goal, correction_style, conversation_pace")
           .eq("id", user.id)
           .maybeSingle(),
-        supabase.from("progress")
-          .select("conversations_count, total_minutes, streak_days")
-          .eq("user_id", user.id)
-          .maybeSingle(),
-        supabase.from("learning_insights")
-          .select("skill_category")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(20),
-        supabase.from("entitlements")
-          .select("plan, subscription_status, current_period_end")
-          .eq("user_id", user.id)
-          .maybeSingle(),
+        supabase.rpc("get_progress_access_data"),
+        supabase.rpc("get_account_access"),
       ]);
-
-      const proPeriodIsValid = !entitlement?.current_period_end || new Date(entitlement.current_period_end).getTime() > Date.now();
-      setHasActivePro(entitlement?.plan === "pro" && entitlement?.subscription_status === "active" && proPeriodIsValid);
+      const progress = accessData?.progress ?? {};
+      const insights = accessData?.insights ?? [];
+      const access = Array.isArray(accountAccess) ? accountAccess[0] : accountAccess;
+      setHasActivePro(access?.effective_plan === "pro");
 
       setName(data?.full_name || user.user_metadata?.full_name || "Usuário SpeakFlow");
       setEmail(user.email || "");
