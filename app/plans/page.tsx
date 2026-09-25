@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
@@ -26,7 +26,6 @@ const freeFeatures = [
 
 export default function PlansPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [billingMessage, setBillingMessage] = useState("");
   const [hasActivePro, setHasActivePro] = useState(false);
@@ -43,7 +42,7 @@ export default function PlansPage() {
       setHasActivePro(access?.effective_plan === "pro");
     }
 
-    const billing = searchParams.get("billing");
+    const billing = new URLSearchParams(window.location.search).get("billing");
 
     if (billing === "canceled") {
       setBillingMessage("Assinatura cancelada. Nenhuma alteração foi feita no seu plano.");
@@ -72,7 +71,7 @@ export default function PlansPage() {
     }
 
     loadPlanStatus();
-  }, [searchParams]);
+  }, []);
 
   async function subscribeToPro() {
     if (isSubscribing || hasActivePro) return;
