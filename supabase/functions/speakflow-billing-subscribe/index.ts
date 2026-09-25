@@ -90,7 +90,27 @@ serve(async (req) => {
 
     const mpBody = await mpResponse.json().catch(() => ({}));
     if (!mpResponse.ok) {
-      console.error("Mercado Pago subscription error:", mpResponse.status);
+      const mpError =
+        mpBody && typeof mpBody === "object"
+          ? {
+              status: mpResponse.status,
+              message: typeof mpBody.message === "string" ? mpBody.message : null,
+              error: typeof mpBody.error === "string" ? mpBody.error : null,
+              code: typeof mpBody.code === "string" || typeof mpBody.code === "number" ? mpBody.code : null,
+              cause: Array.isArray(mpBody.cause)
+                ? mpBody.cause.map((item: unknown) => {
+                    if (!item || typeof item !== "object") return null;
+                    const cause = item as Record<string, unknown>;
+                    return {
+                      code: typeof cause.code === "string" || typeof cause.code === "number" ? cause.code : null,
+                      description: typeof cause.description === "string" ? cause.description : null,
+                    };
+                  }).filter(Boolean)
+                : [],
+            }
+          : { status: mpResponse.status, message: null, error: null, code: null, cause: [] };
+
+      console.error("Mercado Pago subscription error:", JSON.stringify(mpError));
       return new Response(JSON.stringify({ error: "Could not create subscription." }), {
         status: 502,
         headers: jsonHeaders,
