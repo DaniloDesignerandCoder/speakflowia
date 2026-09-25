@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, LockKeyhole } from "lucide-react";
 
 const levelOrder = ["beginner", "elementary", "intermediate", "upper_intermediate", "advanced"];
 
@@ -184,7 +184,7 @@ export default function ProfilePage() {
       </div>
       <section className="profile-journey">
         <div className="profile-journey-heading"><div><span>SUA JORNADA</span><h2>Evolução no SpeakFlow</h2></div><strong>{levelLabels[level] || levelLabels.intermediate}</strong></div>
-        <div className="profile-level-track">{levelOrder.map((item, index) => { const currentIndex = levelOrder.indexOf(level); const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "future"; return <div key={item} className={`profile-level-step ${state}`}><i>{index < currentIndex ? "✓" : index + 1}</i><span>{levelLabels[item].split(" · ")[0]}</span></div>; })}</div>
+        <div className="profile-level-track">{levelOrder.map((item, index) => { const currentIndex = levelOrder.indexOf(level); const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "future"; return <div key={item} className={`profile-level-step ${state}`}><i>{index < currentIndex ? <Check aria-hidden="true" /> : index + 1}</i><span>{levelLabels[item].split(" · ")[0]}</span></div>; })}</div>
         <div className="profile-journey-insight">
           <div><span>FOCOS IDENTIFICADOS</span><strong>{focusSkills.length ? focusSkills.join(" · ") : "Sua jornada está começando"}</strong><p>{focusSkills.length ? "Baseado nos padrões recentes dos seus feedbacks. Continue praticando para refinar seu perfil de aprendizagem." : "À medida que você pratica, o SpeakFlow identifica padrões reais nos seus feedbacks e destaca habilidades para desenvolver."}</p></div>
           <button type="button" onClick={() => router.push("/progress")}>Ver progresso <ArrowRight /></button>
@@ -198,7 +198,7 @@ export default function ProfilePage() {
         <div className="profile-achievement-grid">
           {achievements.map((achievement) => (
             <article key={achievement.title} className={achievement.unlocked ? "unlocked" : "locked"}>
-              <i>{achievement.unlocked ? "✓" : achievement.icon}</i>
+              <i>{achievement.unlocked ? <Check aria-hidden="true" /> : <LockKeyhole aria-hidden="true" />}</i>
               <div><strong>{achievement.title}</strong><p>{achievement.description}</p></div>
             </article>
           ))}
