@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Gauge, LoaderCircle, Mic2, Send, Sparkles, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Gauge, Lightbulb, LoaderCircle, Mic2, Send, Volume2, VolumeX } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -501,7 +501,7 @@ export default function CoachPage() {
                     )}
                     {message.role === "coach" && message.feedback && (
                       <div className="speakflow-insight">
-                        <div className="insight-title"><span><Sparkles /></span> SPEAKFLOW INSIGHT</div>
+                        <div className="insight-title"><span><Lightbulb /></span> SPEAKFLOW INSIGHT</div>
                         <div className="insight-section">
                           <span className="insight-label">VOCÊ DISSE</span>
                           <strong>{message.feedback.original}</strong>
