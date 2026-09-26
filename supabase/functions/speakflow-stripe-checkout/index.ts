@@ -82,6 +82,20 @@ serve(async (req) => {
       });
     }
 
+    const { data: checkoutClaimed, error: checkoutClaimError } = await admin.rpc("claim_stripe_checkout", {
+      p_user_id: user.id,
+      p_hold_seconds: 120,
+    });
+    if (checkoutClaimError) throw checkoutClaimError;
+    if (!checkoutClaimed) {
+      return new Response(JSON.stringify({ error: "Checkout already being created." }), {
+        status: 409,
+        headers: jsonHeaders,
+      });
+    }
+
+    let checkoutCompleted = false;
+    try {
     let siteUrl: URL;
     try {
       siteUrl = new URL(backUrl);
@@ -134,10 +148,16 @@ serve(async (req) => {
       throw new Error("Stripe returned an invalid Checkout Session.");
     }
 
+    checkoutCompleted = true;
     return new Response(JSON.stringify({ checkoutUrl, status: "checkout" }), {
       status: 200,
       headers: jsonHeaders,
     });
+    } finally {
+      if (!checkoutCompleted) {
+        await admin.rpc("release_stripe_checkout", { p_user_id: user.id });
+      }
+    }
   } catch (error) {
     console.error("SpeakFlow Stripe checkout error:", error instanceof Error ? error.message : "unknown");
     return new Response(JSON.stringify({ error: "Billing request failed." }), {
