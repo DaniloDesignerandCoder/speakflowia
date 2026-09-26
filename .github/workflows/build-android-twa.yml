@@ -33,7 +33,7 @@ jobs:
             -v "$PWD/android:/workspace" \
             -w /workspace \
             ghcr.io/googlechromelabs/bubblewrap:latest \
-            -lc 'yes | sdkmanager --licenses >/dev/null && sdkmanager "platforms;android-36" "build-tools;36.1.0"'
+            -lc 'SDKMANAGER="$(find /root/.bubblewrap/android_sdk -type f -name sdkmanager | head -n 1)"; test -n "$SDKMANAGER"; yes | "$SDKMANAGER" --licenses >/dev/null; "$SDKMANAGER" "platforms;android-36" "build-tools;36.1.0"'
 
       - name: Build unsigned Android artifacts
         run: |
