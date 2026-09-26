@@ -31,7 +31,9 @@ export default function PlansPage() {
   const [hasActivePro, setHasActivePro] = useState(false);
   const [activeCore, setActiveCore] = useState(0);
   const [coreThinking, setCoreThinking] = useState(false);
+  const [coreMemory, setCoreMemory] = useState<number | null>(null);
   const coreTimerRef = useRef<number | null>(null);
+  const memoryTimerRef = useRef<number | null>(null);
   const proCardRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -131,10 +133,15 @@ export default function PlansPage() {
   function activateCore(index: number) {
     setCoreThinking(false);
     if (coreTimerRef.current) window.clearTimeout(coreTimerRef.current);
+    if (memoryTimerRef.current) window.clearTimeout(memoryTimerRef.current);
     requestAnimationFrame(() => {
       setActiveCore(index);
       setCoreThinking(true);
-      coreTimerRef.current = window.setTimeout(() => setCoreThinking(false), 900);
+      coreTimerRef.current = window.setTimeout(() => {
+        setCoreThinking(false);
+        setCoreMemory(index);
+        memoryTimerRef.current = window.setTimeout(() => setCoreMemory(null), 2800);
+      }, 900);
     });
   }
 
@@ -225,14 +232,14 @@ export default function PlansPage() {
           </div>
           <div className="plans-neural" aria-label="Ecossistema SpeakFlow Pro">
             <div className="plans-neural-stage">
-              <svg className="plans-neural-lines" viewBox="0 0 400 220" aria-hidden="true">
-                <path d="M200 110 L70 48" /><path d="M200 110 L330 48" /><path d="M200 110 L70 172" /><path d="M200 110 L330 172" />
+              <svg className={`plans-neural-lines is-route-${activeCore} ${coreThinking ? "is-transmitting" : ""} ${coreMemory === activeCore ? "has-memory" : ""}`} viewBox="0 0 400 220" aria-hidden="true">
+                <path className="route-0" d="M70 48 L200 110" /><path className="route-1" d="M330 48 L200 110" /><path className="route-2" d="M70 172 L200 110" /><path className="route-3" d="M330 172 L200 110" />
               </svg>
-              <button type="button" className={`plans-neural-node node-coach ${activeCore === 0 ? "is-active" : ""}`} onClick={() => activateCore(0)}><BrainCircuit /><span>Coach</span></button>
-              <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => activateCore(1)}><Mic2 /><span>Pronúncia</span></button>
-              <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => activateCore(2)}><BookOpenText /><span>Vocabulário</span></button>
-              <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => activateCore(3)}><Headphones /><span>MusicLab</span></button>
-              <div className={`plans-neural-core ${coreThinking ? "is-thinking" : ""}`}>
+              <button type="button" className={`plans-neural-node node-coach ${activeCore === 0 ? "is-active" : ""} ${coreThinking && activeCore === 0 ? "is-transmitting" : ""} ${coreMemory === 0 ? "has-memory" : ""}`} onClick={() => activateCore(0)}><BrainCircuit /><span>Coach</span></button>
+              <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""} ${coreThinking && activeCore === 1 ? "is-transmitting" : ""} ${coreMemory === 1 ? "has-memory" : ""}`} onClick={() => activateCore(1)}><Mic2 /><span>Pronúncia</span></button>
+              <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""} ${coreThinking && activeCore === 2 ? "is-transmitting" : ""} ${coreMemory === 2 ? "has-memory" : ""}`} onClick={() => activateCore(2)}><BookOpenText /><span>Vocabulário</span></button>
+              <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""} ${coreThinking && activeCore === 3 ? "is-transmitting" : ""} ${coreMemory === 3 ? "has-memory" : ""}`} onClick={() => activateCore(3)}><Headphones /><span>MusicLab</span></button>
+              <div className={`plans-neural-core ${coreThinking ? "is-thinking" : ""} ${coreMemory !== null ? "has-memory" : ""}`}>
                 <svg className="plans-ai-mind" viewBox="0 0 100 100" aria-hidden="true">
                   <g className="plans-ai-links">
                     <path d="M19 38 L37 27 L54 37 L73 25" /><path d="M19 38 L31 57 L50 50 L68 64 L82 47" />
