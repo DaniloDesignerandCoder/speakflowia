@@ -66,7 +66,9 @@ Deno.serve(async (req) => {
     const verified = new Webhook(HOOK_SECRET).verify(payload, Object.fromEntries(req.headers)) as HookPayload;
     const email = verified.user?.email;
     if (!email) throw new Error("Missing recipient email.");
-    const actionType = verified.email_data.email_action_type;\n    console.log("Send email hook action:", actionType);\n    const { subject, html } = renderEmail(actionType, actionUrl(verified.email_data));
+    const actionType = verified.email_data.email_action_type;
+    console.log("Send email hook action:", actionType);
+    const { subject, html } = renderEmail(actionType, actionUrl(verified.email_data));
     const response = await fetch("https://api.resend.com/emails", {
       method:"POST",
       headers:{Authorization:`Bearer ${RESEND_API_KEY}`,"Content-Type":"application/json"},
