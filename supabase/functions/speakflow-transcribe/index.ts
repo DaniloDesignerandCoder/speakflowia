@@ -33,8 +33,9 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
-    if (!supabaseUrl || !anonKey || !apiKey) throw new Error("Transcription service is not configured.");
+    if (!supabaseUrl || !anonKey || !serviceRoleKey || !apiKey) throw new Error("Transcription service is not configured.");
 
     const supabase = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -70,7 +71,32 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unsupported audio format." }), { status: 415, headers: jsonHeaders });
     }
 
-    const providerBody = new FormData();
+    const reservedSeconds = 8;
+    const { data: usageRows, error: usageError } = await supabase.rpc("reserve_transcription_usage", {
+      p_seconds: reservedSeconds,
+    });
+    const usage = Array.isArray(usageRows) ? usageRows[0] : usageRows;
+    if (usageError) throw new Error("Unable to reserve transcription usage.");
+    if (!usage?.allowed) {
+      return new Response(JSON.stringify({
+        error: "Monthly transcription limit reached.",
+        code: "transcription_limit_reached",
+        used: usage?.used ?? null,
+        usage_limit: usage?.usage_limit ?? null,
+        remaining: usage?.remaining ?? 0,
+        plan: usage?.effective_plan ?? "free",
+      }), { status: 429, headers: jsonHeaders });
+    }
+
+    const releaseReservedUsage = async () => {
+      const admin = createClient(supabaseUrl, serviceRoleKey);
+      const { error: releaseError } = await admin.rpc("release_transcription_usage", {
+        p_seconds: reservedSeconds,
+      });
+      if (releaseError) console.error("SpeakFlow Transcribe usage release failed.");
+    };
+
+        const providerBody = new FormData();
     providerBody.append("file", audio, audio.name || "speech.webm");
     providerBody.append("model_id", "scribe_v2");
     providerBody.append("language_code", "eng");
@@ -87,6 +113,7 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
+      await releaseReservedUsage();
       console.error("SpeakFlow Transcribe provider error:", response.status);
       return new Response(JSON.stringify({ error: "Transcription service unavailable." }), {
         status: 502, headers: jsonHeaders,
@@ -96,6 +123,7 @@ serve(async (req) => {
     const result = await response.json();
     const text = typeof result?.text === "string" ? result.text.trim() : "";
     if (!text) {
+      await releaseReservedUsage();
       return new Response(JSON.stringify({ error: "No speech detected.", code: "no_speech" }), {
         status: 422, headers: jsonHeaders,
       });
