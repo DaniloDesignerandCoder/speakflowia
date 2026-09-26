@@ -209,7 +209,7 @@ export default function PlansPage() {
           <div className="plans-card-head plans-pro-head"><span>SPEAKFLOW PRO</span><h2>Desbloqueie seu próximo nível.</h2><p>Uma experiência mais completa, adaptativa e contínua para transformar prática em evolução.</p></div>
           <div className="plans-pro-price-row">
             <div className="plans-price"><strong><small>R$</small> 35,99</strong><span>/ mês</span></div>
-            <div className="plans-pro-status"><i /> Acesso premium</div>
+            
           </div>
           <div className="plans-neural" aria-label="Ecossistema SpeakFlow Pro">
             <div className="plans-neural-stage">
