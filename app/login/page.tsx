@@ -126,7 +126,11 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    if (mode !== "reset" && !captchaToken) {
+    const turnstileResponse =
+      document.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "";
+    const verifiedCaptchaToken = captchaToken || turnstileResponse;
+
+    if (mode !== "reset" && !verifiedCaptchaToken) {
       setMessage("Conclua a verificação de segurança para continuar.");
       setLoading(false);
       return;
@@ -153,7 +157,7 @@ export default function LoginPage() {
     } else if (mode === "forgot") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/login?reset=1`,
-        captchaToken,
+        captchaToken: verifiedCaptchaToken,
       });
       resetCaptcha();
 
@@ -170,7 +174,7 @@ export default function LoginPage() {
           data: {
             full_name: name,
           },
-          captchaToken,
+          captchaToken: verifiedCaptchaToken,
         },
       });
       resetCaptcha();
@@ -186,7 +190,7 @@ export default function LoginPage() {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: { captchaToken },
+        options: { captchaToken: verifiedCaptchaToken },
       });
       resetCaptcha();
 
@@ -369,7 +373,7 @@ export default function LoginPage() {
             <button
               type="submit"
               className="login-submit"
-              disabled={loading || (mode !== "reset" && !captchaReady)}
+              disabled={loading}
             >
               {loading
                 ? "Processando..."
