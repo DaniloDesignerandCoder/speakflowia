@@ -173,7 +173,7 @@ export default function PlansPage() {
 
       <section className="plans-trust">
         <div><span>01</span><strong>Comece no seu ritmo</strong><p>O plano gratuito mantém uma porta de entrada simples para o SpeakFlow.</p></div>
-        <div><span>02</span><strong>Upgrade seguro</strong><p>O acesso Pro só será liberado após confirmação do pagamento pelo backend.</p></div>
+        <div><span>02</span><strong>Evolução para o Pro</strong><p>Seu acesso Pro é ativado após a confirmação da assinatura.</p></div>
         <div><span>03</span><strong>Uma conta, uma jornada</strong><p>Seu aprendizado permanece associado à sua identidade SpeakFlow.</p></div>
       </section>
     </main>
