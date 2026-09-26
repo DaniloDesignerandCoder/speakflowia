@@ -204,14 +204,14 @@ export default function CoachPage() {
     }
   }
 
-  function startListening() {
+  function startBrowserSpeechFallback() {
     if (typeof window === "undefined") return;
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("O reconhecimento de voz não está disponível neste navegador.");
+      alert("Não foi possível transcrever sua voz neste navegador.");
       return;
     }
 
@@ -225,6 +225,79 @@ export default function CoachPage() {
     recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
     recognition.start();
+  }
+
+  async function startListening() {
+    if (typeof window === "undefined" || isListening) return;
+
+    let stream: MediaStream | null = null;
+    try {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+        startBrowserSpeechFallback();
+        return;
+      }
+
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredTypes = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"];
+      const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type)) ?? "";
+      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      const chunks: BlobPart[] = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) chunks.push(event.data);
+      };
+
+      recorder.onerror = () => {
+        setIsListening(false);
+        stream?.getTracks().forEach((track) => track.stop());
+      };
+
+      recorder.onstop = async () => {
+        setIsListening(false);
+        stream?.getTracks().forEach((track) => track.stop());
+
+        try {
+          const audioType = recorder.mimeType || mimeType || "audio/webm";
+          const audioBlob = new Blob(chunks, { type: audioType });
+          if (audioBlob.size < 128) throw new Error("Empty audio");
+
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) throw new Error("No active session");
+
+          const extension = audioType.includes("mp4") ? "m4a" : audioType.includes("ogg") ? "ogg" : "webm";
+          const formData = new FormData();
+          formData.append("audio", audioBlob, `speech.${extension}`);
+
+          const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/speakflow-transcribe`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            },
+            body: formData,
+          });
+
+          if (!response.ok) throw new Error("Neural transcription unavailable");
+          const result = await response.json();
+          if (!result?.text || typeof result.text !== "string") throw new Error("No transcript");
+          setInput(result.text);
+        } catch (error) {
+          console.error("SpeakFlow transcription fallback:", error);
+          startBrowserSpeechFallback();
+        }
+      };
+
+      recorder.start();
+      setIsListening(true);
+      window.setTimeout(() => {
+        if (recorder.state === "recording") recorder.stop();
+      }, 8000);
+    } catch (error) {
+      stream?.getTracks().forEach((track) => track.stop());
+      setIsListening(false);
+      console.error("SpeakFlow microphone error:", error);
+      startBrowserSpeechFallback();
+    }
   }
 
   async function sendMessage() {
