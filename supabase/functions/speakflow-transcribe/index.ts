@@ -77,6 +77,7 @@ serve(async (req) => {
     providerBody.append("diarize", "false");
     providerBody.append("tag_audio_events", "false");
     providerBody.append("no_verbatim", "false");
+    // Preserve the SpeakFlow brand name during neural transcription.
     providerBody.append("keyterms", "SpeakFlow");
 
     const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
