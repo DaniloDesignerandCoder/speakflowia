@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import { ArrowLeft, Gauge, BrainCircuit, LoaderCircle, Mic2, Send, Volume2, VolumeX } from "lucide-react";
@@ -46,6 +46,9 @@ export default function CoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isListening, setIsListening] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recordingTimeoutRef = useRef<number | null>(null);
   const [sessionSeconds, setSessionSeconds] = useState(0);
   const [isReplying, setIsReplying] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
@@ -228,7 +231,14 @@ export default function CoachPage() {
   }
 
   async function startListening() {
-    if (typeof window === "undefined" || isListening) return;
+    if (typeof window === "undefined" || isTranscribing) return;
+
+    if (isListening && recorderRef.current?.state === "recording") {
+      if (recordingTimeoutRef.current !== null) window.clearTimeout(recordingTimeoutRef.current);
+      recordingTimeoutRef.current = null;
+      recorderRef.current.stop();
+      return;
+    }
 
     let stream: MediaStream | null = null;
     try {
@@ -241,6 +251,7 @@ export default function CoachPage() {
       const preferredTypes = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"];
       const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported(type)) ?? "";
       const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recorderRef.current = recorder;
       const chunks: BlobPart[] = [];
 
       recorder.ondataavailable = (event) => {
@@ -248,12 +259,17 @@ export default function CoachPage() {
       };
 
       recorder.onerror = () => {
+        recorderRef.current = null;
         setIsListening(false);
         stream?.getTracks().forEach((track) => track.stop());
       };
 
       recorder.onstop = async () => {
+        recorderRef.current = null;
+        if (recordingTimeoutRef.current !== null) window.clearTimeout(recordingTimeoutRef.current);
+        recordingTimeoutRef.current = null;
         setIsListening(false);
+        setIsTranscribing(true);
         stream?.getTracks().forEach((track) => track.stop());
 
         try {
@@ -284,12 +300,15 @@ export default function CoachPage() {
         } catch (error) {
           console.error("SpeakFlow transcription fallback:", error);
           startBrowserSpeechFallback();
+        } finally {
+          setIsTranscribing(false);
         }
       };
 
       recorder.start();
       setIsListening(true);
-      window.setTimeout(() => {
+      recordingTimeoutRef.current = window.setTimeout(() => {
+        recordingTimeoutRef.current = null;
         if (recorder.state === "recording") recorder.stop();
       }, 8000);
     } catch (error) {
@@ -611,13 +630,13 @@ export default function CoachPage() {
                 />
                 <button
                   type="button"
-                  className={isListening ? "mic-button listening" : "mic-button"}
+                  className={isListening ? "mic-button listening" : isTranscribing ? "mic-button transcribing" : "mic-button"}
                   onClick={startListening}
-                  disabled={isListening}
-                  aria-label={isListening ? "Ouvindo sua voz" : "Falar em inglês"}
-                  title={isListening ? "Ouvindo..." : "Falar em inglês"}
+                  disabled={isTranscribing}
+                  aria-label={isListening ? "Parar gravação" : isTranscribing ? "Transcrevendo sua voz" : "Falar em inglês"}
+                  title={isListening ? "Toque para parar" : isTranscribing ? "Transcrevendo..." : "Falar em inglês"}
                 >
-                  {isListening ? <LoaderCircle className="coach-icon-spin" /> : <Mic2 />}
+                  {isTranscribing ? <LoaderCircle className="coach-icon-spin" /> : <Mic2 />}
                 </button>
                 <button
                   className="send-button"
