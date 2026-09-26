@@ -43,7 +43,7 @@ function renderEmail(actionType: string, url: string) {
 <body style="margin:0;padding:0;background:#070b14;font-family:Arial,Helvetica,sans-serif;color:#fff">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#070b14"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:560px;background:#0b1220;border:1px solid #182235;border-radius:20px">
-<tr><td align="center" style="padding:42px 32px 20px"><img src="${LOGO_URL}" alt="SpeakFlow" width="170" style="display:block;width:170px;max-width:70%;height:auto;border:0"></td></tr>
+<tr><td align="center" style="padding:42px 32px 20px"><img src="${LOGO_URL}" alt="SpeakFlow" width="170" style="display:block;width:170px;max-width:70%;height:auto;border:0"><div style="margin-top:10px;color:#ffffff;font-size:18px;font-weight:700;letter-spacing:.2px">Speak<span style="color:#6f8cff">Flow</span></div></td></tr>
 <tr><td align="center" style="padding:10px 36px 0"><div style="display:inline-block;padding:6px 10px;border:1px solid #263553;border-radius:999px;color:#8197ff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase">${c.eyebrow}</div>
 <h1 style="margin:22px 0 12px;font-size:28px;line-height:1.2;font-weight:700;color:#fff">${c.title}</h1>
 <p style="margin:0 auto;max-width:430px;color:#9ca8bd;font-size:15px;line-height:1.7">${c.intro}</p></td></tr>
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     const verified = new Webhook(HOOK_SECRET).verify(payload, Object.fromEntries(req.headers)) as HookPayload;
     const email = verified.user?.email;
     if (!email) throw new Error("Missing recipient email.");
-    const { subject, html } = renderEmail(verified.email_data.email_action_type, actionUrl(verified.email_data));
+    const actionType = verified.email_data.email_action_type;\n    console.log("Send email hook action:", actionType);\n    const { subject, html } = renderEmail(actionType, actionUrl(verified.email_data));
     const response = await fetch("https://api.resend.com/emails", {
       method:"POST",
       headers:{Authorization:`Bearer ${RESEND_API_KEY}`,"Content-Type":"application/json"},
