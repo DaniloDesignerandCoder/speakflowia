@@ -33,6 +33,7 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaReady, setCaptchaReady] = useState(false);
+  const captchaTokenRef = useRef("");
   const captchaContainerRef = useRef<HTMLDivElement | null>(null);
   const captchaWidgetIdRef = useRef<string | null>(null);
 
@@ -56,14 +57,17 @@ export default function LoginPage() {
         sitekey: TURNSTILE_SITE_KEY,
         theme: "auto",
         callback: (token) => {
+          captchaTokenRef.current = token;
           setCaptchaToken(token);
           setCaptchaReady(true);
         },
         "expired-callback": () => {
+          captchaTokenRef.current = "";
           setCaptchaToken("");
           setCaptchaReady(false);
         },
         "error-callback": () => {
+          captchaTokenRef.current = "";
           setCaptchaToken("");
           setCaptchaReady(false);
         },
@@ -89,6 +93,7 @@ export default function LoginPage() {
   }, [mode]);
 
   function resetCaptcha() {
+    captchaTokenRef.current = "";
     setCaptchaToken("");
     setCaptchaReady(false);
     if (window.turnstile && captchaWidgetIdRef.current) {
@@ -128,7 +133,7 @@ export default function LoginPage() {
 
     const turnstileResponse =
       document.querySelector<HTMLInputElement>('input[name="cf-turnstile-response"]')?.value ?? "";
-    const verifiedCaptchaToken = captchaToken || turnstileResponse;
+    const verifiedCaptchaToken = captchaTokenRef.current || captchaToken || turnstileResponse;
 
     if (mode !== "reset" && !verifiedCaptchaToken) {
       setMessage("Conclua a verificação de segurança para continuar.");
