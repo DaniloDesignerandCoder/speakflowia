@@ -114,3 +114,16 @@ button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
 @keyframes ai-thought-wave{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(5.2)}}@keyframes ai-process{0%{opacity:.48;filter:brightness(1)}38%{opacity:1;filter:brightness(1.75) drop-shadow(0 0 7px rgba(120,145,255,.45))}100%{opacity:.68;filter:brightness(1)}}@keyframes ai-logo-response{0%,100%{transform:scale(.96)}46%{transform:scale(1.08);filter:drop-shadow(0 0 18px rgba(166,180,255,.65))}}@keyframes ai-node-response{0%{opacity:0;transform:scale(.2)}38%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(2.8)}}
 .plans-neural-logo{z-index:3}.plans-neural-core>i{z-index:2}
 @media(prefers-reduced-motion:reduce){.plans-ai-mind,.plans-ai-links path,.plans-ai-synapses circle,.plans-neural-core.is-thinking .plans-ai-wave,.plans-neural-core.is-thinking .plans-neural-logo img,.plans-neural-node.is-active:after{animation:none!important}}
+
+/* Neural data flow + residual memory */
+.plans-neural-lines path{transition:stroke .24s ease,opacity .24s ease,filter .24s ease}
+.plans-neural-lines.is-transmitting.is-route-0 .route-0,.plans-neural-lines.is-transmitting.is-route-1 .route-1,.plans-neural-lines.is-transmitting.is-route-2 .route-2,.plans-neural-lines.is-transmitting.is-route-3 .route-3{stroke:rgba(176,189,255,.82);stroke-width:1.35;stroke-dasharray:2 9;filter:drop-shadow(0 0 4px rgba(113,139,255,.8));animation:neural-transmit .34s linear infinite}
+.plans-neural-lines.has-memory.is-route-0 .route-0,.plans-neural-lines.has-memory.is-route-1 .route-1,.plans-neural-lines.has-memory.is-route-2 .route-2,.plans-neural-lines.has-memory.is-route-3 .route-3{stroke:rgba(133,153,255,.34);filter:drop-shadow(0 0 3px rgba(103,127,255,.25))}
+.plans-neural-node.is-transmitting{box-shadow:0 0 0 1px rgba(154,170,255,.18),0 0 26px rgba(91,116,255,.25)!important}
+.plans-neural-node.is-transmitting svg{animation:node-send .45s ease-in-out infinite alternate}
+.plans-neural-node.has-memory:not(.is-transmitting){border-color:rgba(134,151,255,.27)!important;box-shadow:inset 0 0 18px rgba(88,108,221,.055)!important}
+.plans-neural-core.has-memory:not(.is-thinking) .plans-ai-synapses circle:nth-child(3n+1){opacity:.48;filter:drop-shadow(0 0 2px rgba(131,151,255,.62));animation-duration:5.8s}
+.plans-neural-core.is-thinking{box-shadow:0 0 0 9px rgba(113,134,255,.05),0 0 0 19px rgba(113,134,255,.028),0 0 54px rgba(92,113,255,.3)}
+.plans-neural-core.is-thinking:before{content:"";position:absolute;inset:-16px;border-radius:50%;background:radial-gradient(circle,rgba(126,147,255,.12),transparent 67%);animation:core-field .9s ease-out;pointer-events:none}
+@keyframes neural-transmit{to{stroke-dashoffset:-22}}@keyframes node-send{from{transform:scale(1)}to{transform:scale(1.09);filter:drop-shadow(0 0 5px rgba(151,167,255,.55))}}@keyframes core-field{0%{opacity:.15;transform:scale(.82)}45%{opacity:.9;transform:scale(1.08)}100%{opacity:0;transform:scale(1.25)}}
+@media(prefers-reduced-motion:reduce){.plans-neural-lines.is-transmitting path,.plans-neural-node.is-transmitting svg,.plans-neural-core.is-thinking:before{animation:none!important}}
