@@ -69,3 +69,10 @@ button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
 :root[data-theme="light"] .plans-free-mark span{background:rgba(244,246,252,.82)}:root[data-theme="light"] .plans-free-mark img{opacity:.58}
 @media(max-width:760px){.plans-free-mark{right:18px;top:20px;width:48px;height:48px}.plans-free-mark span{width:34px;height:34px}.plans-free-mark img{width:23px;height:23px}.plans-free .plans-card-head{padding-right:58px}.plans-neural-core img{width:43px;height:43px}}
 @media(prefers-reduced-motion:reduce){.plans-neural-core img,.plans-free-mark:before{animation:none!important}}
+
+/* Logo alignment refinement */
+.plans-free-mark i{display:none!important}
+.plans-neural-core{display:flex;flex-direction:column;align-items:center;justify-content:center;place-content:unset;gap:1px;padding:8px;box-sizing:border-box}
+.plans-neural-core img{width:46px;height:46px;margin:0;flex:0 0 auto;object-position:center}
+.plans-neural-core span{display:block;margin:0;text-align:center;line-height:1;font-size:7px;letter-spacing:2.4px;transform:translateX(1.2px)}
+@media(max-width:760px){.plans-neural-core img{width:41px;height:41px}.plans-neural-core span{font-size:6px;letter-spacing:2px;transform:translateX(1px)}}
