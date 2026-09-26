@@ -146,7 +146,7 @@ export default function PlansPage() {
           <div className="plans-card-head"><span>FREE</span><h2>SpeakFlow Free</h2><p>Para começar sua jornada e conhecer a experiência SpeakFlow.</p></div>
           <div className="plans-price"><strong>R$ 0</strong><span>/ para começar</span></div>
           <ul>{freeFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
-          <button type="button" className="plans-secondary" onClick={() => router.push("/coach")}>Continuar no Free</button>
+          {hasActivePro ? <div className="plans-secondary" aria-label="Plano Free disponível">Plano Free</div> : <button type="button" className="plans-secondary" onClick={() => router.push("/coach")}>Continuar no Free</button>}
         </article>
 
         <article className="plans-card plans-pro">
