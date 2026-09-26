@@ -134,21 +134,31 @@ serve(async (req) => {
       if (error) throw error;
     }
 
-    const { data: localSubscription, error: subscriptionError } = await admin
-      .from("subscriptions")
-      .upsert({
-        user_id: userId,
-        provider: "stripe",
-        provider_subscription_id: subscription.id,
-        plan: "pro",
-        status,
-        current_period_start: periodStart,
-        current_period_end: periodEnd,
-        cancel_at_period_end: cancelAtPeriodEnd,
-      }, { onConflict: "provider,provider_subscription_id" })
-      .select("id")
-      .single();
+    const eventCreatedAt = new Date(event.created * 1000).toISOString();
+    const { data: appliedRows, error: subscriptionError } = await admin.rpc("apply_stripe_subscription_event", {
+      p_user_id: userId,
+      p_provider_subscription_id: subscription.id,
+      p_status: status,
+      p_current_period_start: periodStart,
+      p_current_period_end: periodEnd,
+      p_cancel_at_period_end: cancelAtPeriodEnd,
+      p_event_created_at: eventCreatedAt,
+    });
     if (subscriptionError) throw subscriptionError;
+
+    const appliedResult = Array.isArray(appliedRows) ? appliedRows[0] : appliedRows;
+    if (!appliedResult?.subscription_id) throw new Error("Stripe subscription event did not resolve a local subscription.");
+    const localSubscription = { id: appliedResult.subscription_id };
+
+    if (appliedResult.applied === false) {
+      const { error: staleProcessedError } = await admin.from("billing_events").update({
+        processing_status: "processed",
+        processed_at: new Date().toISOString(),
+        processing_error: null,
+      }).eq("provider", "stripe").eq("provider_event_id", event.id);
+      if (staleProcessedError) throw staleProcessedError;
+      return new Response(JSON.stringify({ ok: true, stale: true }), { status: 200, headers: jsonHeaders });
+    }
 
     const hasProAccess = status === "active";
     const entitlement = {
