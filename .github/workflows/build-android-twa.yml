@@ -1,0 +1,42 @@
+name: Build SpeakFlow Android TWA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "android/twa-manifest.json"
+      - ".github/workflows/build-android-twa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate Android project from TWA manifest
+        run: |
+          docker run --rm             -v "$PWD/android:/workspace"             -w /workspace             ghcr.io/googlechromelabs/bubblewrap:latest             update --skipVersionUpgrade
+
+      - name: Build unsigned Android artifacts
+        run: |
+          docker run --rm             -v "$PWD/android:/workspace"             -w /workspace             ghcr.io/googlechromelabs/bubblewrap:latest             build --skipSigning
+
+      - name: Verify Android 16 target
+        run: |
+          grep -R "targetSdkVersion 36" android/app/build.gradle
+          grep -R "compileSdkVersion 36" android/app/build.gradle
+
+      - name: Upload unsigned App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: speakflow-android-unsigned
+          path: |
+            android/app-release-bundle.aab
+            android/app-release-unsigned.apk
+          if-no-files-found: error
+          retention-days: 7
