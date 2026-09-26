@@ -51,12 +51,16 @@ jobs:
           grep -R "targetSdkVersion 36" android/app/build.gradle
           grep -R "compileSdkVersion 36" android/app/build.gradle
 
+      - name: Collect unsigned Android artifacts
+        run: |
+          mkdir -p android/dist
+          find android -type f \( -name "*.aab" -o -name "*.apk" \) -print -exec cp {} android/dist/ \;
+          test -n "$(find android/dist -type f -name "*.aab" -print -quit)"
+
       - name: Upload unsigned App Bundle
         uses: actions/upload-artifact@v4
         with:
           name: speakflow-android-unsigned
-          path: |
-            android/app-release-bundle.aab
-            android/app-release-unsigned.apk
+          path: android/dist/
           if-no-files-found: error
           retention-days: 7
