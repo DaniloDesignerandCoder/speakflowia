@@ -6,6 +6,7 @@ on:
     paths:
       - "supabase/functions/speakflow-voice/**"
       - "supabase/functions/speakflow-coach/**"
+      - "supabase/functions/speakflow-transcribe/**"
       - "supabase/functions/speakflow-stripe-checkout/**"
       - "supabase/functions/speakflow-stripe-webhook/**"
 
@@ -18,6 +19,7 @@ jobs:
     outputs:
       voice: ${{ steps.filter.outputs.voice }}
       coach: ${{ steps.filter.outputs.coach }}
+      transcribe: ${{ steps.filter.outputs.transcribe }}
       stripe_checkout: ${{ steps.filter.outputs.stripe_checkout }}
       stripe_webhook: ${{ steps.filter.outputs.stripe_webhook }}
     steps:
@@ -34,6 +36,7 @@ jobs:
           CHANGED="$(git diff --name-only "$BEFORE" "$AFTER")"
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-voice/'; then echo "voice=true" >> "$GITHUB_OUTPUT"; else echo "voice=false" >> "$GITHUB_OUTPUT"; fi
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-coach/'; then echo "coach=true" >> "$GITHUB_OUTPUT"; else echo "coach=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-transcribe/'; then echo "transcribe=true" >> "$GITHUB_OUTPUT"; else echo "transcribe=false" >> "$GITHUB_OUTPUT"; fi
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-stripe-checkout/'; then echo "stripe_checkout=true" >> "$GITHUB_OUTPUT"; else echo "stripe_checkout=false" >> "$GITHUB_OUTPUT"; fi
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-stripe-webhook/'; then echo "stripe_webhook=true" >> "$GITHUB_OUTPUT"; else echo "stripe_webhook=false" >> "$GITHUB_OUTPUT"; fi
 
@@ -50,6 +53,20 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy speakflow-voice --project-ref njoisdldoellzuqxkyuk
+
+  deploy-transcribe:
+    needs: changes
+    if: needs.changes.outputs.transcribe == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy speakflow-transcribe
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: supabase functions deploy speakflow-transcribe --project-ref njoisdldoellzuqxkyuk
 
   deploy-coach:
     needs: changes
