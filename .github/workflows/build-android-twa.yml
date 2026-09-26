@@ -22,6 +22,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$PWD/android:/workspace" \
+            -v speakflow-android-sdk:/root/.bubblewrap/android_sdk \
             -w /workspace \
             ghcr.io/googlechromelabs/bubblewrap:latest \
             update --skipVersionUpgrade
@@ -31,6 +32,7 @@ jobs:
           docker run --rm \
             --entrypoint sh \
             -v "$PWD/android:/workspace" \
+            -v speakflow-android-sdk:/root/.bubblewrap/android_sdk \
             -w /workspace \
             ghcr.io/googlechromelabs/bubblewrap:latest \
             -lc 'SDK_ROOT=/root/.bubblewrap/android_sdk; SDKMANAGER="$(find "$SDK_ROOT" -type f -name sdkmanager | head -n 1)"; test -n "$SDKMANAGER"; yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses >/dev/null; "$SDKMANAGER" --sdk_root="$SDK_ROOT" "platforms;android-36" "build-tools;36.1.0"'
@@ -39,6 +41,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$PWD/android:/workspace" \
+            -v speakflow-android-sdk:/root/.bubblewrap/android_sdk \
             -w /workspace \
             ghcr.io/googlechromelabs/bubblewrap:latest \
             build --skipSigning
