@@ -7,7 +7,7 @@ import { supabase } from "../lib/supabase";
 export default function LoginPage() {
   const router = useRouter();
 
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -44,7 +44,17 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    if (mode === "signup") {
+    if (mode === "forgot") {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login?reset=1`,
+      });
+
+      if (error) {
+        setMessage(getFriendlyAuthMessage(error.message));
+      } else {
+        setMessage("Se este e-mail estiver associado a uma conta SpeakFlow, enviaremos as instruções para redefinir sua senha.");
+      }
+    } else if (mode === "signup") {
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -137,19 +147,23 @@ export default function LoginPage() {
 
           <div className="login-heading">
             <div className="login-eyebrow">
-              {mode === "login" ? "BEM-VINDO DE VOLTA" : "COMECE SUA JORNADA"}
+              {mode === "login" ? "BEM-VINDO DE VOLTA" : mode === "forgot" ? "RECUPERAÇÃO DE ACESSO" : "COMECE SUA JORNADA"}
             </div>
 
             <h1>
               {mode === "login"
                 ? "Entre no seu SpeakFlow."
-                : "Crie sua conta."}
+                : mode === "forgot"
+                  ? "Redefina sua senha."
+                  : "Crie sua conta."}
             </h1>
 
             <p>
               {mode === "login"
                 ? "Continue sua evolução em inglês."
-                : "Sua jornada rumo à fluência começa aqui."}
+                : mode === "forgot"
+                  ? "Informe seu e-mail e enviaremos um link seguro para você."
+                  : "Sua jornada rumo à fluência começa aqui."}
             </p>
           </div>
 
@@ -180,18 +194,33 @@ export default function LoginPage() {
               />
             </label>
 
-            <label>
-              <span>Senha</span>
+            {mode !== "forgot" && (
+              <label>
+                <span>Senha</span>
 
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                minLength={6}
-                required
-              />
-            </label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  minLength={6}
+                  required
+                />
+              </label>
+            )}
+
+            {mode === "login" && (
+              <button
+                type="button"
+                className="login-forgot"
+                onClick={() => {
+                  setMode("forgot");
+                  setMessage("");
+                }}
+              >
+                Esqueci minha senha
+              </button>
+            )}
 
             {message && (
               <div className="login-message">
@@ -208,7 +237,9 @@ export default function LoginPage() {
                 ? "Processando..."
                 : mode === "login"
                   ? "Entrar no SpeakFlow"
-                  : "Criar minha conta"}
+                  : mode === "forgot"
+                    ? "Enviar link de recuperação"
+                    : "Criar minha conta"}
             </button>
           </form>
 
@@ -216,17 +247,19 @@ export default function LoginPage() {
             <span>
               {mode === "login"
                 ? "Ainda não tem uma conta?"
-                : "Já possui uma conta?"}
+                : mode === "forgot"
+                  ? "Lembrou sua senha?"
+                  : "Já possui uma conta?"}
             </span>
 
             <button
-              onClick={() =>
-                setMode(mode === "login" ? "signup" : "login")
-              }
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setMessage("");
+              }}
             >
-              {mode === "login"
-                ? "Criar conta"
-                : "Entrar"}
+              {mode === "login" ? "Criar conta" : "Entrar"}
             </button>
           </div>
         </section>
