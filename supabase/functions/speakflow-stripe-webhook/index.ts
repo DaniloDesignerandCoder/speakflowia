@@ -41,6 +41,7 @@ serve(async (req) => {
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
   const stripePriceId = Deno.env.get("STRIPE_PRO_PRICE_ID");
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
 
   if (!supabaseUrl || !serviceRoleKey || !stripeSecretKey || !stripePriceId || !webhookSecret) {
     console.error("Stripe webhook is not configured.");
@@ -162,6 +163,61 @@ serve(async (req) => {
       .from("entitlements")
       .upsert(entitlement, { onConflict: "user_id" });
     if (entitlementError) throw entitlementError;
+
+    if (hasProAccess && event.type === "customer.subscription.created") {
+      const { data: claimedEmail, error: claimError } = await admin.rpc("claim_pro_welcome_email", {
+        p_user_id: userId,
+        p_provider_subscription_id: subscription.id,
+      });
+      if (claimError) {
+        console.error("Could not claim Pro welcome email:", claimError.message);
+      } else if (claimedEmail?.claimed) {
+        try {
+          if (!resendApiKey) throw new Error("RESEND_API_KEY is not configured.");
+
+          const { data: userResult, error: userError } = await admin.auth.admin.getUserById(userId);
+          if (userError) throw userError;
+          const recipient = userResult.user?.email;
+          if (!recipient) throw new Error("SpeakFlow user has no email.");
+
+          const appUrl = "https://speakflow.speakflowia.workers.dev";
+          const logoUrl = appUrl + "/speakflow-logo.png";
+          const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#070b14;font-family:Arial,Helvetica,sans-serif;color:#fff">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#070b14"><tr><td align="center" style="padding:40px 16px">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:560px;background:#0b1220;border:1px solid #182235;border-radius:20px">
+<tr><td align="center" style="padding:42px 32px 20px"><img src="${logoUrl}" alt="SpeakFlow" width="170" style="display:block;width:170px;max-width:70%;height:auto;border:0"><div style="margin-top:10px;color:#fff;font-size:18px;font-weight:700">Speak<span style="color:#6f8cff">Flow</span></div></td></tr>
+<tr><td align="center" style="padding:10px 36px 0"><div style="display:inline-block;padding:6px 10px;border:1px solid #263553;border-radius:999px;color:#8197ff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase">SPEAKFLOW PRO</div>
+<h1 style="margin:22px 0 12px;font-size:28px;line-height:1.2;color:#fff">Seu SpeakFlow Pro está ativo.</h1>
+<p style="margin:0 auto;max-width:430px;color:#9ca8bd;font-size:15px;line-height:1.7">Obrigado por escolher a SpeakFlow. Seu acesso Pro foi confirmado e seus recursos avançados já estão disponíveis.</p></td></tr>
+<tr><td style="padding:24px 44px 0;color:#c3ccdc;font-size:14px;line-height:1.8">Coach de IA com limites ampliados · aprendizado adaptativo completo · MusicLab™ · laboratórios de vocabulário e pronúncia · acompanhamento avançado do seu progresso.</td></tr>
+<tr><td align="center" style="padding:30px 36px 28px"><a href="${appUrl}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:15px 28px;border-radius:11px">Acessar meu SpeakFlow Pro</a></td></tr>
+<tr><td style="padding:0 36px"><div style="height:1px;background:#182235">&nbsp;</div></td></tr>
+<tr><td align="center" style="padding:25px 36px 36px"><p style="margin:0;color:#7f8ba0;font-size:12px;line-height:1.6">SpeakFlow — o poder da IA guiando sua fluência em inglês.</p></td></tr>
+</table></td></tr></table></body></html>`;
+
+          const emailResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "SpeakFlow <onboarding@resend.dev>",
+              to: [recipient],
+              subject: "Seu SpeakFlow Pro está ativo 🚀",
+              html,
+            }),
+          });
+          if (!emailResponse.ok) throw new Error(`Resend rejected Pro welcome email: ${emailResponse.status}`);
+
+          const { error: sentError } = await admin.rpc("complete_pro_welcome_email", {
+            p_provider_subscription_id: subscription.id,
+          });
+          if (sentError) throw sentError;
+        } catch (emailError) {
+          console.error("SpeakFlow Pro welcome email failed:", emailError instanceof Error ? emailError.message : "unknown");
+          await admin.rpc("release_pro_welcome_email", { p_provider_subscription_id: subscription.id });
+        }
+      }
+    }
 
     const { error: processedError } = await admin.from("billing_events").update({
       processing_status: "processed",
