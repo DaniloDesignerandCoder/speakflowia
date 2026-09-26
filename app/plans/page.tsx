@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
@@ -29,6 +29,7 @@ export default function PlansPage() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [billingMessage, setBillingMessage] = useState("");
   const [hasActivePro, setHasActivePro] = useState(false);
+  const proCardRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     async function loadPlanStatus() {
@@ -71,6 +72,57 @@ export default function PlansPage() {
     }
 
     loadPlanStatus();
+  }, []);
+
+  useEffect(() => {
+    const card = proCardRef.current;
+    if (!card) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      card.classList.add("is-visible");
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        card.classList.add("is-visible");
+        observer.disconnect();
+      }
+    }, { threshold: 0.22 });
+    observer.observe(card);
+
+    let frame = 0;
+    const updatePointer = (clientX: number, clientY: number) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+        const y = Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100));
+        card.style.setProperty("--pro-x", `${x}%`);
+        card.style.setProperty("--pro-y", `${y}%`);
+        card.style.setProperty("--pro-tilt-x", `${((50 - y) / 50) * 1.15}deg`);
+        card.style.setProperty("--pro-tilt-y", `${((x - 50) / 50) * 1.15}deg`);
+      });
+    };
+    const resetPointer = () => {
+      card.style.setProperty("--pro-x", "78%");
+      card.style.setProperty("--pro-y", "12%");
+      card.style.setProperty("--pro-tilt-x", "0deg");
+      card.style.setProperty("--pro-tilt-y", "0deg");
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "mouse") updatePointer(event.clientX, event.clientY);
+    };
+    card.addEventListener("pointermove", onPointerMove);
+    card.addEventListener("pointerleave", resetPointer);
+
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      card.removeEventListener("pointermove", onPointerMove);
+      card.removeEventListener("pointerleave", resetPointer);
+    };
   }, []);
 
   async function subscribeToPro() {
@@ -149,8 +201,8 @@ export default function PlansPage() {
           {hasActivePro ? <div className="plans-secondary" aria-label="Plano Free disponível">Plano Free</div> : <button type="button" className="plans-secondary" onClick={() => router.push("/coach")}>Continuar no Free</button>}
         </article>
 
-        <article className="plans-card plans-pro">
-          <div className="plans-pro-orbit" aria-hidden="true" />
+        <article ref={proCardRef} className="plans-card plans-pro">
+          <div className="plans-pro-aura" aria-hidden="true" /><div className="plans-pro-orbit" aria-hidden="true" /><div className="plans-pro-energy" aria-hidden="true" />
           <div className="plans-pro-label">EXPERIÊNCIA COMPLETA</div>
           <div className="plans-card-head plans-pro-head"><span>SPEAKFLOW PRO</span><h2>Desbloqueie seu próximo nível.</h2><p>Uma experiência mais completa, adaptativa e contínua para transformar prática em evolução.</p></div>
           <div className="plans-pro-price-row">
