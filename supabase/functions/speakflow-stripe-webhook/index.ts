@@ -78,6 +78,8 @@ serve(async (req) => {
     "customer.subscription.created",
     "customer.subscription.updated",
     "customer.subscription.deleted",
+    "invoice.paid",
+    "invoice.payment_failed",
   ]);
   if (!supported.has(event.type)) {
     return new Response(JSON.stringify({ ok: true, ignored: true }), { status: 200, headers: jsonHeaders });
@@ -99,7 +101,22 @@ serve(async (req) => {
       return new Response(JSON.stringify({ ok: true, duplicate: true }), { status: 200, headers: jsonHeaders });
     }
 
-    const subscription = event.data.object as Stripe.Subscription;
+    let subscription: Stripe.Subscription;
+    if (event.type === "invoice.paid" || event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = typeof invoice.parent?.subscription_details?.subscription === "string"
+        ? invoice.parent.subscription_details.subscription
+        : typeof (invoice as unknown as { subscription?: string }).subscription === "string"
+          ? (invoice as unknown as { subscription: string }).subscription
+          : "";
+      if (!subscriptionId.startsWith("sub_")) {
+        return new Response(JSON.stringify({ ok: true, ignored: true }), { status: 200, headers: jsonHeaders });
+      }
+      subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    } else {
+      subscription = event.data.object as Stripe.Subscription;
+    }
+
     const userId = getUserId(subscription);
     if (!userId) throw new Error("Stripe subscription is missing a valid SpeakFlow user ID.");
 
