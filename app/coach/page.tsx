@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
-import { ArrowLeft, Gauge, BrainCircuit, LoaderCircle, Mic2, Send, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Gauge, BrainCircuit, LoaderCircle, Mic2, Send, Square, Volume2, VolumeX } from "lucide-react";
 import "./session-summary.css";
 
 type Feedback = {
@@ -636,8 +636,15 @@ export default function CoachPage() {
                   aria-label={isListening ? "Parar gravação" : isTranscribing ? "Transcrevendo sua voz" : "Falar em inglês"}
                   title={isListening ? "Toque para parar" : isTranscribing ? "Transcrevendo..." : "Falar em inglês"}
                 >
-                  {isTranscribing ? <LoaderCircle className="coach-icon-spin" /> : <Mic2 />}
+                  {isTranscribing ? <LoaderCircle className="coach-icon-spin" /> : isListening ? <Square className="mic-stop-icon" /> : <Mic2 />}
                 </button>
+                {(isListening || isTranscribing) && (
+                  <div className={isListening ? "speech-status listening" : "speech-status transcribing"} role="status" aria-live="polite">
+                    <span className="speech-status-dot" />
+                    <strong>{isListening ? "Ouvindo..." : "Transcrevendo..."}</strong>
+                    {isListening && <span>Toque novamente para parar</span>}
+                  </div>
+                )}
                 <button
                   className="send-button"
                   onClick={sendMessage}
