@@ -13,8 +13,8 @@
   "backgroundColor": "#07090d",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://speakflow.speakflowia.workers.dev/speakflow-logo.png",
-  "maskableIconUrl": "https://speakflow.speakflowia.workers.dev/speakflow-logo.png",
+  "iconUrl": "https://speakflow.speakflowia.workers.dev/speakflow-app-icon.svg",
+  "maskableIconUrl": "https://speakflow.speakflowia.workers.dev/speakflow-app-icon.svg",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
@@ -42,6 +42,8 @@
   "protocolHandlers": [],
   "fileHandlers": [],
   "launchHandlerClientMode": "",
-  "displayOverride": ["standalone"],
+  "displayOverride": [
+    "standalone"
+  ],
   "appVersion": "1.0.0"
 }
