@@ -49,7 +49,7 @@ export default function Home() {
     avatarUrl: "",
   });
 
-  const [heroExperience, setHeroExperience] = useState<"coach" | "musiclab">("coach");
+  const [heroExperience, setHeroExperience] = useState<"coach" | "pronunciation" | "vocabulary" | "musiclab">("coach");
   const [hasActivePro, setHasActivePro] = useState(false);
 
   const [progress, setProgress] = useState({
@@ -74,7 +74,7 @@ export default function Home() {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setHeroExperience((current) => current === "coach" ? "musiclab" : "coach");
+      setHeroExperience((current) => ({ coach: "pronunciation", pronunciation: "vocabulary", vocabulary: "musiclab", musiclab: "coach" } as const)[current]);
     }, 8500);
     return () => window.clearInterval(timer);
   }, []);
@@ -339,11 +339,24 @@ export default function Home() {
             </div>
 
 
-            <div className={"dashboard-live-demo " + (heroExperience === "musiclab" ? "show-musiclab" : "show-coach")} aria-label="Demonstração interativa SpeakFlow">
+            <div className={"dashboard-live-demo show-" + heroExperience} aria-label="Demonstração interativa SpeakFlow">
               <div className="live-demo-scene live-demo-coach-scene" aria-hidden={heroExperience !== "coach"}>
                 <div className="live-demo-brand"><img src="/speakflow-logo.png" alt="" aria-hidden="true" /><div><strong>SpeakFlow Coach</strong><span>CONVERSAÇÃO</span></div></div>
                 <div className="live-demo-conversation"><div className="live-demo-message student"><span>YOU</span><p>Yesterday I go to school.</p></div><div className="live-demo-message coach"><span>SPEAKFLOW</span><p>Almost! Try: “Yesterday I went to school.”</p></div><div className="live-demo-insight"><span>✦ SMART FEEDBACK</span><strong>went</strong><small>past tense of “go”</small></div></div>
                 <div className="live-demo-caption"><span>Speak naturally.</span><span>Learn while you talk.</span></div>
+              </div>
+              <div className="live-demo-scene live-demo-pronunciation-scene" aria-hidden={heroExperience !== "pronunciation"}>
+                <div className="live-experience-head"><span><Mic2 /> PRONÚNCIA</span><b>LISTENING</b></div>
+                <div className="live-pronunciation-target"><small>FRASE-ALVO</small><strong>“Could you tell me where the station is?”</strong></div>
+                <div className="live-pronunciation-mic"><Mic2 /><i /><i /></div>
+                <div className="live-speech-wave">{Array.from({length:18},(_,i)=><i key={i} style={{height:(20+((i*23)%70))+"%"}} />)}</div>
+                <div className="live-pronunciation-result"><span>RECONHECIDO</span><p>Could you tell me where the <strong>station</strong> is?</p><small>Correspondência com a frase-alvo</small></div>
+              </div>
+              <div className="live-demo-scene live-demo-vocabulary-scene" aria-hidden={heroExperience !== "vocabulary"}>
+                <div className="live-experience-head"><span><BookOpenText /> VOCABULÁRIO</span><b>CONTEXT BUILDER</b></div>
+                <div className="live-vocab-word"><small>NEW WORD</small><strong>achievement</strong><span>/əˈtʃiːvmənt/</span></div>
+                <div className="live-vocab-network"><i /><i /><i /><div><span>SIGNIFICADO</span><strong>conquista</strong></div><div><span>CONTEXTO</span><strong>goals & progress</strong></div><div><span>USO</span><strong>real situations</strong></div></div>
+                <div className="live-vocab-example"><small>EXAMPLE</small><p>Finishing the project was a great <strong>achievement</strong>.</p></div>
               </div>
               <div className="live-demo-scene live-demo-musiclab-scene" aria-hidden={heroExperience !== "musiclab"}>
                 <div className="live-music-head"><div><span>MUSICLAB™</span><small>NOW LISTENING</small></div><b>LIVE EXPERIENCE</b></div>
@@ -353,7 +366,16 @@ export default function Home() {
                 <div className="live-music-progress"><span /></div>
                 <div className="live-music-footer"><span>LISTEN</span><span>DISCOVER</span><span>SHADOW</span></div>
               </div>
-              <div className="live-demo-switch" aria-hidden="true"><i className={heroExperience === "coach" ? "active" : ""} /><i className={heroExperience === "musiclab" ? "active" : ""} /></div>
+              <div className="live-demo-switch" aria-label="Experiências SpeakFlow">
+                {([
+                  ["coach", MessageCircleMore, "Coach"],
+                  ["pronunciation", Mic2, "Pronúncia"],
+                  ["vocabulary", BookOpenText, "Vocabulário"],
+                  ["musiclab", AudioLines, "MusicLab"],
+                ] as const).map(([experience, Icon, label]) => (
+                  <button key={experience} type="button" className={heroExperience === experience ? "active" : ""} onClick={() => setHeroExperience(experience)} aria-label={label}><Icon /></button>
+                ))}
+              </div>
             </div>
 
           </section>
