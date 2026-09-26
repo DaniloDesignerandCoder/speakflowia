@@ -59,7 +59,7 @@ jobs:
             -v speakflow-android-sdk:/root/.bubblewrap/android_sdk \
             -w /workspace \
             ghcr.io/googlechromelabs/bubblewrap:latest \
-            -lc 'sh ./gradlew assembleDebug'
+            -lc 'export ANDROID_HOME=/root/.bubblewrap/android_sdk; export ANDROID_SDK_ROOT="$ANDROID_HOME"; printf "sdk.dir=%s\n" "$ANDROID_HOME" > local.properties; sh ./gradlew assembleDebug'
 
       - name: Collect Android artifacts
         run: |
