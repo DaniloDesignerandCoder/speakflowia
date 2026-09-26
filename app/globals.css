@@ -2972,6 +2972,69 @@ img {
 .mic-button:disabled {
   cursor: default;
 }
+
+.mic-button.listening {
+  animation: speakflow-mic-pulse 1.25s ease-in-out infinite;
+}
+
+.mic-button.listening .mic-stop-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.mic-button.transcribing {
+  opacity: 0.82;
+}
+
+.speech-status {
+  position: absolute;
+  left: 16px;
+  bottom: -31px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(218, 225, 255, 0.72);
+  font-size: 10px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.speech-status strong {
+  color: #b9c6ff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.speech-status span:last-child {
+  opacity: 0.66;
+}
+
+.speech-status-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 999px;
+  background: #8fa6ff;
+}
+
+.speech-status.listening .speech-status-dot {
+  animation: speakflow-record-dot 1s ease-in-out infinite;
+}
+
+@keyframes speakflow-mic-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(111, 136, 255, 0.08), 0 0 18px rgba(111, 136, 255, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(111, 136, 255, 0.06), 0 0 30px rgba(111, 136, 255, 0.3);
+  }
+}
+
+@keyframes speakflow-record-dot {
+  0%, 100% { opacity: 0.38; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
 /* AVATAR — SPEAKFLOW COACH */
 
 .message-avatar {
