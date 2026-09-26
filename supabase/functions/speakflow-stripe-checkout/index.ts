@@ -151,6 +151,18 @@ serve(async (req) => {
     }
 
     checkoutCompleted = true;
+
+    // The claim only protects the short critical section that creates a Checkout Session.
+    // Once Stripe has returned a valid session, release it immediately so abandoning
+    // Checkout does not lock the user out. The Stripe idempotency key above safely
+    // reuses the same session for rapid retries within the same two-minute window.
+    const { error: releaseClaimError } = await admin.rpc("release_stripe_checkout", {
+      p_user_id: user.id,
+    });
+    if (releaseClaimError) {
+      console.error("Could not release Stripe checkout claim:", releaseClaimError.message);
+    }
+
     return new Response(JSON.stringify({ checkoutUrl, status: "checkout" }), {
       status: 200,
       headers: jsonHeaders,
