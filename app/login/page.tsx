@@ -1,18 +1,26 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("reset") === "1") {
+      setMode("reset");
+      setMessage("");
+    }
+  }, []);
 
   function getFriendlyAuthMessage(errorMessage: string) {
     const raw = errorMessage.toLowerCase();
@@ -44,7 +52,25 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
-    if (mode === "forgot") {
+    if (mode === "reset") {
+      if (password !== confirmPassword) {
+        setMessage("As senhas não coincidem. Digite a mesma senha nos dois campos.");
+        setLoading(false);
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setMessage(getFriendlyAuthMessage(error.message));
+      } else {
+        await supabase.auth.signOut();
+        setPassword("");
+        setConfirmPassword("");
+        setMode("login");
+        window.history.replaceState({}, "", "/login");
+        setMessage("Senha atualizada com sucesso. Entre novamente com sua nova senha.");
+      }
+    } else if (mode === "forgot") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/login?reset=1`,
       });
@@ -147,7 +173,7 @@ export default function LoginPage() {
 
           <div className="login-heading">
             <div className="login-eyebrow">
-              {mode === "login" ? "BEM-VINDO DE VOLTA" : mode === "forgot" ? "RECUPERAÇÃO DE ACESSO" : "COMECE SUA JORNADA"}
+              {mode === "login" ? "BEM-VINDO DE VOLTA" : mode === "forgot" ? "RECUPERAÇÃO DE ACESSO" : mode === "reset" ? "NOVA SENHA" : "COMECE SUA JORNADA"}
             </div>
 
             <h1>
@@ -155,7 +181,9 @@ export default function LoginPage() {
                 ? "Entre no seu SpeakFlow."
                 : mode === "forgot"
                   ? "Redefina sua senha."
-                  : "Crie sua conta."}
+                  : mode === "reset"
+                    ? "Crie uma nova senha."
+                    : "Crie sua conta."}
             </h1>
 
             <p>
@@ -163,7 +191,9 @@ export default function LoginPage() {
                 ? "Continue sua evolução em inglês."
                 : mode === "forgot"
                   ? "Informe seu e-mail e enviaremos um link seguro para você."
-                  : "Sua jornada rumo à fluência começa aqui."}
+                  : mode === "reset"
+                    ? "Escolha uma nova senha para proteger sua conta SpeakFlow."
+                    : "Sua jornada rumo à fluência começa aqui."}
             </p>
           </div>
 
@@ -182,17 +212,19 @@ export default function LoginPage() {
               </label>
             )}
 
-            <label>
-              <span>E-mail</span>
+            {mode !== "reset" && (
+              <label>
+                <span>E-mail</span>
 
-              <input
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-              />
-            </label>
+                <input
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </label>
+            )}
 
             {mode !== "forgot" && (
               <label>
@@ -203,6 +235,20 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  minLength={6}
+                  required
+                />
+              </label>
+            )}
+
+            {mode === "reset" && (
+              <label>
+                <span>Confirmar nova senha</span>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
                   minLength={6}
                   required
                 />
@@ -239,11 +285,13 @@ export default function LoginPage() {
                   ? "Entrar no SpeakFlow"
                   : mode === "forgot"
                     ? "Enviar link de recuperação"
-                    : "Criar minha conta"}
+                    : mode === "reset"
+                      ? "Salvar nova senha"
+                      : "Criar minha conta"}
             </button>
           </form>
 
-          <div className="login-switch">
+          {mode !== "reset" && <div className="login-switch">
             <span>
               {mode === "login"
                 ? "Ainda não tem uma conta?"
@@ -261,7 +309,7 @@ export default function LoginPage() {
             >
               {mode === "login" ? "Criar conta" : "Entrar"}
             </button>
-          </div>
+          </div>}
         </section>
 
         <footer className="login-footer">
