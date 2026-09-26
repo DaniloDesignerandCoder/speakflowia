@@ -53,9 +53,13 @@ jobs:
 
       - name: Build debug APK for device testing
         run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          docker run --rm \
+            --entrypoint sh \
+            -v "$PWD/android:/workspace" \
+            -v speakflow-android-sdk:/root/.bubblewrap/android_sdk \
+            -w /workspace \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            -lc 'sh ./gradlew assembleDebug'
 
       - name: Collect Android artifacts
         run: |
