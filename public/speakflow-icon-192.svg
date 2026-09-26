@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512" role="img" aria-label="SpeakFlow">
+  <defs>
+    <linearGradient id="g" x1="15%" y1="10%" x2="85%" y2="90%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#dce5ff"/>
+      <stop offset="100%" stop-color="#7d96ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#07090d"/>
+  <g transform="translate(76 76) scale(3)" fill="none" stroke="url(#g)" stroke-width="12" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M30 18L58 46L42 62L20 40Z"/>
+    <path d="M90 18L62 46L78 62L100 40Z"/>
+    <path d="M42 58L62 78L46 94L26 74Z"/>
+    <path d="M78 58L58 78L74 94L94 74Z"/>
+    <path d="M46 94L60 108L74 94"/>
+  </g>
+</svg>
