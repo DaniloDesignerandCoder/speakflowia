@@ -52,8 +52,9 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const apiKey = Deno.env.get("ELEVENLABS_API_KEY");
-    if (!supabaseUrl || !anonKey || !apiKey) throw new Error("Voice service is not configured.");
+    if (!supabaseUrl || !anonKey || !serviceRoleKey || !apiKey) throw new Error("Voice service is not configured.");
 
     const supabase = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -137,10 +138,12 @@ serve(async (req) => {
       );
     }
 
+    const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
     let usageReserved = true;
     const releaseReservedUsage = async () => {
       if (!usageReserved) return;
-      const { error: releaseError } = await supabase.rpc("release_voice_usage", {
+      const { error: releaseError } = await supabaseAdmin.rpc("release_voice_usage", {
+        p_user_id: user.id,
         p_characters: text.length,
       });
       if (releaseError) {
