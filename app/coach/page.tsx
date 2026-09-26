@@ -74,7 +74,13 @@ export default function CoachPage() {
         .single();
 
       if (profile?.full_name) setUserName(profile.full_name);
-      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+      if (profile?.avatar_url) {
+        const storedAvatar = String(profile.avatar_url);
+        const marker = "/avatars/";
+        const avatarPath = storedAvatar.includes(marker) ? storedAvatar.split(marker)[1].split("?")[0] : storedAvatar;
+        const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(avatarPath, 3600);
+        setAvatarUrl(signedAvatar?.signedUrl || "");
+      }
       if (profile?.learning_goal) setLearningGoal(profile.learning_goal);
       if (profile?.correction_style) setCorrectionStyle(profile.correction_style);
       if (profile?.conversation_pace) setConversationPace(profile.conversation_pace);
