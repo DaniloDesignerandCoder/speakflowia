@@ -166,7 +166,7 @@ export default function PlansPage() {
           <button type="button" className="plans-primary" onClick={subscribeToPro} disabled={isSubscribing || hasActivePro} aria-busy={isSubscribing}>
             {hasActivePro ? "SpeakFlow Pro ativo" : isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
           </button>
-          <p className="plans-safe-note"><Check /> Ativação confirmada com segurança pelo backend SpeakFlow.</p>
+          <p className="plans-safe-note"><Check /> Sua experiência Pro está pronta para acompanhar sua evolução.</p>
           {billingMessage && <p className="plans-billing-message" role="status">{billingMessage}</p>}
         </article>
       </section>
