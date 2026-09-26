@@ -196,7 +196,7 @@ export default function PlansPage() {
 
       <section className="plans-grid" aria-label="Planos SpeakFlow">
         <article className="plans-card plans-free">
-          <div className="plans-free-mark" aria-hidden="true"><span><img src="/speakflow-logo.png" alt="" /></span><i /></div>
+          <div className="plans-free-mark" aria-hidden="true"><span><img src="/speakflow-logo.png" alt="" /></span></div>
           <div className="plans-card-head"><span>FREE</span><h2>SpeakFlow Free</h2><p>Para começar sua jornada e conhecer a experiência SpeakFlow.</p></div>
           <div className="plans-price"><strong>R$ 0</strong><span>/ para começar</span></div>
           <ul>{freeFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
@@ -220,7 +220,7 @@ export default function PlansPage() {
               <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => setActiveCore(1)}><Mic2 /><span>Pronúncia</span></button>
               <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => setActiveCore(2)}><BookOpenText /><span>Vocabulário</span></button>
               <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => setActiveCore(3)}><Headphones /><span>MusicLab</span></button>
-              <div className="plans-neural-core"><span>PRO</span><img src="/speakflow-logo.png" alt="SpeakFlow" /><i /></div>
+              <div className="plans-neural-core"><img src="/speakflow-logo.png" alt="SpeakFlow" /><span>PRO</span><i /></div>
             </div>
             <div className="plans-neural-caption" aria-live="polite">
               <span>0{activeCore + 1}</span><div><strong>{["Converse com inteligência", "Refine sua fala", "Expanda seu repertório", "Aprenda com música"][activeCore]}</strong><p>{["Prática guiada pelo Coach com contexto contínuo.", "Treinos direcionados para desenvolver clareza e confiança.", "Vocabulário conectado a situações que fazem sentido para você.", "Transforme música em uma experiência ativa de aprendizado."][activeCore]}</p></div>
