@@ -146,6 +146,11 @@ Deno.serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
+      throw new Error("Coach service is not configured.");
+    }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -1008,10 +1013,13 @@ Rules:
       );
     }
 
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
     let coachUsageReserved = true;
     const releaseReservedCoachUsage = async () => {
       if (!coachUsageReserved) return;
-      const { error: releaseError } = await supabase.rpc("release_coach_usage");
+      const { error: releaseError } = await supabaseAdmin.rpc("release_coach_usage", {
+        p_user_id: user.id,
+      });
       if (releaseError) {
         console.error("SpeakFlow Coach usage release failed:", releaseError.message);
         return;
