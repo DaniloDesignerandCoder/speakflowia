@@ -220,7 +220,7 @@ export default function PlansPage() {
               <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => setActiveCore(1)}><Mic2 /><span>Pronúncia</span></button>
               <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => setActiveCore(2)}><BookOpenText /><span>Vocabulário</span></button>
               <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => setActiveCore(3)}><Headphones /><span>MusicLab</span></button>
-              <div className="plans-neural-core"><div className="plans-core-collider" aria-hidden="true"><b /><b /><b /><b /><em /><em /></div><div className="plans-neural-logo"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div><i /></div>
+              <div className="plans-neural-core"><div className="plans-neural-logo"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div><i /></div>
             </div>
             <div className="plans-neural-caption" aria-live="polite">
               <span>0{activeCore + 1}</span><div><strong>{["Converse com inteligência", "Refine sua fala", "Expanda seu repertório", "Aprenda com música"][activeCore]}</strong><p>{["Prática guiada pelo Coach com contexto contínuo.", "Treinos direcionados para desenvolver clareza e confiança.", "Vocabulário conectado a situações que fazem sentido para você.", "Transforme música em uma experiência ativa de aprendizado."][activeCore]}</p></div>
