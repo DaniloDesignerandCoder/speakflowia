@@ -6,8 +6,8 @@ on:
     paths:
       - "supabase/functions/speakflow-voice/**"
       - "supabase/functions/speakflow-coach/**"
-      - "supabase/functions/speakflow-billing-subscribe/**"
-      - "supabase/functions/speakflow-billing-webhook/**"
+      - "supabase/functions/speakflow-stripe-checkout/**"
+      - "supabase/functions/speakflow-stripe-webhook/**"
 
 permissions:
   contents: read
@@ -18,8 +18,8 @@ jobs:
     outputs:
       voice: ${{ steps.filter.outputs.voice }}
       coach: ${{ steps.filter.outputs.coach }}
-      billing_subscribe: ${{ steps.filter.outputs.billing_subscribe }}
-      billing_webhook: ${{ steps.filter.outputs.billing_webhook }}
+      stripe_checkout: ${{ steps.filter.outputs.stripe_checkout }}
+      stripe_webhook: ${{ steps.filter.outputs.stripe_webhook }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,8 +34,8 @@ jobs:
           CHANGED="$(git diff --name-only "$BEFORE" "$AFTER")"
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-voice/'; then echo "voice=true" >> "$GITHUB_OUTPUT"; else echo "voice=false" >> "$GITHUB_OUTPUT"; fi
           if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-coach/'; then echo "coach=true" >> "$GITHUB_OUTPUT"; else echo "coach=false" >> "$GITHUB_OUTPUT"; fi
-          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-billing-subscribe/'; then echo "billing_subscribe=true" >> "$GITHUB_OUTPUT"; else echo "billing_subscribe=false" >> "$GITHUB_OUTPUT"; fi
-          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-billing-webhook/'; then echo "billing_webhook=true" >> "$GITHUB_OUTPUT"; else echo "billing_webhook=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-stripe-checkout/'; then echo "stripe_checkout=true" >> "$GITHUB_OUTPUT"; else echo "stripe_checkout=false" >> "$GITHUB_OUTPUT"; fi
+          if echo "$CHANGED" | grep -q '^supabase/functions/speakflow-stripe-webhook/'; then echo "stripe_webhook=true" >> "$GITHUB_OUTPUT"; else echo "stripe_webhook=false" >> "$GITHUB_OUTPUT"; fi
 
   deploy-voice:
     needs: changes
@@ -65,30 +65,30 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy speakflow-coach --project-ref njoisdldoellzuqxkyuk
 
-  deploy-billing-subscribe:
+  deploy-stripe-checkout:
     needs: changes
-    if: needs.changes.outputs.billing_subscribe == 'true'
+    if: needs.changes.outputs.stripe_checkout == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Deploy speakflow-billing-subscribe
+      - name: Deploy speakflow-stripe-checkout
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy speakflow-billing-subscribe --project-ref njoisdldoellzuqxkyuk
+        run: supabase functions deploy speakflow-stripe-checkout --project-ref njoisdldoellzuqxkyuk
 
-  deploy-billing-webhook:
+  deploy-stripe-webhook:
     needs: changes
-    if: needs.changes.outputs.billing_webhook == 'true'
+    if: needs.changes.outputs.stripe_webhook == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - name: Deploy speakflow-billing-webhook
+      - name: Deploy speakflow-stripe-webhook
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: supabase functions deploy speakflow-billing-webhook --project-ref njoisdldoellzuqxkyuk --no-verify-jwt
+        run: supabase functions deploy speakflow-stripe-webhook --project-ref njoisdldoellzuqxkyuk --no-verify-jwt
