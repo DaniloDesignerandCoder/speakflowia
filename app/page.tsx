@@ -121,9 +121,17 @@ export default function Home() {
     const levelId = profileResult.data?.preferred_level ?? "intermediate";
     const levelInfo = levelMap[levelId] ?? levelMap.intermediate;
     setCurrentLevel({ id: levelId, ...levelInfo });
+    const storedAvatar = profileResult.data?.avatar_url ? String(profileResult.data.avatar_url) : "";
+    let signedAvatarUrl = "";
+    if (storedAvatar) {
+      const marker = "/avatars/";
+      const avatarPath = storedAvatar.includes(marker) ? storedAvatar.split(marker)[1].split("?")[0] : storedAvatar;
+      const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(avatarPath, 3600);
+      signedAvatarUrl = signedAvatar?.signedUrl || "";
+    }
     setUserProfile((current) => ({
       ...current,
-      avatarUrl: profileResult.data?.avatar_url ?? "",
+      avatarUrl: signedAvatarUrl,
     }));
 
     const minutes = Math.round(
