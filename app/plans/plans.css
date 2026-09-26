@@ -30,3 +30,7 @@ button:focus-visible{outline:2px solid rgba(145,168,255,.55);outline-offset:2px}
 :root[data-theme="light"] .plans-pro{background:radial-gradient(circle at 86% 0%,rgba(111,131,255,.18),transparent 32%),linear-gradient(155deg,#f1f3ff 0%,#fff 58%,#f8f9ff 100%);border-color:rgba(91,112,226,.3)}:root[data-theme="light"] .plans-pro-feature{background:rgba(89,108,220,.035);border-color:rgba(85,104,205,.1)}:root[data-theme="light"] .plans-pro-feature strong{color:#202942}:root[data-theme="light"] .plans-pro-feature p{color:#69748c}
 @media(max-width:760px){.plans-pro{min-height:auto;padding:31px 24px}.plans-pro-head h2{font-size:30px}.plans-pro-price-row .plans-price strong{font-size:39px}.plans-pro-features{grid-template-columns:1fr}.plans-pro-feature{min-height:70px}.plans-pro-orbit{right:-180px}.plans-pro-status{font-size:7px}}
 @media(max-width:390px){.plans-pro{padding:28px 20px}.plans-pro-head h2{font-size:27px}.plans-pro-price-row{align-items:flex-end}.plans-pro-status{max-width:75px;line-height:1.4}.plans-pro-price-row .plans-price strong{font-size:36px}}
+
+/* Free plan: keep secondary action clean when Pro is already active */
+.plans-card:not(.plans-pro) .plans-secondary:not(button){border:0;background:transparent;color:#717c94;padding:0;min-height:auto;font-size:9px;font-weight:800;letter-spacing:.7px;text-transform:uppercase}
+:root[data-theme="light"] .plans-card:not(.plans-pro) .plans-secondary:not(button){border:0;background:transparent;color:#778198}
