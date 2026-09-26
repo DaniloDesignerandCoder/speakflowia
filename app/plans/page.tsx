@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
-import { ArrowLeft, Check, BrainCircuit, Headphones, Mic2, TrendingUp } from "lucide-react";
+import { ArrowLeft, Check, BrainCircuit, Headphones, Mic2, TrendingUp, BookOpenText } from "lucide-react";
 
 const freePlan = SPEAKFLOW_PLAN_LIMITS.free;
 const proPlan = SPEAKFLOW_PLAN_LIMITS.pro;
@@ -29,6 +29,7 @@ export default function PlansPage() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [billingMessage, setBillingMessage] = useState("");
   const [hasActivePro, setHasActivePro] = useState(false);
+  const [activeCore, setActiveCore] = useState(0);
   const proCardRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -209,6 +210,21 @@ export default function PlansPage() {
             <div className="plans-price"><strong><small>R$</small> 35,99</strong><span>/ mês</span></div>
             <div className="plans-pro-status"><i /> Acesso premium</div>
           </div>
+          <div className="plans-neural" aria-label="Ecossistema SpeakFlow Pro">
+            <div className="plans-neural-stage">
+              <svg className="plans-neural-lines" viewBox="0 0 400 220" aria-hidden="true">
+                <path d="M200 110 L70 48" /><path d="M200 110 L330 48" /><path d="M200 110 L70 172" /><path d="M200 110 L330 172" />
+              </svg>
+              <button type="button" className={`plans-neural-node node-coach ${activeCore === 0 ? "is-active" : ""}`} onClick={() => setActiveCore(0)}><BrainCircuit /><span>Coach</span></button>
+              <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => setActiveCore(1)}><Mic2 /><span>Pronúncia</span></button>
+              <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => setActiveCore(2)}><BookOpenText /><span>Vocabulário</span></button>
+              <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => setActiveCore(3)}><Headphones /><span>MusicLab</span></button>
+              <div className="plans-neural-core"><span>PRO</span><strong>SpeakFlow</strong><i /></div>
+            </div>
+            <div className="plans-neural-caption" aria-live="polite">
+              <span>0{activeCore + 1}</span><div><strong>{["Converse com inteligência", "Refine sua fala", "Expanda seu repertório", "Aprenda com música"][activeCore]}</strong><p>{["Prática guiada pelo Coach com contexto contínuo.", "Treinos direcionados para desenvolver clareza e confiança.", "Vocabulário conectado a situações que fazem sentido para você.", "Transforme música em uma experiência ativa de aprendizado."][activeCore]}</p></div>
+            </div>
+          </div>
           <div className="plans-unlock-title">O que você desbloqueia</div>
           <div className="plans-pro-features">
             {proFeatures.map(({ icon: Icon, title, text }) => (
@@ -223,10 +239,11 @@ export default function PlansPage() {
         </article>
       </section>
 
-      <section className="plans-trust">
-        <div><span>01</span><strong>Comece no seu ritmo</strong><p>O plano gratuito mantém uma porta de entrada simples para o SpeakFlow.</p></div>
-        <div><span>02</span><strong>Evolução para o Pro</strong><p>Seu acesso Pro é ativado após a confirmação da assinatura.</p></div>
-        <div><span>03</span><strong>Uma conta, uma jornada</strong><p>Seu aprendizado permanece associado à sua identidade SpeakFlow.</p></div>
+      <section className="plans-journey" aria-label="Jornada SpeakFlow">
+        <div className="plans-journey-line" aria-hidden="true"><i /><i /><i /></div>
+        <article><span>01</span><strong>Pratique</strong><p>Entre em contato com o inglês todos os dias no seu ritmo.</p></article>
+        <article><span>02</span><strong>Conecte</strong><p>Coach, Labs e MusicLab trabalham como partes da mesma jornada.</p></article>
+        <article><span>03</span><strong>Evolua</strong><p>Seu aprendizado ganha continuidade conforme você avança.</p></article>
       </section>
     </main>
   );
