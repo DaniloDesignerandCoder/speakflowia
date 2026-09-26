@@ -250,6 +250,24 @@ Deno.serve(async (req: Request) => {
     const userMessage = typeof body.message === "string" ? body.message.trim() : "";
 
     if (body.operation === "session_summary") {
+      const { data: summaryUsageRows, error: summaryUsageError } = await supabase.rpc("reserve_coach_summary_usage");
+
+      if (summaryUsageError) {
+        console.error("SpeakFlow Coach summary usage reservation failed:", summaryUsageError.message);
+        return new Response(
+          JSON.stringify({ error: "Session summary usage check failed." }),
+          { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const summaryUsage = Array.isArray(summaryUsageRows) ? summaryUsageRows[0] : summaryUsageRows;
+      if (!summaryUsage?.allowed) {
+        return new Response(
+          JSON.stringify({ error: "Session summary monthly limit reached.", code: "summary_limit_reached" }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
       const sessionData = {
         level,
         mode: typeof body.mode === "string" ? body.mode : mode,
