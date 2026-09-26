@@ -20,11 +20,27 @@ jobs:
 
       - name: Generate Android project from TWA manifest
         run: |
-          docker run --rm             -v "$PWD/android:/workspace"             -w /workspace             ghcr.io/googlechromelabs/bubblewrap:latest             update --skipVersionUpgrade
+          docker run --rm \
+            -v "$PWD/android:/workspace" \
+            -w /workspace \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            update --skipVersionUpgrade
+
+      - name: Accept Android SDK licenses and install API 36
+        run: |
+          docker run --rm \
+            -v "$PWD/android:/workspace" \
+            -w /workspace \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            sh -lc 'yes | sdkmanager --licenses >/dev/null && sdkmanager "platforms;android-36" "build-tools;36.1.0"'
 
       - name: Build unsigned Android artifacts
         run: |
-          docker run --rm             -v "$PWD/android:/workspace"             -w /workspace             ghcr.io/googlechromelabs/bubblewrap:latest             build --skipSigning
+          docker run --rm \
+            -v "$PWD/android:/workspace" \
+            -w /workspace \
+            ghcr.io/googlechromelabs/bubblewrap:latest \
+            build --skipSigning
 
       - name: Verify Android 16 target
         run: |
