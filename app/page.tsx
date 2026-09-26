@@ -436,9 +436,9 @@ export default function Home() {
               </div>
             </div>
             <div className="dashboard-level-adaptive">
-              <span>APRENDIZADO ADAPTATIVO</span>
-              <strong>Seu Coach acompanha seu ritmo.</strong>
-              <p>Vocabulário, perguntas e feedback são ajustados ao seu nível durante os treinos.</p>
+              <span>{hasActivePro ? "APRENDIZADO ADAPTATIVO" : "TREINO PERSONALIZADO"}</span>
+              <strong>{hasActivePro ? "Seu Coach evolui com seu histórico." : "Seu Coach acompanha seu nível."}</strong>
+              <p>{hasActivePro ? "Seu histórico e seus insights orientam uma experiência adaptativa contínua." : "Vocabulário, perguntas e feedback são ajustados ao seu nível durante os treinos."}</p>
               <button onClick={() => router.push("/coach")}>Treinar neste nível</button>
             </div>
           </section>
