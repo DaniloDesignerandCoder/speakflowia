@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import "./plans.css";
 import { supabase } from "../lib/supabase";
 import { SPEAKFLOW_PLAN_LIMITS } from "../lib/entitlements";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, BrainCircuit, Headphones, Mic2, TrendingUp } from "lucide-react";
 
 const freePlan = SPEAKFLOW_PLAN_LIMITS.free;
 const proPlan = SPEAKFLOW_PLAN_LIMITS.pro;
 
 const proFeatures = [
-  `Até ${proPlan.coachMonthlyLimit.toLocaleString("pt-BR")} interações mensais com o Coach`,
-  "Vocabulary Lab e Pronunciation Lab completos",
-  `Até ${proPlan.voiceCharacterMonthlyLimit.toLocaleString("pt-BR")} caracteres mensais de voz neural SpeakFlow`,
-  "Aprendizado adaptativo e histórico completo",
+  { icon: BrainCircuit, title: "Coach IA ampliado", text: `Até ${proPlan.coachMonthlyLimit.toLocaleString("pt-BR")} interações mensais` },
+  { icon: Mic2, title: "Labs completos", text: "Vocabulary e Pronunciation sem a experiência reduzida do Free" },
+  { icon: Headphones, title: "Voz neural SpeakFlow", text: `Até ${proPlan.voiceCharacterMonthlyLimit.toLocaleString("pt-BR")} caracteres mensais` },
+  { icon: TrendingUp, title: "Evolução adaptativa", text: "Plano de aprendizado e histórico completo de progresso" },
 ];
 
 const freeFeatures = [
@@ -150,13 +150,23 @@ export default function PlansPage() {
         </article>
 
         <article className="plans-card plans-pro">
+          <div className="plans-pro-orbit" aria-hidden="true" />
           <div className="plans-pro-label">EXPERIÊNCIA COMPLETA</div>
-          <div className="plans-card-head"><span>PRO</span><h2>SpeakFlow Pro</h2><p>Para transformar prática constante em evolução contínua.</p></div>
-          <div className="plans-price"><strong>R$ 35,99</strong><span>/ mês</span></div>
-          <ul>{proFeatures.map((feature) => <li key={feature}><Check /> {feature}</li>)}</ul>
+          <div className="plans-card-head plans-pro-head"><span>SPEAKFLOW PRO</span><h2>Desbloqueie seu próximo nível.</h2><p>Uma experiência mais completa, adaptativa e contínua para transformar prática em evolução.</p></div>
+          <div className="plans-pro-price-row">
+            <div className="plans-price"><strong><small>R$</small> 35,99</strong><span>/ mês</span></div>
+            <div className="plans-pro-status"><i /> Acesso premium</div>
+          </div>
+          <div className="plans-unlock-title">O que você desbloqueia</div>
+          <div className="plans-pro-features">
+            {proFeatures.map(({ icon: Icon, title, text }) => (
+              <div className="plans-pro-feature" key={title}><span><Icon /></span><div><strong>{title}</strong><p>{text}</p></div></div>
+            ))}
+          </div>
           <button type="button" className="plans-primary" onClick={subscribeToPro} disabled={isSubscribing || hasActivePro} aria-busy={isSubscribing}>
             {hasActivePro ? "SpeakFlow Pro ativo" : isSubscribing ? "Abrindo assinatura..." : "Assinar SpeakFlow Pro"}
           </button>
+          <p className="plans-safe-note"><Check /> Ativação confirmada com segurança pelo backend SpeakFlow.</p>
           {billingMessage && <p className="plans-billing-message" role="status">{billingMessage}</p>}
         </article>
       </section>
