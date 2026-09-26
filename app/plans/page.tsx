@@ -30,6 +30,8 @@ export default function PlansPage() {
   const [billingMessage, setBillingMessage] = useState("");
   const [hasActivePro, setHasActivePro] = useState(false);
   const [activeCore, setActiveCore] = useState(0);
+  const [coreThinking, setCoreThinking] = useState(false);
+  const coreTimerRef = useRef<number | null>(null);
   const proCardRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -126,6 +128,16 @@ export default function PlansPage() {
     };
   }, []);
 
+  function activateCore(index: number) {
+    setCoreThinking(false);
+    if (coreTimerRef.current) window.clearTimeout(coreTimerRef.current);
+    requestAnimationFrame(() => {
+      setActiveCore(index);
+      setCoreThinking(true);
+      coreTimerRef.current = window.setTimeout(() => setCoreThinking(false), 900);
+    });
+  }
+
   async function subscribeToPro() {
     if (isSubscribing || hasActivePro) return;
 
@@ -216,11 +228,26 @@ export default function PlansPage() {
               <svg className="plans-neural-lines" viewBox="0 0 400 220" aria-hidden="true">
                 <path d="M200 110 L70 48" /><path d="M200 110 L330 48" /><path d="M200 110 L70 172" /><path d="M200 110 L330 172" />
               </svg>
-              <button type="button" className={`plans-neural-node node-coach ${activeCore === 0 ? "is-active" : ""}`} onClick={() => setActiveCore(0)}><BrainCircuit /><span>Coach</span></button>
-              <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => setActiveCore(1)}><Mic2 /><span>Pronúncia</span></button>
-              <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => setActiveCore(2)}><BookOpenText /><span>Vocabulário</span></button>
-              <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => setActiveCore(3)}><Headphones /><span>MusicLab</span></button>
-              <div className="plans-neural-core"><div className="plans-neural-logo"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div><i /></div>
+              <button type="button" className={`plans-neural-node node-coach ${activeCore === 0 ? "is-active" : ""}`} onClick={() => activateCore(0)}><BrainCircuit /><span>Coach</span></button>
+              <button type="button" className={`plans-neural-node node-pronunciation ${activeCore === 1 ? "is-active" : ""}`} onClick={() => activateCore(1)}><Mic2 /><span>Pronúncia</span></button>
+              <button type="button" className={`plans-neural-node node-vocabulary ${activeCore === 2 ? "is-active" : ""}`} onClick={() => activateCore(2)}><BookOpenText /><span>Vocabulário</span></button>
+              <button type="button" className={`plans-neural-node node-music ${activeCore === 3 ? "is-active" : ""}`} onClick={() => activateCore(3)}><Headphones /><span>MusicLab</span></button>
+              <div className={`plans-neural-core ${coreThinking ? "is-thinking" : ""}`}>
+                <svg className="plans-ai-mind" viewBox="0 0 100 100" aria-hidden="true">
+                  <g className="plans-ai-links">
+                    <path d="M19 38 L37 27 L54 37 L73 25" /><path d="M19 38 L31 57 L50 50 L68 64 L82 47" />
+                    <path d="M31 57 L27 76 L48 72 L68 64 L77 79" /><path d="M37 27 L50 50 L73 25" />
+                  </g>
+                  <g className="plans-ai-synapses">
+                    <circle cx="19" cy="38" r="2" /><circle cx="37" cy="27" r="1.7" /><circle cx="54" cy="37" r="2.1" />
+                    <circle cx="73" cy="25" r="1.6" /><circle cx="31" cy="57" r="2" /><circle cx="50" cy="50" r="2.4" />
+                    <circle cx="68" cy="64" r="1.8" /><circle cx="82" cy="47" r="1.7" /><circle cx="27" cy="76" r="1.6" />
+                    <circle cx="48" cy="72" r="1.9" /><circle cx="77" cy="79" r="1.5" />
+                  </g>
+                </svg>
+                <div className="plans-ai-wave" aria-hidden="true" />
+                <div className="plans-neural-logo"><img src="/speakflow-logo.png" alt="SpeakFlow" /></div><i />
+              </div>
             </div>
             <div className="plans-neural-caption" aria-live="polite">
               <span>0{activeCore + 1}</span><div><strong>{["Converse com inteligência", "Refine sua fala", "Expanda seu repertório", "Aprenda com música"][activeCore]}</strong><p>{["Prática guiada pelo Coach com contexto contínuo.", "Treinos direcionados para desenvolver clareza e confiança.", "Vocabulário conectado a situações que fazem sentido para você.", "Transforme música em uma experiência ativa de aprendizado."][activeCore]}</p></div>
