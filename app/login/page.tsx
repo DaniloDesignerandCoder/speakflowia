@@ -1,8 +1,25 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+
+const TURNSTILE_SITE_KEY = "0x4AAAAAAFD82y1uV5Y1kHXl";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        theme?: "auto" | "light" | "dark";
+        callback: (token: string) => void;
+        "expired-callback"?: () => void;
+        "error-callback"?: () => void;
+      }) => string;
+      reset: (widgetId?: string) => void;
+    };
+  }
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +31,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaReady, setCaptchaReady] = useState(false);
+  const captchaContainerRef = useRef<HTMLDivElement | null>(null);
+  const captchaWidgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get("reset") === "1") {
@@ -21,6 +42,59 @@ export default function LoginPage() {
       setMessage("");
     }
   }, []);
+
+  useEffect(() => {
+    if (mode === "reset") return;
+
+    setCaptchaToken("");
+    setCaptchaReady(false);
+    captchaWidgetIdRef.current = null;
+
+    const renderTurnstile = () => {
+      if (!captchaContainerRef.current || !window.turnstile || captchaWidgetIdRef.current) return;
+      captchaWidgetIdRef.current = window.turnstile.render(captchaContainerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: "auto",
+        callback: (token) => {
+          setCaptchaToken(token);
+          setCaptchaReady(true);
+        },
+        "expired-callback": () => {
+          setCaptchaToken("");
+          setCaptchaReady(false);
+        },
+        "error-callback": () => {
+          setCaptchaToken("");
+          setCaptchaReady(false);
+        },
+      });
+    };
+
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-speakflow-turnstile="true"]');
+    if (existingScript) {
+      renderTurnstile();
+      existingScript.addEventListener("load", renderTurnstile);
+      return () => existingScript.removeEventListener("load", renderTurnstile);
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.dataset.speakflowTurnstile = "true";
+    script.addEventListener("load", renderTurnstile);
+    document.head.appendChild(script);
+
+    return () => script.removeEventListener("load", renderTurnstile);
+  }, [mode]);
+
+  function resetCaptcha() {
+    setCaptchaToken("");
+    setCaptchaReady(false);
+    if (window.turnstile && captchaWidgetIdRef.current) {
+      window.turnstile.reset(captchaWidgetIdRef.current);
+    }
+  }
 
   function getFriendlyAuthMessage(errorMessage: string) {
     const raw = errorMessage.toLowerCase();
@@ -52,6 +126,12 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
 
+    if (mode !== "reset" && !captchaToken) {
+      setMessage("Conclua a verificação de segurança para continuar.");
+      setLoading(false);
+      return;
+    }
+
     if (mode === "reset") {
       if (password !== confirmPassword) {
         setMessage("As senhas não coincidem. Digite a mesma senha nos dois campos.");
@@ -73,7 +153,9 @@ export default function LoginPage() {
     } else if (mode === "forgot") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/login?reset=1`,
+        captchaToken,
       });
+      resetCaptcha();
 
       if (error) {
         setMessage(getFriendlyAuthMessage(error.message));
@@ -88,8 +170,10 @@ export default function LoginPage() {
           data: {
             full_name: name,
           },
+          captchaToken,
         },
       });
+      resetCaptcha();
 
       if (error) {
         setMessage(getFriendlyAuthMessage(error.message));
@@ -102,7 +186,9 @@ export default function LoginPage() {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
+      resetCaptcha();
 
       if (error) {
         setMessage(getFriendlyAuthMessage(error.message));
@@ -268,6 +354,12 @@ export default function LoginPage() {
               </button>
             )}
 
+            {mode !== "reset" && (
+              <div className="login-captcha" aria-label="Verificação de segurança">
+                <div ref={captchaContainerRef} />
+              </div>
+            )}
+
             {message && (
               <div className="login-message">
                 {message}
@@ -277,7 +369,7 @@ export default function LoginPage() {
             <button
               type="submit"
               className="login-submit"
-              disabled={loading}
+              disabled={loading || (mode !== "reset" && !captchaReady)}
             >
               {loading
                 ? "Processando..."
