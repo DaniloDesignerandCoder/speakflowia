@@ -113,11 +113,13 @@ serve(async (req) => {
     const cancelUrl = new URL(siteUrl.toString());
     cancelUrl.searchParams.set("billing", "canceled");
 
+    const stripeIdempotencyKey = `speakflow-checkout-${user.id}-${Math.floor(Date.now() / 120000)}`;
     const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${stripeSecretKey}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "Idempotency-Key": stripeIdempotencyKey,
       },
       body: formBody({
         mode: "subscription",
