@@ -12,15 +12,15 @@
   "lang": "pt-BR",
   "icons": [
     {
-      "src": "/speakflow-logo.png",
-      "sizes": "any",
-      "type": "image/png",
+      "src": "/speakflow-app-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/speakflow-logo.png",
-      "sizes": "any",
-      "type": "image/png",
+      "src": "/speakflow-app-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
       "purpose": "maskable"
     }
   ]
