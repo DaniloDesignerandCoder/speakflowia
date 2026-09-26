@@ -56,7 +56,15 @@ export default function ProfilePage() {
 
       setName(data?.full_name || user.user_metadata?.full_name || "Usuário SpeakFlow");
       setEmail(user.email || "");
-      setAvatarUrl(data?.avatar_url || "");
+      if (data?.avatar_url) {
+        const storedAvatar = String(data.avatar_url);
+        const marker = "/avatars/";
+        const avatarPath = storedAvatar.includes(marker) ? storedAvatar.split(marker)[1].split("?")[0] : storedAvatar;
+        const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(avatarPath, 3600);
+        setAvatarUrl(signedAvatar?.signedUrl || "");
+      } else {
+        setAvatarUrl("");
+      }
       setStats({
         sessions: progress?.conversations_count || 0,
         minutes: progress?.total_minutes || 0,
@@ -101,10 +109,9 @@ export default function ProfilePage() {
     const path = `${userId}/avatar.${extension}`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true, contentType: file.type });
     if (uploadError) { setMessage("Não foi possível enviar a foto."); setUploading(false); return; }
-    const { data: publicData } = supabase.storage.from("avatars").getPublicUrl(path);
-    const url = `${publicData.publicUrl}?v=${Date.now()}`;
-    const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", userId);
-    if (!error) { setAvatarUrl(url); setMessage("Foto atualizada."); }
+    const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
+    const { error } = await supabase.from("profiles").update({ avatar_url: path }).eq("id", userId);
+    if (!error) { setAvatarUrl(signedData?.signedUrl || ""); setMessage("Foto atualizada."); }
     else setMessage("A foto foi enviada, mas não foi possível atualizar o perfil.");
     setUploading(false);
   }
@@ -112,10 +119,10 @@ export default function ProfilePage() {
   async function removeAvatar() {
     if (!userId || !avatarUrl) return;
     setUploading(true);
-    const marker = "/avatars/";
-    const cleanUrl = avatarUrl.split("?")[0];
-    const path = cleanUrl.includes(marker) ? cleanUrl.split(marker)[1] : "";
-    if (path) await supabase.storage.from("avatars").remove([path]);
+    const path = `${userId}/avatar.${avatarUrl.split("?")[0].split(".").pop() || "jpg"}`;
+    const { data: objects } = await supabase.storage.from("avatars").list(userId);
+    const ownAvatar = objects?.find((item) => item.name.startsWith("avatar."));
+    if (ownAvatar) await supabase.storage.from("avatars").remove([`${userId}/${ownAvatar.name}`]);
     const { error } = await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId);
     if (!error) { setAvatarUrl(""); setMessage("Foto removida."); }
     setUploading(false);
